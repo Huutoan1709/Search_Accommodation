@@ -5,14 +5,16 @@ from enum import Enum
 from django.conf import settings
 from django.utils import timezone
 
+
 class BaseModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         abstract = True
-#User model
+
+
+# User model
 
 class User(AbstractUser):
     ROLES = (
@@ -29,14 +31,15 @@ class User(AbstractUser):
     email = models.EmailField(max_length=100, unique=True)
     gender = models.CharField(max_length=6, choices=GENDER)
     role = models.CharField(max_length=30, null=False, choices=ROLES)
-    avatar = CloudinaryField(null = True)
+    avatar = CloudinaryField(null=True)
     address = models.CharField(max_length=255)
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', through='Follow')
-    booking = models.ManyToManyField('Rooms', through='Bookings',related_name='booked_users')
-    review = models.ManyToManyField('Rooms', through='Reviews',related_name='reviewed_users')
+    booking = models.ManyToManyField('Rooms', through='Bookings', related_name='booked_users')
+    review = models.ManyToManyField('Rooms', through='Reviews', related_name='reviewed_users')
 
     def __str__(self):
         return str(self.get_full_name())
+
 
 class Follow(BaseModel):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follow_user')
@@ -48,11 +51,14 @@ class Follow(BaseModel):
 
 class RoomType(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField()
+    description = models.TextField(null= False)
+    def __str__(self):
+        return str(self.name)
+
 
 class RoomImage(BaseModel):
     url = CloudinaryField()
-    room = models.ForeignKey('Rooms',related_name='Room_Images',on_delete=models.CASCADE)
+    room = models.ForeignKey('Rooms', related_name='Room_Images', on_delete=models.CASCADE)
 
 
 class Rooms(BaseModel):
@@ -75,12 +81,14 @@ class Rooms(BaseModel):
     def __str__(self):
         return f"Room: {self.title} by {self.landlord.username}"
 
+
 class Locations(models.Model):
     address = models.TextField()
     city = models.CharField(max_length=255)
     district = models.CharField(max_length=255)
     latitude = models.FloatField()
     longitude = models.FloatField()
+
 
 class Notifications(BaseModel):
     message = models.TextField()
@@ -89,10 +97,11 @@ class Notifications(BaseModel):
 
 
 class SupportRequests(BaseModel):
-    subject = models.CharField(max_length = 255)
+    subject = models.CharField(max_length=255)
     description = models.TextField()
     status = models.BooleanField(default=False)
     user = models.ForeignKey('User', related_name='User_Support', on_delete=models.SET_NULL, null=True)
+
 
 class Bookings(BaseModel):
     STATUS_CHOICES = [
@@ -112,11 +121,14 @@ class Bookings(BaseModel):
 
     def __str__(self):
         return f"Booking {self.id} by {self.customer.username} - Status: {self.get_status_display()}"
+
+
 class Reviews(BaseModel):
     customer = models.ForeignKey(User, related_name='Customer_Reviews', on_delete=models.CASCADE)
     room = models.ForeignKey(Rooms, related_name='Room_Reviews', on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
+
 
 class Contract(BaseModel):
     start_date = models.DateField()
@@ -125,6 +137,7 @@ class Contract(BaseModel):
     landlord = models.ForeignKey(User, on_delete=models.CASCADE, related_name='landlord_contracts')
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='customer_contracts')
     room = models.ForeignKey(Rooms, on_delete=models.CASCADE)
+
 
 class Payment(BaseModel):
     PAYMENT_METHOD_CHOICES = [
@@ -144,7 +157,6 @@ class Payment(BaseModel):
     payment_date = models.DateTimeField(default=timezone.now)
     additional_info = models.TextField(blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='payments')
+
     def __str__(self):
         return f"Payment {self.transaction_id} by {self.user.username} - {self.get_status_display()}"
-
-
