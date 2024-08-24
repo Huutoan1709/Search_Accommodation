@@ -12,8 +12,8 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed']
-
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role']
+# 'followed'
 
 class UserInfoSerializer(UserSerializer):
     follower_count = SerializerMethodField()
