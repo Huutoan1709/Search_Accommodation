@@ -1,5 +1,6 @@
 
 from .models import User
+from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer,UserSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
@@ -8,7 +9,14 @@ from API.models import User,Follow,Rooms,RoomType,RoomImage
 
 class UserViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.RetrieveAPIView):
     serializer_class = UserInfoSerializer
-    query_set = User.objects.filter(is_active =True)
+    queryset = User.objects.filter(is_active =True)
+    pagination_class = paginators.BasePaginator
+
+    @action(methods=['get'], detail=False)
+    def list_users(self, request):
+        users = self.queryset
+        serializer = self.get_serializer(users, many=True)
+        return response.Response(serializer.data)
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self,request):

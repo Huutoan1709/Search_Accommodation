@@ -44,6 +44,7 @@ class User(AbstractUser):
 class Follow(BaseModel):
     follower = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follow_user')
     following = models.ForeignKey(User, on_delete=models.CASCADE, related_name='follow_following')
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('follower', 'following')
@@ -51,7 +52,7 @@ class Follow(BaseModel):
 
 class RoomType(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(null= False)
+    description = models.TextField(null= False, default ='')
     def __str__(self):
         return str(self.name)
 
