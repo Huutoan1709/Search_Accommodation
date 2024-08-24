@@ -12,7 +12,7 @@ class UserViewSet(viewsets.ViewSet,generics.CreateAPIView,generics.RetrieveAPIVi
     queryset = User.objects.filter(is_active =True)
     pagination_class = paginators.BasePaginator
 
-    @action(methods=['get'], detail=False)
+    @action(methods=['get'], detail=False, url_path= 'list-user')
     def list_users(self, request):
         users = self.queryset
         serializer = self.get_serializer(users, many=True)
