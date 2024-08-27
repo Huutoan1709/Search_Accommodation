@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from .models import User,Follow
+from .models import User,Follow,Rooms,RoomImage,RoomType,Reviews
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
+from datetime import datetime
 
 
 class UserSerializer(ModelSerializer):
+    followed = SerializerMethodField()
     def get_followed(self, obj):
         if self.context.get('request') and self.context['request'].user.id:
             return Follow.objects.filter(follower=self.context['request'].user, following=obj,
@@ -12,8 +14,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role']
-# 'followed'
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed']
 
 class UserInfoSerializer(UserSerializer):
     follower_count = SerializerMethodField()
