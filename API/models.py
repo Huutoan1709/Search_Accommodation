@@ -64,11 +64,6 @@ class RoomImage(BaseModel):
 
 
 class Rooms(BaseModel):
-    STATUS_CHOICES = [
-        ('AVAILABLE', 'Available'),
-        ('BOOKED', 'Booked'),
-        ('UNAVAILABLE', 'Unavailable'),
-    ]
     title = models.CharField(max_length=400)
     description = models.TextField()
     price = models.FloatField()
@@ -80,13 +75,13 @@ class Rooms(BaseModel):
     area = models.FloatField()
     latitude = models.FloatField()
     longitude = models.FloatField()
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='AVAILABLE')
     landlord = models.ForeignKey(User, related_name='landlord', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', related_name='Room_Type', on_delete=models.CASCADE)
     is_approved = models.BooleanField(default=False)  # Admin approval
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"Phòng: {self.title} by {self.landlord.username}"
+        return f"Phòng: {self.title} từ {self.landlord.username}"
 
 
 class Notifications(BaseModel):
@@ -100,6 +95,9 @@ class SupportRequests(BaseModel):
     description = models.TextField()
     status = models.BooleanField(default=False)
     user = models.ForeignKey('User', related_name='User_Support', on_delete=models.SET_NULL, null=True)
+    def __str__(self):
+        return f"Yêu cầu {self.subject} Từ {str(self.user.get_full_name())}"
+
 
 
 class Bookings(BaseModel):

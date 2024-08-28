@@ -1,9 +1,8 @@
 from rest_framework import serializers
-from .models import User, Follow, Rooms, RoomImage, RoomType, Reviews,Bookings
+from .models import User, Follow, Rooms, RoomImage, RoomType, Reviews, Bookings, SupportRequests
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
-
 
 
 class UserSerializer(ModelSerializer):
@@ -70,8 +69,6 @@ class RoomTypeSerializer(ModelSerializer):
         fields = ['name', 'description']
 
 
-
-
 class RoomsSerializer(ModelSerializer):
     is_reserved = SerializerMethodField()
 
@@ -83,10 +80,9 @@ class RoomsSerializer(ModelSerializer):
 
     class Meta:
         model = Rooms
-        fields = ['id', 'title', 'description', 'price', 'max_people','ward','district','city','other_address' ,'area', 'status','status', 'is_reserved',
-                  'is_approved']
+        fields = ['id', 'title', 'description', 'price', 'max_people', 'ward', 'district', 'city',
+                  'area', 'is_active','is_approved','is_reserved']
         extra_kwargs = {
-            'status': {'read_only': True},
             'is_approved': {'read_only': True},
         }
 
@@ -101,7 +97,7 @@ class DetailRoomSerializer(RoomsSerializer):
         return RoomImageSerializer(active_images, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude','longitude','landlord', 'room_type', 'images']
+        fields = RoomsSerializer.Meta.fields + ['other_address','latitude', 'longitude', 'landlord', 'room_type', 'images']
 
 
 class BookingSerializer(ModelSerializer):
@@ -121,3 +117,10 @@ class ReviewSerializer(ModelSerializer):
     class Meta:
         model = Reviews
         fields = ['id', 'customer', 'room', 'rating', 'comment', 'created_at']
+
+class SupportRequestsSerializer(ModelSerializer):
+    user = UserSerializer(read_only=True)
+
+    class Meta:
+        model = SupportRequests
+        fields = ['id', 'subject', 'description', 'status', 'user', 'created_at', 'updated_at']

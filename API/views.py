@@ -1,10 +1,10 @@
 from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, UserSerializer, RoomsSerializer, RoomTypeSerializer, RoomImageSerializer, \
-    DetailRoomSerializer
+    DetailRoomSerializer,SupportRequestsSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
-from API.models import User, Follow, Rooms, RoomType, RoomImage
+from API.models import User, Follow, Rooms, RoomType, RoomImage,SupportRequests
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -48,6 +48,15 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
         serializer = serializers.UserSerializer([follow.follower for follow in followers], many=True)
 
         return response.Response(serializer.data, status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='my-room', detail=True)
+    def get_myroom(self, request, pk):
+        if request.user.__eq__(self.get_object()):
+            rooms = Rooms.objects.filter(landlord=self.get_object(), is_active=True).all()
+        else:
+            rooms = Rooms.objects.filter(landlord=self.get_object(), is_active=True, is_approved=True).all()
+
+        return response.Response(serializers.DetailRoomSerializer(rooms, many=True).data, status.HTTP_200_OK)
 
 
 class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
@@ -93,3 +102,16 @@ class RoomImageViewSet(viewsets.ViewSet, generics.DestroyAPIView):
 class RoomTypeViewSet(viewsets.ViewSet, generics.DestroyAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
+
+
+class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = SupportRequestsSerializer
+    queryset = SupportRequests.objects.all()
+    pagination_class = paginators.BasePaginator
+
+
+    # def get_queryset(self):
+    #     user = self.request.user
+    #     if user.is_authenticated and user.role == 'WEBMASTER':
+    #         return SupportRequests.objects.all()
+    #     return SupportRequests.objects.filter(user=user)
