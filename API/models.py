@@ -28,11 +28,11 @@ class User(AbstractUser):
         ('OTHER', 'Khac'),
     )
     phone = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(max_length=100, unique=True)
+    email = models.EmailField(max_length=100, unique=True, null=True)
     gender = models.CharField(max_length=6, choices=GENDER)
     role = models.CharField(max_length=30, null=False, choices=ROLES)
     avatar = CloudinaryField(null=True)
-    address = models.CharField(max_length=255)
+    address = models.CharField(max_length=255, null=True)
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', through='Follow')
     booking = models.ManyToManyField('Rooms', through='Bookings', related_name='booked_users')
     review = models.ManyToManyField('Rooms', through='Reviews', related_name='reviewed_users')
@@ -52,7 +52,8 @@ class Follow(BaseModel):
 
 class RoomType(models.Model):
     name = models.CharField(max_length=255)
-    description = models.TextField(null= False, default ='')
+    description = models.TextField(null=True, blank =True)
+
     def __str__(self):
         return str(self.name)
 
@@ -72,23 +73,20 @@ class Rooms(BaseModel):
     description = models.TextField()
     price = models.FloatField()
     max_people = models.IntegerField(default=1)
+    ward = models.CharField(max_length=255)
+    district = models.CharField(max_length=255)
+    city = models.CharField(max_length=255)
+    other_address = models.CharField(max_length=255)
     area = models.FloatField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
     status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='AVAILABLE')
     landlord = models.ForeignKey(User, related_name='landlord', on_delete=models.CASCADE)
-    location = models.ForeignKey('Locations', related_name='Room_Location', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', related_name='Room_Type', on_delete=models.CASCADE)
     is_approved = models.BooleanField(default=False)  # Admin approval
 
     def __str__(self):
-        return f"Room: {self.title} by {self.landlord.username}"
-
-
-class Locations(models.Model):
-    address = models.TextField()
-    city = models.CharField(max_length=255)
-    district = models.CharField(max_length=255)
-    latitude = models.FloatField()
-    longitude = models.FloatField()
+        return f"Phòng: {self.title} by {self.landlord.username}"
 
 
 class Notifications(BaseModel):
