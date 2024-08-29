@@ -10,16 +10,11 @@ from API.models import User, Follow, Rooms, RoomType, RoomImage,SupportRequests
 # from django_filters.rest_framework import DjangoFilterBackend
 
 
-class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPIView):
+class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     serializer_class = UserInfoSerializer
     queryset = User.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
 
-    @action(methods=['get'], detail=False, url_path='list-user')
-    def list_users(self, request):
-        users = self.queryset
-        serializer = self.get_serializer(users, many=True)
-        return response.Response(serializer.data)
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
