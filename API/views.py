@@ -58,6 +58,15 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.RetrieveAPI
 
         return response.Response(serializers.DetailRoomSerializer(rooms, many=True).data, status.HTTP_200_OK)
 
+    @action(methods=['get'],url_path='my-supportRequest',detail=True)
+    def get_mysupportRequest(self,request,pk):
+        if request.user.__eq__(self.get_object()):
+            support_requests = SupportRequests.objects.filter(user=self.get_object()).all()
+            serializer = SupportRequestSerializer(support_requests, many=True)
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return response.Response({"detail": "You do not have permission to access this resource."},
+                                     status=status.HTTP_403_FORBIDDEN)
 
 class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
     serializer_class = RoomsSerializer
