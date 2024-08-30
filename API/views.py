@@ -67,7 +67,7 @@ class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = RoomsSerializer
     queryset = Rooms.objects.all()
     pagination_class = paginators.BasePaginator
-    permission_classes = [permissions.IsAuthenticated]
+        # permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action.__eq__('list'):
@@ -112,6 +112,7 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
+
 
 
     # def get_queryset(self):

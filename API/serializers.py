@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Follow, Rooms, RoomImage, RoomType, Reviews, Bookings, SupportRequests
+from .models import User, Follow, Rooms, RoomImage, RoomType, Reviews, Bookings, SupportRequests,FavoriteRoom
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
@@ -124,3 +124,7 @@ class SupportRequestsSerializer(ModelSerializer):
     class Meta:
         model = SupportRequests
         fields = ['id', 'subject', 'description', 'status', 'user', 'created_at', 'updated_at']
+class FavoriteRoomSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FavoriteRoom
+        fields = ['user', 'room']
