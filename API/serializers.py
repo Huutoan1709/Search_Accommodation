@@ -74,7 +74,7 @@ class RoomsSerializer(ModelSerializer):
 
     def get_is_reserved(self, obj):
         active_booking = Bookings.objects.filter(
-            room=obj, status='CONFIRMED', end_date__gte=timezone.now()
+            room=obj, status='CONFIRMED', expiration__gte=timezone.now()
         ).exists()
         return active_booking
 
@@ -103,8 +103,7 @@ class DetailRoomSerializer(RoomsSerializer):
 class BookingSerializer(ModelSerializer):
     class Meta:
         model = Bookings
-        fields = ['id', 'customer', 'room', 'start_date', 'end_date', 'deposit_amount', 'total_amount',
-                  'status', 'payment_id', 'cancellation_reason']
+        fields = ['id', 'customer', 'room', 'deposit_amount', 'total_amount', 'status']
 
 
 class ReviewSerializer(ModelSerializer):

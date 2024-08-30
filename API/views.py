@@ -1,10 +1,11 @@
 from .models import User
 from API import serializers, perms, paginators
-from .serializers import UserInfoSerializer, UserSerializer, RoomsSerializer, RoomTypeSerializer, RoomImageSerializer, \
-    DetailRoomSerializer,SupportRequestsSerializer
+from .serializers import UserInfoSerializer, FavoriteRoomSerializer, UserSerializer, RoomsSerializer, \
+    RoomTypeSerializer, RoomImageSerializer, \
+    DetailRoomSerializer, SupportRequestsSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
-from API.models import User, Follow, Rooms, RoomType, RoomImage,SupportRequests
+from API.models import User, Follow, Rooms, RoomType, RoomImage, SupportRequests, FavoriteRoom
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -14,7 +15,6 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = UserInfoSerializer
     queryset = User.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
-
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
@@ -53,21 +53,42 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(serializers.DetailRoomSerializer(rooms, many=True).data, status.HTTP_200_OK)
 
-    @action(methods=['get'],url_path='my-supportRequest',detail=True)
-    def get_mysupportRequest(self,request,pk):
-        if request.user.__eq__(self.get_object()):
-            support_requests = SupportRequests.objects.filter(user=self.get_object()).all()
-            serializer = SupportRequestSerializer(support_requests, many=True)
-            return response.Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return response.Response({"detail": "You do not have permission to access this resource."},
-                                     status=status.HTTP_403_FORBIDDEN)
+    @action(methods=['get'], url_path='my-supportRequest', detail=False)
+    def get_mysupportRequest(self, request, pk):
+        user = request.user
+        support_requests = SupportRequests.objects.filter(user=user)
+        serializer = SupportRequestSerializer(support_requests, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['get'], url_path='my-favorite', detail=False)
+    def get_myfavorite(self, request):
+        # Sử dụng request.user để lấy người dùng hiện tại
+        user = request.user
+
+        # Lọc phòng yêu thích của người dùng
+        favorite_rooms = FavoriteRoom.objects.filter(user=user)
+        serializer = FavoriteRoomSerializer(favorite_rooms, many=True)
+
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    @action(methods=['post'], url_path='follow', detail=True)
+    def follow(self, request, pk):
+
+        f, created = Follow.objects.get_or_create(follower=request.user, following=self.get_object())
+
+        if not created:
+            f.is_active = not f.is_active
+            f.save()
+
+        return response.Response(status=status.HTTP_200_OK)
+
 
 class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
     serializer_class = RoomsSerializer
     queryset = Rooms.objects.all()
     pagination_class = paginators.BasePaginator
-        # permission_classes = [permissions.IsAuthenticated]
+
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action.__eq__('list'):
@@ -112,8 +133,6 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
-
-
 
     # def get_queryset(self):
     #     user = self.request.user
