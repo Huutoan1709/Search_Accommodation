@@ -19,7 +19,8 @@ INSTALLED_APPS = [
     'drf_yasg',
     'oauth2_provider',
     'cloudinary_storage',
-    'cloudinary'
+    'cloudinary',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -85,6 +86,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Configure Django Filter Backend
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
+}
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 

@@ -1,14 +1,38 @@
 from .models import User
 from API import serializers, perms, paginators
-from .serializers import UserInfoSerializer, FavoriteRoomSerializer, UserSerializer, RoomsSerializer, \
-    RoomTypeSerializer, RoomImageSerializer, \
-    DetailRoomSerializer, SupportRequestsSerializer
+from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
+    SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
-from API.models import User, Follow, Rooms, RoomType, RoomImage, SupportRequests, FavoriteRoom
+from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
+    Amenities
+from django_filters.rest_framework import DjangoFilterBackend
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
+class UpdatePartialAPIView(generics.UpdateAPIView):
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+
+        # Chỉ cho phép PATCH
+        if not request.method == 'PATCH':
+            return response.Response({"message": "Only PATCH method is allowed"},
+                                     status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        return response.Response(serializer.data)
+
+
+class DestroySoftAPIView(generics.DestroyAPIView):
+    def destroy(self, request, *args, **kwargs):
+        image = self.get_object()
+        image.is_active = False
+        image.save()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
@@ -44,31 +68,11 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(serializer.data, status.HTTP_200_OK)
 
-    @action(methods=['get'], url_path='my-room', detail=True)
-    def get_myroom(self, request, pk):
-        if request.user.__eq__(self.get_object()):
-            rooms = Rooms.objects.filter(landlord=self.get_object(), is_active=True).all()
-        else:
-            rooms = Rooms.objects.filter(landlord=self.get_object(), is_active=True, is_approved=True).all()
-
-        return response.Response(serializers.DetailRoomSerializer(rooms, many=True).data, status.HTTP_200_OK)
-
-    @action(methods=['get'], url_path='my-supportRequest', detail=False)
-    def get_mysupportRequest(self, request, pk):
+    @action(methods=['get'], url_path='my-rooms', detail=False)
+    def my_rooms(self, request):
         user = request.user
-        support_requests = SupportRequests.objects.filter(user=user)
-        serializer = SupportRequestSerializer(support_requests, many=True)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-    @action(methods=['get'], url_path='my-favorite', detail=False)
-    def get_myfavorite(self, request):
-        # Sử dụng request.user để lấy người dùng hiện tại
-        user = request.user
-
-        # Lọc phòng yêu thích của người dùng
-        favorite_rooms = FavoriteRoom.objects.filter(user=user)
-        serializer = FavoriteRoomSerializer(favorite_rooms, many=True)
-
+        rooms = Rooms.objects.filter(landlord=user, is_active=True).all()
+        serializer = DetailRoomSerializer(rooms, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], url_path='follow', detail=True)
@@ -82,49 +86,111 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(status=status.HTTP_200_OK)
 
+    # @action(methods=['post'], url_path='favorite-post', detail=False)
+    # def favorite_post(self, request):
+    #     post_id = request.data.get('post_id')
+    #     if not post_id:
+    #         return response.Response({"error": "Post ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     try:
+    #         post = Post.objects.get(id=post_id)
+    #     except Post.DoesNotExist:
+    #         return response.Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+    #
+    #     # Tạo hoặc lấy bản ghi yêu thích
+    #     favorite, created = FavoritePost.objects.get_or_create(user=request.user, post=post)
+    #
+    #     if not created:
+    #         # Nếu bản ghi đã tồn tại, xóa để bỏ yêu thích
+    #         favorite.delete()
+    #         return response.Response({"message": "Post removed from favorites"}, status=status.HTTP_200_OK)
+    #
+    #     return response.Response({"message": "Post added to favorites"}, status=status.HTTP_201_CREATED)
 
-class RoomViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
-    serializer_class = RoomsSerializer
-    queryset = Rooms.objects.all()
+    @action(methods=['get'], detail=False, url_path='my-favorites')
+    def my_favorites(self, request):
+        favorites = FavoritePost.objects.filter(user=request.user)
+        post_ids = [favorite.post.id for favorite in favorites]
+        posts = Post.objects.filter(id__in=post_ids)
+        serializer = PostSerializer(posts, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
+    # serializer_class = RoomsSerializer
+    # queryset = Rooms.objects.all()
     pagination_class = paginators.BasePaginator
-
-    # permission_classes = [permissions.IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['price', 'ward', 'district', 'city', 'other_address', 'description']
+    filterset_fields = ['price', 'ward', 'district', 'city', 'other_address', 'area']
+    ordering_fields = ['price', 'area']
+    ordering = ['price']
 
     def get_serializer_class(self):
         if self.action.__eq__('list'):
             return RoomsSerializer
         return DetailRoomSerializer
 
-    @action(methods=['post'], detail=True, url_path='images')
-    def create_images(self, request, pk):
-        if request.method.__eq__('POST'):
-            images = request.FILES.getlist('images')
-            uploaded_images = []
-            for image in images:
-                i = RoomImage.objects.create(url=image, room=self.get_object())
-                uploaded_images.append(i)
+    def get_queryset(self):
+        queryset = Rooms.objects.filter(is_active=True)
+        min_price = self.request.query_params.get('min_price', None)
+        max_price = self.request.query_params.get('max_price', None)
+        min_area = self.request.query_params.get('min_area', None)
+        max_area = self.request.query_params.get('max_area', None)
+        latitude = self.request.query_params.get('latitude', None)
+        longitude = self.request.query_params.get('longitude', None)
 
-            return response.Response(serializers.RoomImageSerializer(uploaded_images, many=True).data,
-                                     status=status.HTTP_200_OK)
+        if min_price and max_price:
+            queryset = queryset.filter(price__range=(min_price, max_price))
+        elif min_price:
+            queryset = queryset.filter(price__gte=min_price)
+        elif max_price:
+            queryset = queryset.filter(price__lte=max_price)
 
-        return response.Response(status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        if min_area and max_area:
+            queryset = queryset.filter(area__range=(min_area, max_area))
+        elif min_area:
+            queryset = queryset.filter(area__gte=min_area)
+        elif max_area:
+            queryset = queryset.filter(area__lte=max_area)
+        if latitude and longtidue:
+            lat = float(latitude)
+            lon = float(longitude)
+            queryset = queryset.filter(lat__range=(lat - 0.03, lat + 0.03), lon__range=(lon - 0.03, lon + 0.03))
 
-    @action(detail=True, methods=['patch'], url_path='update-room')
-    def update_room(self, request, pk=None):
-        room = self.get_object()
-        serializer = RoomsSerializer(room, data=request.data, partial=True)
-        if serializer.is_valid():
+        return queryset
+
+    def create(self, request, *args, **kwargs):
+        serializer = WriteRoomSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return response.Response(serializer.data, status=status.HTTP_200_OK)
-        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            # context = {
+            #     'user': self.request.user,
+            #     'room': serializer.data
+            # }
+            # send_motel_news_email(context)
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        return response.Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-class RoomImageViewSet(viewsets.ViewSet, generics.DestroyAPIView):
-    serializer_class = RoomImageSerializer
-    queryset = RoomImage.objects.all()
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+    serializer_class = PostSerializer
+    queryset = Post.objects.filter(is_approved=True)
 
 
-class RoomTypeViewSet(viewsets.ViewSet, generics.DestroyAPIView):
+class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
+    serializer_class = PriceSerializer
+    queryset = Price.objects.filter(is_active=True).all()
+    # permission_classes = [perms.HasMotelOwnerAuthenticated]
+
+
+class Amenities(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
+    serializer_class = AmenitiesSerializer
+    queryset = Amenities.objects.all()
+
+
+class RoomTypeViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
 
@@ -133,9 +199,3 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     if user.is_authenticated and user.role == 'WEBMASTER':
-    #         return SupportRequests.objects.all()
-    #     return SupportRequests.objects.filter(user=user)

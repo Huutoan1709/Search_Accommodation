@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import User, Follow, Rooms, RoomImage, RoomType, Reviews, Bookings, SupportRequests,FavoriteRoom
+from .models import User, Follow, PostImage, Post, Price, Rooms, RoomType, Reviews, FavoritePost, Amenities, \
+    SupportRequests
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
@@ -52,78 +53,110 @@ class UserInfoSerializer(UserSerializer):
         }
 
 
-class RoomImageSerializer(ModelSerializer):
+class PostImageSerializer(ModelSerializer):
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['url'] = instance.url.url
         return rep
 
     class Meta:
-        model = RoomImage
+        model = PostImage
         fields = ['id', 'url']
 
 
 class RoomTypeSerializer(ModelSerializer):
     class Meta:
         model = RoomType
-        fields = ['name', 'description']
+        fields = ['id','name', 'description']
 
 
 class RoomsSerializer(ModelSerializer):
-    is_reserved = SerializerMethodField()
-
-    def get_is_reserved(self, obj):
-        active_booking = Bookings.objects.filter(
-            room=obj, status='CONFIRMED', expiration__gte=timezone.now()
-        ).exists()
-        return active_booking
+    # is_reserved = SerializerMethodField()
+    #
+    # def get_is_reserved(self, obj):
+    #     active_booking = Bookings.objects.filter(
+    #         room=obj, status='CONFIRMED', expiration__gte=timezone.now()
+    #     ).exists()
+    #     return active_booking
+    landlord = UserInfoSerializer()
+    room_type = RoomTypeSerializer()
 
     class Meta:
         model = Rooms
-        fields = ['id', 'title', 'description', 'price', 'max_people', 'ward', 'district', 'city',
-                  'area', 'is_active','is_approved','is_reserved']
+        fields = ['id', 'price', 'ward',
+                  'district', 'city', 'other_address', 'area', 'landlord','room_type']
         extra_kwargs = {
-            'is_approved': {'read_only': True},
+            'landlord':
+                {'read_only': True},
         }
 
 
-class DetailRoomSerializer(RoomsSerializer):
-    landlord = UserSerializer(read_only=True)
-    images = SerializerMethodField()
-    room_type = RoomTypeSerializer()
+class PriceSerializer(ModelSerializer):
+    class Meta:
+        model = Price
+        fields = '__all__'
 
-    def get_images(self, obj):
-        active_images = obj.Room_Images.all()
-        return RoomImageSerializer(active_images, many=True).data
+
+class AmenitiesSerializer(ModelSerializer):
+    class Meta:
+        model = Amenities
+        fields = ['id', 'name', 'description']
+
+
+class DetailRoomSerializer(RoomsSerializer):
+    prices = SerializerMethodField()
+    amenities = SerializerMethodField()
+
+    def get_amenities(self, obj):
+        active_amenities = obj.amenities.filter(is_active=True)
+        return AmenitiesSerializer(active_amenities, many=True).data
+
+    def get_prices(self, obj):
+        active_prices = obj.prices.filter(is_active=True)
+        return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['other_address','latitude', 'longitude', 'landlord', 'room_type', 'images']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities']
 
 
-class BookingSerializer(ModelSerializer):
+class WriteRoomSerializer(RoomsSerializer):
+    def create(self, validated_data):
+        data = validated_data.copy()
+        room = Rooms(**data)
+        room.landlord = self.context['request'].user
+        room.save()
+
+        return room
+
+    class Meta(RoomsSerializer.Meta):
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude']
+
+
+class PostSerializer(ModelSerializer):
+    images = SerializerMethodField()
+
+    def get_images(self, obj):
+        active_images = obj.PostImage.filter(is_active=True)
+        return PostImageSerializer(active_images, many=True).data
+
     class Meta:
-        model = Bookings
-        fields = ['id', 'customer', 'room', 'deposit_amount', 'total_amount', 'status']
+        model = Post
+        fields = ['id', 'title', 'content', 'user', 'created_at','images','is_approved']
+        extra_kwargs = {
+            'user':
+                {'read_only': True},
+        }
 
-
-class ReviewSerializer(ModelSerializer):
-    customer = SerializerMethodField()
-
-    def get_customer(self, obj):
-        customer = obj.filter(is_active=True)
-        return ImageSerializer(customer, many=True).data
-
+class FavoritePostSerializer(ModelSerializer):
     class Meta:
-        model = Reviews
-        fields = ['id', 'customer', 'room', 'rating', 'comment', 'created_at']
+        model = FavoritePost
+        fields = ['user', 'post']
 
+
+#
 class SupportRequestsSerializer(ModelSerializer):
     user = UserSerializer(read_only=True)
 
     class Meta:
         model = SupportRequests
         fields = ['id', 'subject', 'description', 'status', 'user', 'created_at', 'updated_at']
-class FavoriteRoomSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FavoriteRoom
-        fields = ['user', 'room']
