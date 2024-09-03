@@ -7,6 +7,7 @@ from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
     Amenities
 from django_filters.rest_framework import DjangoFilterBackend
+from django.http import QueryDict
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -56,14 +57,16 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     @action(methods=['get'], url_path='following', detail=True)
     def get_following(self, request, pk):
-        following = Follow.objects.filter(follower=self.get_object(), is_active=True).all()
+        user = self.get_object()
+        following = Follow.objects.filter(follower=user, is_active=True).all()
         serializer = serializers.UserSerializer([follow.following for follow in following], many=True)
 
         return response.Response(serializer.data, status.HTTP_200_OK)
 
     @action(methods=['get'], url_path='followers', detail=True)
     def get_follower(self, request, pk):
-        followers = Follow.objects.filter(following=self.get_object(), is_active=True).all()
+        user = self.get_object()
+        followers = Follow.objects.filter(following=user, is_active=True).all()
         serializer = serializers.UserSerializer([follow.follower for follow in followers], many=True)
 
         return response.Response(serializer.data, status.HTTP_200_OK)
@@ -86,26 +89,26 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(status=status.HTTP_200_OK)
 
-    # @action(methods=['post'], url_path='favorite-post', detail=False)
-    # def favorite_post(self, request):
-    #     post_id = request.data.get('post_id')
-    #     if not post_id:
-    #         return response.Response({"error": "Post ID is required"}, status=status.HTTP_400_BAD_REQUEST)
-    #
-    #     try:
-    #         post = Post.objects.get(id=post_id)
-    #     except Post.DoesNotExist:
-    #         return response.Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
-    #
-    #     # Tạo hoặc lấy bản ghi yêu thích
-    #     favorite, created = FavoritePost.objects.get_or_create(user=request.user, post=post)
-    #
-    #     if not created:
-    #         # Nếu bản ghi đã tồn tại, xóa để bỏ yêu thích
-    #         favorite.delete()
-    #         return response.Response({"message": "Post removed from favorites"}, status=status.HTTP_200_OK)
-    #
-    #     return response.Response({"message": "Post added to favorites"}, status=status.HTTP_201_CREATED)
+    @action(methods=['post'], url_path='favorite-post', detail=False)
+    def favorite_post(self, request):
+        post_id = request.data.get('post_id')
+        if not post_id:
+            return response.Response({"error": "Post ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            return response.Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Tạo hoặc lấy bản ghi yêu thích
+        favorite, created = FavoritePost.objects.get_or_create(user=request.user, post=post)
+
+        if not created:
+            # Nếu bản ghi đã tồn tại, xóa để bỏ yêu thích
+            favorite.delete()
+            return response.Response({"message": "Post removed from favorites"}, status=status.HTTP_200_OK)
+
+        return response.Response({"message": "Post added to favorites"}, status=status.HTTP_201_CREATED)
 
     @action(methods=['get'], detail=False, url_path='my-favorites')
     def my_favorites(self, request):
@@ -156,41 +159,110 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         if latitude and longtidue:
             lat = float(latitude)
             lon = float(longitude)
-            queryset = queryset.filter(lat__range=(lat - 0.03, lat + 0.03), lon__range=(lon - 0.03, lon + 0.03))
+            queryset = queryset.filter(latitude__range=(lat - 0.03, lat + 0.03),
+                                       longitude__range=(lon - 0.03, lon + 0.03))
 
         return queryset
 
     def create(self, request, *args, **kwargs):
+        request.data['landlord'] = request.user.id
         serializer = WriteRoomSerializer(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            # context = {
-            #     'user': self.request.user,
-            #     'room': serializer.data
-            # }
-            # send_motel_news_email(context)
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return response.Response(status=status.HTTP_400_BAD_REQUEST)
+    # context = {
+    #     'user': self.request.user,
+    #     'room': serializer.data
+    # }
+    # send_motel_news_email(context)
+
+    @action(methods=['post'], url_path='prices', detail=True)
+    def add_price(self, request, pk):
+        room = self.get_object()
+        price_data = request.data.copy()
+        price_data['room'] = room.id
+        serializer = PriceSerializer(data=price_data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], url_path='amenities', detail=True)
+    def add_amenities(self, request, pk=None):
+        room = self.get_object()
+        amenities_data = request.data.get('amenities', [])
+        amenities_objects = []
+
+        for amenity_id in amenities_data:
+            try:
+                amenity = Amenities.objects.get(id=amenity_id)
+                amenities_objects.append(amenity)
+            except Amenities.DoesNotExist:
+                return response.Response({'error': f'Amenity with id {amenity_id} not found'},
+                                         status=status.HTTP_404_NOT_FOUND)
+
+        room.amenities.set(amenities_objects)
+        room.save()
+
+        serializer = DetailRoomSerializer(room)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        motel = self.get_object()
+        motel.is_active = False
+        motel.save()
+        return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
     serializer_class = PostSerializer
-    queryset = Post.objects.filter(is_approved=True)
+    queryset = Post.objects.all()
+
+    def create(self, request, *args, **kwargs):
+        data = QueryDict('', mutable=True)
+        data.update(request.data)
+
+        data['user'] = request.user.id
+
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['post'], detail=True, url_path='images')
+    def images(self, request, pk=None):
+        if request.method == 'POST':
+            post = self.get_object()
+            images = request.FILES.getlist('images')
+            if not images:
+                return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+            uploaded_images = []
+            for image in images:
+                post_image = PostImage.objects.create(url=image, post=post)
+                uploaded_images.append(post_image)
+
+            return Response(PostImageSerializer(uploaded_images, many=True).data, status=status.HTTP_200_OK)
+
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
-    queryset = Price.objects.filter(is_active=True).all()
+    queryset = Price.objects.all()
     # permission_classes = [perms.HasMotelOwnerAuthenticated]
 
 
-class Amenities(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
+class AmenitiesViewSet(viewsets.ViewSet, generics.ListCreateAPIView, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = AmenitiesSerializer
     queryset = Amenities.objects.all()
 
 
-class RoomTypeViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
+class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
 

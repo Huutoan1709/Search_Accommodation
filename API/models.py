@@ -54,9 +54,10 @@ class Follow(BaseModel):
         unique_together = ('follower', 'following')
 
 
-class RoomType(models.Model):
+class RoomType(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
+
 
     def __str__(self):
         return str(self.name)
@@ -74,6 +75,8 @@ class Post(BaseModel):
     user = models.ForeignKey('User', related_name='User_Post', on_delete=models.CASCADE)
     room = models.ForeignKey('Rooms', related_name='Room_Post', on_delete=models.CASCADE)
 
+    def __str__(self):
+        return f'{self.title} + {self.room}'
 class Amenities(BaseModel):
     name = models.CharField(max_length=50)
     description = models.TextField(blank = True)
