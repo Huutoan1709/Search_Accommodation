@@ -1,7 +1,8 @@
 from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
-    SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer
+    SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
+    CreatePostSerializer,PostImageSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
@@ -118,6 +119,12 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         serializer = PostSerializer(posts, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+    # MYPOST
+
+    # Mysupport
+
+    # Myreview
+
 
 class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
     # serializer_class = RoomsSerializer
@@ -156,7 +163,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             queryset = queryset.filter(area__gte=min_area)
         elif max_area:
             queryset = queryset.filter(area__lte=max_area)
-        if latitude and longtidue:
+        if latitude and longitude:
             lat = float(latitude)
             lon = float(longitude)
             queryset = queryset.filter(latitude__range=(lat - 0.03, lat + 0.03),
@@ -190,25 +197,25 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(methods=['post'], url_path='amenities', detail=True)
-    def add_amenities(self, request, pk=None):
-        room = self.get_object()
-        amenities_data = request.data.get('amenities', [])
-        amenities_objects = []
-
-        for amenity_id in amenities_data:
-            try:
-                amenity = Amenities.objects.get(id=amenity_id)
-                amenities_objects.append(amenity)
-            except Amenities.DoesNotExist:
-                return response.Response({'error': f'Amenity with id {amenity_id} not found'},
-                                         status=status.HTTP_404_NOT_FOUND)
-
-        room.amenities.set(amenities_objects)
-        room.save()
-
-        serializer = DetailRoomSerializer(room)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
+    # @action(methods=['post'], detail=True)
+    # def add_amenities(self, request, pk=None):
+    #     room = self.get_object()
+    #     amenities_data = request.data.get('amenities', [])
+    #     amenities_objects = []
+    #
+    #     for amenity_id in amenities_data:
+    #         try:
+    #             amenity = Amenities.objects.get(id=amenity_id)
+    #             amenities_objects.append(amenity)
+    #         except Amenities.DoesNotExist:
+    #             return response.Response({'error': f'Amenity with id {amenity_id} not found'},
+    #                                      status=status.HTTP_404_NOT_FOUND)
+    #
+    #     room.amenities.set(amenities_objects)
+    #     room.save()
+    #
+    #     serializer = DetailRoomSerializer(room)
+    #     return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         motel = self.get_object()
@@ -221,6 +228,13 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
+    def get_serializer_class(self):
+        if self.action.__eq__('list'):
+            return PostSerializer
+        if self.action.__eq__('post'):
+            return CreatePostSerializer
+        return DetailPostSerializer
+
     def create(self, request, *args, **kwargs):
         data = QueryDict('', mutable=True)
         data.update(request.data)
@@ -230,25 +244,25 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         serializer = self.get_serializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['post'], detail=True, url_path='images')
-    def images(self, request, pk=None):
+    def images(self, request, pk):
         if request.method == 'POST':
             post = self.get_object()
             images = request.FILES.getlist('images')
             if not images:
-                return Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
+                return response.Response({'error': 'No images provided'}, status=status.HTTP_400_BAD_REQUEST)
 
             uploaded_images = []
             for image in images:
                 post_image = PostImage.objects.create(url=image, post=post)
                 uploaded_images.append(post_image)
 
-            return Response(PostImageSerializer(uploaded_images, many=True).data, status=status.HTTP_200_OK)
+            return response.Response(PostImageSerializer(uploaded_images, many=True).data, status=status.HTTP_200_OK)
 
-        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):

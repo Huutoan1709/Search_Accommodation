@@ -30,9 +30,8 @@ class UserInfoSerializer(UserSerializer):
     following_count = SerializerMethodField()
 
     def create(self, validated_data):
-        data = validated_data.copy()
-        user = User(**data)
-        user.set_password(user.password)
+        user = User(**validated_data)
+        user.set_password(validated_data['password'])
         user.save()
         return user
 
@@ -68,7 +67,7 @@ class PriceSerializer(ModelSerializer):
 class AmenitiesSerializer(ModelSerializer):
     class Meta:
         model = Amenities
-        fields = ['id', 'name', 'description','is_active']
+        fields = ['id', 'name', 'description', 'is_active']
 
 
 class RoomsSerializer(ModelSerializer):
@@ -84,13 +83,9 @@ class RoomsSerializer(ModelSerializer):
 
 class DetailRoomSerializer(RoomsSerializer):
     prices = SerializerMethodField()
-    amenities = SerializerMethodField()
+    amenities = AmenitiesSerializer(many=True)
     room_type = RoomTypeSerializer()
     landlord = UserSerializer()
-
-    def get_amenities(self, obj):
-        active_amenities = obj.amenities.filter(is_active=True)
-        return AmenitiesSerializer(active_amenities, many=True).data
 
     def get_prices(self, obj):
         active_prices = obj.prices.filter(is_active=True)
@@ -103,16 +98,7 @@ class DetailRoomSerializer(RoomsSerializer):
 class WriteRoomSerializer(RoomsSerializer):
     room_type = serializers.PrimaryKeyRelatedField(queryset=RoomType.objects.filter(is_active=True))
     landlord = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    amenities = AmenitiesSerializer(many=True, read_only=True)
-    # def create(self, validated_data):
-    #     amenities_data = validated_data.pop('amenities', [])  # Lấy amenities từ validated_data
-    #     validated_data['landlord'] = self.context['request'].user
-    #
-    #     room = Rooms.objects.create(**validated_data)
-    #     # Gán amenities cho phòng
-    #     room.amenities.set(amenities_data)
-    #
-    #     return room
+    # amenities = serializers.PrimaryKeyRelatedField(queryset=Amenities.objects.all(), many=True)
 
     class Meta(RoomsSerializer.Meta):
         fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'room_type', 'landlord','amenities']
@@ -123,6 +109,7 @@ class PostImageSerializer(ModelSerializer):
         rep = super().to_representation(instance)
         rep['url'] = instance.url.url
         return rep
+
     class Meta:
         model = PostImage
         fields = ['id', 'url']
@@ -131,22 +118,36 @@ class PostImageSerializer(ModelSerializer):
 class PostSerializer(ModelSerializer):
     images = SerializerMethodField()
     user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-    room = serializers.PrimaryKeyRelatedField(queryset=Rooms.objects.all())
+    room = RoomsSerializer()
+
     def get_images(self, obj):
         active_images = obj.Post_Images.filter(is_active=True)
         return PostImageSerializer(active_images, many=True).data
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'is_approved','room']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'is_approved', 'room']
         extra_kwargs = {
             'user': {'read_only': True},
         }
 
+
+class DetailPostSerializer(PostSerializer):
+    room = DetailRoomSerializer()
+
+    class Meta(PostSerializer.Meta):
+        model = Post
+
+
+class CreatePostSerializer(PostSerializer):
+    room = serializers.PrimaryKeyRelatedField(queryset=Rooms.objects.all())
+
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
-        post = Post.objects.create(**validated_data)
-        return post
+        return Post.objects.create(**validated_data)
+
+
+
 
 class FavoritePostSerializer(ModelSerializer):
     class Meta:
