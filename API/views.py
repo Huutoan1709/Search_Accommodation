@@ -79,6 +79,13 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         serializer = DetailRoomSerializer(rooms, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['get'], detail=False, url_path='my-post')
+    def my_post(self, request):
+        user = request.user
+        post = Post.objects.filter(user=user).all()
+        serializer = DetailPostSerializer(post, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(methods=['post'], url_path='follow', detail=True)
     def follow(self, request, pk):
 
@@ -118,8 +125,6 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         posts = Post.objects.filter(id__in=post_ids)
         serializer = PostSerializer(posts, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
-
-    # MYPOST
 
     # Mysupport
 
@@ -197,25 +202,6 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    # @action(methods=['post'], detail=True)
-    # def add_amenities(self, request, pk=None):
-    #     room = self.get_object()
-    #     amenities_data = request.data.get('amenities', [])
-    #     amenities_objects = []
-    #
-    #     for amenity_id in amenities_data:
-    #         try:
-    #             amenity = Amenities.objects.get(id=amenity_id)
-    #             amenities_objects.append(amenity)
-    #         except Amenities.DoesNotExist:
-    #             return response.Response({'error': f'Amenity with id {amenity_id} not found'},
-    #                                      status=status.HTTP_404_NOT_FOUND)
-    #
-    #     room.amenities.set(amenities_objects)
-    #     room.save()
-    #
-    #     serializer = DetailRoomSerializer(room)
-    #     return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
         motel = self.get_object()
@@ -224,7 +210,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView,generics.DestroyAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
@@ -246,6 +232,12 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(status=status.HTTP_400_BAD_REQUEST)
+
+    @action(methods=['get'], detail=False, url_path='wait-approved')
+    def wait_approved(self, request):
+        approved = Post.objects.filter(is_approved=False).all()
+        serializer = DetailPostSerializer(approved, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True, url_path='images')
     def images(self, request, pk):
