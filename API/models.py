@@ -5,6 +5,7 @@ from cloudinary.models import CloudinaryField
 from enum import Enum
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 EXPIRATION_BOOKING = 2
 
@@ -132,9 +133,8 @@ class FavoritePost(BaseModel):
 class Reviews(BaseModel):
     customer = models.ForeignKey('User', related_name='Customer_Reviews', on_delete=models.CASCADE)
     post = models.ForeignKey('Post', related_name='Post_Reviews', on_delete=models.CASCADE)
-    rating = models.IntegerField()
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     comment = models.TextField()
-    review_quality = models.IntegerField(default=0)
 
 class SupportRequests(BaseModel):
     subject = models.CharField(max_length=255)

@@ -163,3 +163,12 @@ class SupportRequestsSerializer(ModelSerializer):
         model = SupportRequests
         fields = ['id', 'subject', 'description', 'is_handle', 'user', 'created_at', 'updated_at']
 #####APi review ,support,FavoritePost
+
+class ReviewSerializer(ModelSerializer):
+    class Meta:
+        model = Reviews
+        fields = ['id','customer','post','rating','comment']
+
+# class DetailReviewSerializer(ModelSerializer):
+#     customer = UserSerializer(read_only=True)
+#     post = PostSerializer()

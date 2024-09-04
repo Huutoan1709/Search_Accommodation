@@ -2,7 +2,7 @@ from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
     SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
-    CreatePostSerializer,PostImageSerializer
+    CreatePostSerializer, PostImageSerializer,ReviewSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
@@ -202,7 +202,6 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
     def destroy(self, request, *args, **kwargs):
         motel = self.get_object()
         motel.is_active = False
@@ -210,7 +209,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView,generics.DestroyAPIView):
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView):
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
@@ -256,7 +255,6 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
     queryset = Price.objects.all()
@@ -277,3 +275,13 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
+
+class ReviewViewSet(viewsets.ViewSet,generics.ListCreateAPIView,generics.RetrieveUpdateDestroyAPIView):
+    serializer_class = ReviewSerializer
+    queryset = Reviews.objects.all()
+    # def get_serializer_class(self):
+    #     if self.action.__eq__('list'):
+    #         return PostSerializer
+    #     if self.action.__eq__('post'):
+    #         return CreatePostSerializer
+    #     return DetailPostSerializer
