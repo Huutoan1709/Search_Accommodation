@@ -127,9 +127,12 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     # Mysupport
-
-    # Myreview
-
+    @action(methods=['get'], detail=False, url_path='my-review')
+    def my_post(self, request):
+        user = request.user
+        review = Reviews.objects.filter(customer=user).all()
+        serializer = DetailPostSerializer(review, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
     # serializer_class = RoomsSerializer
@@ -210,8 +213,8 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
 
 
 class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView):
-    serializer_class = PostSerializer
-    queryset = Post.objects.all()
+    queryset = Post.objects.filter(is_active=True)
+    pagination_class = paginators.BasePaginator
 
     def get_serializer_class(self):
         if self.action.__eq__('list'):
@@ -254,6 +257,13 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             return response.Response(PostImageSerializer(uploaded_images, many=True).data, status=status.HTTP_200_OK)
 
         return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    @action(methods=['get'], detail=True, url_path='reviews')
+    def get_review(self, request, pk=None):
+        post = self.get_object()
+        reviews = post.Post_Reviews.all()
+        serializer = ReviewSerializer(reviews, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
