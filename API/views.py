@@ -2,7 +2,7 @@ from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
     SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
-    CreatePostSerializer, PostImageSerializer,ReviewSerializer
+    CreatePostSerializer, PostImageSerializer, ReviewSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
@@ -41,6 +41,14 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = UserInfoSerializer
     queryset = User.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
+    def get_permissions(self):
+        if self.action in ['get_follower', 'get_following', 'follow', 'current_user', 'my_rooms', 'my_post','favorite_post','my_review','my_favorites']:
+            return [permissions.IsAuthenticated()]
+
+        if self.action in ['update', 'partial_update']:
+            return [perms.IsOwner()]
+
+        return [permissions.AllowAny()]
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
@@ -128,11 +136,12 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     # Mysupport
     @action(methods=['get'], detail=False, url_path='my-review')
-    def my_post(self, request):
+    def my_review(self, request):
         user = request.user
         review = Reviews.objects.filter(customer=user).all()
         serializer = DetailPostSerializer(review, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPIView, generics.RetrieveDestroyAPIView):
     # serializer_class = RoomsSerializer
@@ -265,6 +274,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         serializer = ReviewSerializer(reviews, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
     queryset = Price.objects.all()
@@ -286,7 +296,8 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
 
-class ReviewViewSet(viewsets.ViewSet,generics.ListCreateAPIView,generics.RetrieveUpdateDestroyAPIView):
+
+class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     queryset = Reviews.objects.all()
     # def get_serializer_class(self):

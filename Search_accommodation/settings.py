@@ -97,7 +97,7 @@ REST_FRAMEWORK = {
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Asia/Ho_Chi_Minh'  # Thay đổi múi giờ thành múi giờ của bạn
+TIME_ZONE = 'Asia/Ho_Chi_Minh'
 USE_TZ = True
 USE_I18N = True
 
