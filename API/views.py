@@ -153,6 +153,15 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
     ordering_fields = ['price', 'area']
     ordering = ['price']
 
+    def get_permissions(self):
+        if self.action in ['partial_update', 'destroy', 'add_price']:
+            return [perms.RoomLandlordAuthenticated()]
+
+        if self.action in ['create', ]:
+            return [perms.IsRoomLandlord()]
+
+        return [permissions.AllowAny()]
+
     def get_serializer_class(self):
         if self.action.__eq__('list'):
             return RoomsSerializer
@@ -224,7 +233,9 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
 class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView):
     queryset = Post.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
-
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['__all__']
+    ordering = ['-created_at']
     def get_serializer_class(self):
         if self.action.__eq__('list'):
             return PostSerializer
@@ -291,6 +302,7 @@ class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartia
     queryset = RoomType.objects.all()
 
 
+
 class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
@@ -300,9 +312,4 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
 class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     queryset = Reviews.objects.all()
-    # def get_serializer_class(self):
-    #     if self.action.__eq__('list'):
-    #         return PostSerializer
-    #     if self.action.__eq__('post'):
-    #         return CreatePostSerializer
-    #     return DetailPostSerializer
+

@@ -33,6 +33,6 @@ class OwnerAuthenticated(permissions.IsAuthenticated):
 
 
 class RoomLandlordAuthenticated(IsRoomLandlord):
-    # Đối tượng user là chủ trọ của đối tượng motel
+    # Đối tượng user là chủ trọ của đối tượng room
     def has_object_permission(self, request, view, obj):
         return super().has_permission(request, view) and obj.landlord == request.user
