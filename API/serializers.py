@@ -11,7 +11,14 @@ class UserSerializer(ModelSerializer):
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
-        rep['avatar'] = instance.avatar.url
+        # Check if avatar has a URL attribute
+        if hasattr(instance.avatar, 'url') and instance.avatar:
+            rep['avatar'] = instance.avatar.url
+        else:
+            # Provide a default image URL in case avatar does not have a URL
+            rep[
+                'avatar'] = "https://res.cloudinary.com/daf0utpgr/image/upload/v1725727571/avatar_default.webp"  # Replace with your default image URL
+
         return rep
 
     def get_followed(self, obj):

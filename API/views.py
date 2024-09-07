@@ -52,6 +52,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
+        self.check_object_permissions(request, request.user)
         if request.method.__eq__('DELETE'):
             user = request.user
             user.is_active = False
