@@ -81,6 +81,7 @@ class Post(BaseModel):
 class Amenities(BaseModel):
     name = models.CharField(max_length=50)
     description = models.TextField(blank = True)
+    quanlity = models.IntegerField(default = 1)
 
     def __str__(self):
         return self.name
