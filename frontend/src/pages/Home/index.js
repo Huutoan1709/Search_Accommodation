@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import API, { endpoints } from "../../API";
+import "./HomeStyle.scss";
 
 function Home() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios("http://127.0.0.1:8000/post/");
-        setData(result.data);
+        const result = await API.get(endpoints["post"], {
+          params: { page: currentPage },
+        });
+        setData(result.data.results);
+        setTotalPages(result.data.total_pages);
       } catch (err) {
         setError(err.message);
       }
     };
 
     fetchData();
-  }, []);
+  }, [currentPage]);
+
+  const handlePageChange = (page) => {
+    if (page > 0 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   if (error) {
     return <div>Error: {error}</div>;
@@ -24,34 +36,74 @@ function Home() {
 
   return (
     <div>
-      {data &&
-        Array.isArray(data.results) &&
-        data.results.map((item) => (
-          <div key={item.id}>
-            <p>ID: {item.id}</p>
-            <p>Title: {item.title}</p>
-            <p>Content: {item.content}</p>
-            <p>User: {item.user}</p>
-            <p>Created At: {item.created_at}</p>
-            <p>Is Approved: {item.is_approved.toString()}</p>
-            <p>Room:</p>
-            <ul>
-              <li>Price: {item.room.price}</li>
-              <li>Ward: {item.room.ward}</li>
-              <li>District: {item.room.district}</li>
-              <li>City: {item.room.city}</li>
-              <li>Other Address: {item.room.other_address}</li>
-              <li>Area: {item.room.area}</li>
-              <li>Landlord: {item.room.landlord}</li>
-            </ul>
-            <p>Images:</p>
-            <ul>
-              {item.images.map((image, index) => (
-                <li key={index}>Image URL: {image.url}</li>
+      {/* Header */}
+      <header className="header">
+        <div className="header-logo">
+          <img src="Logomotel.jpg" alt="Logo" />
+          <span></span>
+        </div>
+        <nav className="header-nav">
+          <a href="#" className="active">
+            Phòng trọ
+          </a>
+          <a href="#">Nhà đất cho thuê</a>
+          <a href="#">Tin tức</a>
+          <a href="#">Thông Báo</a>
+          <a href="#">Hỗ Trợ</a>
+        </nav>
+        <div className="header-icons">
+          <button>❤</button>
+          <button className="post-button">Đăng nhập</button>
+          <button className="post-button">Đăng ký</button>
+          <button className="post-button">Đăng tin</button>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <div className="content">
+        <div className="container">
+          <h2>Tất cả phòng trên toàn quốc</h2>
+          {data && data.length > 0 ? (
+            <div className="listings">
+              {data.map((item) => (
+                <div key={item.id} className="listing-card">
+                  <img
+                    src={item.images[0]?.url}
+                    alt={item.title}
+                    className="listing-image"
+                  />
+                  <div className="listing-details">
+                    <h3>{item.title}</h3>
+                    <p>{item.description}</p>
+                    <p>Giá: {item.room.price} Triệu/Tháng</p>
+                    <p>Diện tích: {item.room.area} m²</p>
+                    <p>Loại phòng: {item.room.room_type}</p>
+                    <p>Ngày đăng: {item.created_at}</p>
+                    <p>
+                      Địa chỉ: {item.room.district}, {item.room.city}
+                    </p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
+          ) : (
+            <p>No listings available</p>
+          )}
+
+          {/* Pagination */}
+          <div className="pagination">
+            <button onClick={() => handlePageChange(currentPage - 1)}>
+              Previous
+            </button>
+            <span>
+              Page {currentPage} of {totalPages}
+            </span>
+            <button onClick={() => handlePageChange(currentPage + 1)}>
+              Next
+            </button>
           </div>
-        ))}
+        </div>
+      </div>
     </div>
   );
 }

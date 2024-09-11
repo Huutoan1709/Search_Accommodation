@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import API, { endpoints } from "../../API";
 
 function Room() {
   const [data, setData] = useState(null);
@@ -8,7 +9,7 @@ function Room() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios("http://127.0.0.1:8000/room/");
+        const result = await API.get(endpoints["room"]);
         setData(result.data);
       } catch (err) {
         setError(err.message);
