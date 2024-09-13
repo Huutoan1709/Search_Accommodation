@@ -42,6 +42,9 @@ class UserInfoSerializer(UserSerializer):
         user.save()
         return user
 
+
+
+
     def get_follower_count(self, obj):
         return Follow.objects.filter(following=obj, is_active=True).count()
 

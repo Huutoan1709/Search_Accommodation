@@ -231,7 +231,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView):
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView, generics.RetrieveAPIView):
     queryset = Post.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
