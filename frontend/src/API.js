@@ -3,16 +3,17 @@ import axios from "axios";
 const HOST = "http://127.0.0.1:8000/";
 
 export const endpoints = {
-  listuser: "/users/",
-  current_user: "/users/current_user/",
   post: "/post/",
+  wait_post: "/post/wait-approved/",
+  postdetail: (postId) => `/post/${postId}/`,
   room: "/room/",
   roomdetail: (roomId) => `/room/${roomId}/`,
-  postdetail: (postId) => `/post/${postId}/`,
+
   login: "/o/token/",
-  register: "/users/",
+  register: "/user/",
   room_type: "/room_type/",
   amenities: "/amenities/",
+  detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
 };
 
 // Function to create an axios instance with the authorization token

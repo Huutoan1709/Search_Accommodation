@@ -1,74 +1,12 @@
 /* Home.css */
-.header {
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 20px;
-  background-color: white;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.header-logo {
-  display: flex;
-  align-items: center;
-}
-
-.header-logo img {
-  height: 40px;
-  margin-right: 10px;
-}
-
-.header-nav {
-  display: flex;
-  gap: 20px;
-}
-
-.header-nav a {
-  text-decoration: none;
-  color: black;
-  padding: 5px 10px;
-  font-size: 14px;
-  transition: color 0.3s ease;
-}
-
-.header-nav a.active,
-.header-nav a:hover {
-  color: #e02020; /* Active color */
-  border-bottom: 2px solid #e02020; /* Underline active link */
-}
-
-.header-icons {
-  display: flex;
-  gap: 15px;
-}
-
-.header-icons button {
-  background: none;
-  font-size: 14px;
-  cursor: pointer;
-  transition: color 0.3s ease;
-  color: #2c2c2c;
-  background: #fff;
-  border: solid 1px #2c2c2c;
-  font-size: 14px;
-  line-height: 20px;
-  font-weight: bold;
-  letter-spacing: -0.2px;
-  padding: 13px 15px;
-  border-radius: 8px;
-}
-
-.header-icons button:hover {
-  color: #e02020; /* Hover color */
-}
-
 // CONTENT
 .container {
   margin-top: 8px;
-  width: 1024px;
+  max-width: 1024px;
   margin: 0 auto;
 }
+
+//SEARCH BAR
 .listings {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
