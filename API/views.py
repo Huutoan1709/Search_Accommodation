@@ -41,8 +41,10 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = UserInfoSerializer
     queryset = User.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
+
     def get_permissions(self):
-        if self.action in ['get_follower', 'get_following', 'follow', 'current_user', 'my_rooms', 'my_post','favorite_post','my_review','my_favorites']:
+        if self.action in ['get_follower', 'get_following', 'follow', 'current_user', 'my_rooms', 'my_post',
+                           'favorite_post', 'my_review', 'my_favorites']:
             return [permissions.IsAuthenticated()]
 
         if self.action in ['update', 'partial_update']:
@@ -231,30 +233,51 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView, generics.RetrieveAPIView):
-    queryset = Post.objects.filter(is_active=True)
+class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView,
+                  generics.RetrieveAPIView):
     pagination_class = paginators.BasePaginator
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['__all__']
     ordering = ['-created_at']
+
+    def get_queryset(self):
+        if self.action == 'list':
+            return Post.objects.filter(is_active=True, is_approved=True)
+        else:
+            return Post.objects.filter(is_active=True)
     def get_serializer_class(self):
-        if self.action.__eq__('list'):
-            return PostSerializer
-        if self.action.__eq__('post'):
-            return CreatePostSerializer
-        return DetailPostSerializer
+        serializers = {
+            'list': PostSerializer,
+            'create': CreatePostSerializer,
+            'retrieve': DetailPostSerializer,
+            'update': DetailPostSerializer,
+            'partial_update': DetailPostSerializer,
+        }
+        return serializers.get(self.action, PostSerializer)
 
     def create(self, request, *args, **kwargs):
         data = QueryDict('', mutable=True)
         data.update(request.data)
 
-        data['user'] = request.user.id
+        room_id = data.get('room')
+        room = Rooms.objects.get(id=room_id)
+        if room.landlord.id != request.user.id:
+            return response.Response({'error': 'Only the landlord of the room can create a post about it'},
+                                     status=status.HTTP_400_BAD_REQUEST)
 
+        data['user'] = request.user.id
         serializer = self.get_serializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def update(self, request, *args, **kwargs):
+        if request.user.role not in ['WEBMASTER', 'ADMIN']:
+            return response.Response({'error': 'Only admin and webmaster can update this attribute'},
+                                     status=status.HTTP_403_FORBIDDEN)
+
+        return super().update(request, *args, **kwargs)
 
     @action(methods=['get'], detail=False, url_path='wait-approved')
     def wait_approved(self, request):
@@ -303,7 +326,6 @@ class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartia
     queryset = RoomType.objects.all()
 
 
-
 class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
@@ -313,4 +335,3 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
 class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     queryset = Reviews.objects.all()
-

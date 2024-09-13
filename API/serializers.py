@@ -42,9 +42,6 @@ class UserInfoSerializer(UserSerializer):
         user.save()
         return user
 
-
-
-
     def get_follower_count(self, obj):
         return Follow.objects.filter(following=obj, is_active=True).count()
 
@@ -108,10 +105,11 @@ class DetailRoomSerializer(RoomsSerializer):
 class WriteRoomSerializer(RoomsSerializer):
     room_type = serializers.PrimaryKeyRelatedField(queryset=RoomType.objects.filter(is_active=True))
     landlord = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
     # amenities = serializers.PrimaryKeyRelatedField(queryset=Amenities.objects.all(), many=True)
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'room_type', 'landlord','amenities']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'room_type', 'landlord', 'amenities']
 
 
 class PostImageSerializer(ModelSerializer):
@@ -125,9 +123,15 @@ class PostImageSerializer(ModelSerializer):
         fields = ['id', 'url']
 
 
+class UserPostSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'phone']
+
+
 class PostSerializer(ModelSerializer):
     images = SerializerMethodField()
-    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    user = UserPostSerializer()
     room = RoomsSerializer()
 
     def get_images(self, obj):
@@ -136,7 +140,7 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'is_approved', 'room']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room']
         extra_kwargs = {
             'user': {'read_only': True},
         }
@@ -147,16 +151,28 @@ class DetailPostSerializer(PostSerializer):
 
     class Meta(PostSerializer.Meta):
         model = Post
+        fields = PostSerializer.Meta.fields+['is_approved']
 
 
-class CreatePostSerializer(PostSerializer):
+class CreatePostSerializer(ModelSerializer):
+    images = SerializerMethodField()
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     room = serializers.PrimaryKeyRelatedField(queryset=Rooms.objects.all())
 
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return Post.objects.create(**validated_data)
 
+    def get_images(self, obj):
+        active_images = obj.Post_Images.filter(is_active=True)
+        return PostImageSerializer(active_images, many=True).data
 
+    class Meta:
+        model = Post
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room']
+        extra_kwargs = {
+            'user': {'read_only': True},
+        }
 
 
 class FavoritePostSerializer(ModelSerializer):
@@ -172,12 +188,14 @@ class SupportRequestsSerializer(ModelSerializer):
     class Meta:
         model = SupportRequests
         fields = ['id', 'subject', 'description', 'is_handle', 'user', 'created_at', 'updated_at']
+
+
 #####APi review ,support,FavoritePost
 
 class ReviewSerializer(ModelSerializer):
     class Meta:
         model = Reviews
-        fields = ['id','customer','post','rating','comment']
+        fields = ['id', 'customer', 'post', 'rating', 'comment']
 
 # class DetailReviewSerializer(ModelSerializer):
 #     customer = UserSerializer(read_only=True)
