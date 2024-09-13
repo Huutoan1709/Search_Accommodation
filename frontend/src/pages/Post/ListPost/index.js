@@ -5,7 +5,7 @@ import Button from '../../DefaultLayout/Button';
 
 const ListPost = () => {
     return (
-        <div className="w-full border-blue-600 bg-white shadow-md rounded-md ">
+        <div className="w-full border-blue-600 shadow-md rounded-md bg-[#fff] ">
             <div className="flex items-centre justify-between my-3 pt-5 px-4">
                 <h3 className="text-xl font-semibold">Danh Sách Tin Đăng</h3>
                 <span>Cấp nhập : 12:05</span>

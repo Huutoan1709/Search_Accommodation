@@ -54,20 +54,8 @@ function Home() {
         }));
     };
 
-    const handleSearch = async () => {
-        try {
-            const result = await API.get(endpoints['post'], {
-                params: { ...searchParams, page: 1 },
-            });
-            setData(result.data.results);
-            setTotalPages(result.data.total_pages);
-            setCurrentPage(1);
-        } catch (err) {
-            setError(err.message);
-        }
-    };
     return (
-        <div className="bg-slate-100">
+        <div className="bg-slate-50">
             <Header />
             <div className="w-[1024px] flex m-auto">
                 <div className="flex w-full gap-4">
