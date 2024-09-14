@@ -1,3 +1,15 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+button.slick-arrow {
+    font-size: 50px !important;
+}
+.slick-next {
+    right: 35px !important;
+    z-index: 10 !important;
+}
+.slick-prev {
+    left: 10px !important;
+    z-index: 10 !important;
+}

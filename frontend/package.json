@@ -13,6 +13,8 @@
     "@testing-library/user-event": "^13.2.1",
     "axios": "^1.7.7",
     "css-reset-and-normalize": "^2.3.6",
+    "date-fns": "^4.0.0-beta.1",
+    "i": "^0.3.7",
     "normalize.css": "^8.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

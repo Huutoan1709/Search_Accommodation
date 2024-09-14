@@ -17,7 +17,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
     };
     return (
         <div
-            className="w-full flex  border-t border-red-600 p-4 pt-5 rounded-xl mb-[15px] shadow-2xl "
+            className="w-full flex  border-t border-red-600 p-4 pt-5 rounded-xl mb-[15px] shadow-2  xl "
             onClick={handlePostClick}
         >
             <div className="w-[42%] flex flex-wrap gap-[2px] items-center rounded-xl relative cursor-pointer">

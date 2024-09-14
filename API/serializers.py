@@ -4,7 +4,7 @@ from .models import User, Follow, PostImage, Post, Price, Rooms, RoomType, Revie
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
-
+from django.utils.timesince import timesince
 
 class UserSerializer(ModelSerializer):
     followed = SerializerMethodField()
@@ -78,10 +78,13 @@ class AmenitiesSerializer(ModelSerializer):
 
 
 class RoomsSerializer(ModelSerializer):
+    created_at_humanized = serializers.SerializerMethodField()
+    def get_created_at_humanized(self, obj):
+        return timesince(obj.created_at) + ' trước'
     class Meta:
         model = Rooms
         fields = ['id', 'price', 'ward',
-                  'district', 'city', 'other_address', 'area', 'landlord']
+                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized']
         extra_kwargs = {
             'landlord':
                 {'read_only': True},
@@ -133,6 +136,9 @@ class PostSerializer(ModelSerializer):
     images = SerializerMethodField()
     user = UserPostSerializer()
     room = RoomsSerializer()
+    created_at_humanized = SerializerMethodField()
+    def get_created_at_humanized(self, obj):
+        return timesince(obj.created_at) + ' trước'
 
     def get_images(self, obj):
         active_images = obj.Post_Images.filter(is_active=True)
@@ -140,7 +146,7 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room','created_at_humanized']
         extra_kwargs = {
             'user': {'read_only': True},
         }

@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'cloudinary',
     'django_filters',
     'corsheaders',
+    'django.contrib.humanize',
 ]
 
 MIDDLEWARE = [

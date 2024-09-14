@@ -1,15 +1,16 @@
-@import "normalize.css";
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap");
+@import 'normalize.css';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 html {
-  font-size: 62.5%;
+    font-size: 62.5%;
 }
 body {
-  font-family: "roboto", sans-serif;
-  font-size: 1.6rem;
-  line-height: 1.5;
-  text-rendering: optimizeLegibility;
+    font-family: 'Montserrat', sans-serif !important;
+    font-size: 1.6rem;
+    line-height: 1.5;
+    text-rendering: optimizeLegibility;
+    background-color: #fafafa;
 }
