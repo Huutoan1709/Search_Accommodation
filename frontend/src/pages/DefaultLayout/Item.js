@@ -7,11 +7,19 @@ import { SlUserFollow, SlUserFollowing } from 'react-icons/sl';
 import { PiMapPinAreaFill } from 'react-icons/pi';
 import { MdOutlineAttachMoney } from 'react-icons/md';
 import { BiArea } from 'react-icons/bi';
+import { useNavigate } from 'react-router-dom';
 
-const Item = ({ images, title, content, room, created_at, user }) => {
+const Item = ({ images, title, content, room, created_at, user, id }) => {
     const [HoverHearth, setHoverHearth] = useState(false);
+    const navigate = useNavigate();
+    const handlePostClick = () => {
+        navigate(`/post/${id}`);
+    };
     return (
-        <div className="w-full flex  border-t border-red-600 p-4 pt-5 rounded-xl mb-[15px] shadow-xl">
+        <div
+            className="w-full flex  border-t border-red-600 p-4 pt-5 rounded-xl mb-[15px] shadow-2xl "
+            onClick={handlePostClick}
+        >
             <div className="w-[42%] flex flex-wrap gap-[2px] items-center rounded-xl relative cursor-pointer">
                 {images.slice(0, 4).map((image, index) => (
                     <img key={index} src={image.url} alt="image" className="w-[140px] h-[120px] object-cover" />
@@ -27,7 +35,7 @@ const Item = ({ images, title, content, room, created_at, user }) => {
             </div>
             <div className="w-3/5 pl-3">
                 <div className="items-center">
-                    <h3 className="text-red-600 font-semibold">{title}</h3>
+                    <h3 className="text-red-600 font-semibold cursor-pointer">{title}</h3>
                 </div>
                 <div className="my-2 flex items-center">
                     <span className="flex font-bold text-blue-600 mx-2">
@@ -41,7 +49,7 @@ const Item = ({ images, title, content, room, created_at, user }) => {
                 </div>
                 <span className="flex items-center my-2">
                     <PiMapPinAreaFill className="text-blue-700 mx-1" size={20} />
-                    {`${room?.ward}, ${room?.district}, ${room?.city}`}
+                    {`${room?.district}, ${room?.city}`}
                 </span>
                 <p className="text-gray-600 my-2, min-h-[120px]">
                     {content.length > 200 ? `${content.slice(0, 200)}...` : content}

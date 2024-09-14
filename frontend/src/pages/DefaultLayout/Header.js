@@ -37,7 +37,7 @@ const Header = () => {
                 <button className="post-button" onClick={handleRegisterClick}>
                     Đăng ký
                 </button>
-                <button className="post-button">Đăng tin</button>
+                <button className="post-button ">Đăng tin</button>
             </div>
         </header>
     );
