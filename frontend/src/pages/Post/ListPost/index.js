@@ -10,22 +10,20 @@ const ListPost = () => {
     const [nextPage, setNextPage] = useState(null);
     const [previousPage, setPreviousPage] = useState(null);
     const [count, setCount] = useState(0);
-    const [currentPage, setCurrentPage] = useState(1); // Fix currentPage
-    const [totalPages, setTotalPages] = useState(1); // Fix totalPages
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
     const postsPerPage = 5; // =page_size (pagination django)
 
-    // Function to extract the page number from a URL
     const getPageNumber = (url) => {
         if (!url) return currentPage;
 
         try {
-            // Handle relative URLs by adding the current domain
             const absoluteUrl = new URL(url, window.location.origin);
             const urlParams = new URLSearchParams(absoluteUrl.search);
-            return parseInt(urlParams.get('page')) || 1; // Default to page 1 if no page param
+            return parseInt(urlParams.get('page')) || 1;
         } catch (error) {
             console.error('Invalid URL:', url);
-            return currentPage; // In case of error, fallback to current page
+            return currentPage;
         }
     };
 
@@ -39,12 +37,8 @@ const ListPost = () => {
             setCount(result.data.count);
             setTotalPages(Math.ceil(result.data.count / postsPerPage));
 
-            const pageFromUrl = getPageNumber(url); // Extract page number from URL
-            setCurrentPage(pageFromUrl); // Set the correct current page
-
-            console.log('Current URL:', url);
-            console.log('Current Page:', pageFromUrl);
-            console.log('Total Pages:', Math.ceil(result.data.count / postsPerPage));
+            const pageFromUrl = getPageNumber(url);
+            setCurrentPage(pageFromUrl);
         } catch (err) {
             setError(err.message);
         }
@@ -101,8 +95,8 @@ const ListPost = () => {
     }
 
     return (
-        <div className="w-full border-blue-600 shadow-md rounded-md bg-[#fff]">
-            <div className="flex items-centre justify-between my-3 pt-5 px-4">
+        <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
+            <div className="flex items-centre justify-between my-3">
                 <h3 className="font-semibold text-4xl">TỔNG {count} KẾT QUẢ</h3>
                 <span>Cập nhập: 12:05</span>
             </div>

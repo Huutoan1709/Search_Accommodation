@@ -1,13 +1,12 @@
 import React, { memo, useState } from 'react';
 import '../../output.css';
-import { PiHeartStraightFill } from 'react-icons/pi';
-import { PiHeartStraightLight } from 'react-icons/pi';
 import Logomotel from '../../assets/Logomotel.png';
-import { SlUserFollow, SlUserFollowing } from 'react-icons/sl';
-import { PiMapPinAreaFill } from 'react-icons/pi';
+import { useNavigate } from 'react-router-dom';
+import { PiHeartStraightFill, PiHeartStraightLight } from 'react-icons/pi';
 import { MdOutlineAttachMoney } from 'react-icons/md';
 import { BiArea } from 'react-icons/bi';
-import { useNavigate } from 'react-router-dom';
+import { SlUserFollow } from 'react-icons/sl';
+import { PiMapPinAreaFill } from 'react-icons/pi';
 
 const Item = ({ images, title, content, room, created_at, user, id }) => {
     const [HoverHearth, setHoverHearth] = useState(false);
@@ -16,13 +15,10 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
         navigate(`/post/${id}`);
     };
     return (
-        <div
-            className="w-full flex  border-t border-red-600 p-4 pt-5 rounded-xl mb-[15px] shadow-2  xl "
-            onClick={handlePostClick}
-        >
-            <div className="w-[42%] flex flex-wrap gap-[2px] items-center rounded-xl relative cursor-pointer">
+        <div className="w-full flex  border-t border-orange-700 p-5 gap-1 bg-white " onClick={handlePostClick}>
+            <div className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer">
                 {images.slice(0, 4).map((image, index) => (
-                    <img key={index} src={image.url} alt="image" className="w-[140px] h-[120px] object-cover" />
+                    <img key={index} src={image.url} alt="image" className="w-[135px] h-[120px] object-cover" />
                 ))}
                 <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1">{`${images.length} ảnh`}</span>
                 <span
@@ -33,26 +29,26 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     {HoverHearth ? <PiHeartStraightFill size={25} color="red" /> : <PiHeartStraightLight size={25} />}
                 </span>
             </div>
-            <div className="w-3/5 pl-3">
+            <div className="w-[60%] pl-2">
                 <div className="items-center">
                     <h3 className="text-red-600 font-semibold cursor-pointer">{title}</h3>
                 </div>
                 <div className="my-2 flex items-center">
-                    <span className="flex font-bold text-blue-600 mx-2">
-                        <MdOutlineAttachMoney size={20} />
-                        {room?.price} triệu/tháng
+                    <span className="flex font-bold mr-2">
+                        <MdOutlineAttachMoney size={20} className="text-gray-500" />
+                        <p className="text-green-500">{room?.price} triệu/tháng</p>
                     </span>
-                    <span className=" flex font-bold text-blue-600 ml-4">
-                        <BiArea size={20} />
+                    <span className=" flex ml-4">
+                        <BiArea size={20} className="text-gray-500" />
                         {room?.area}m2
                     </span>
                 </div>
                 <span className="flex items-center my-2">
-                    <PiMapPinAreaFill className="text-blue-700 mx-1" size={20} />
+                    <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
                     {`${room?.district}, ${room?.city}`}
                 </span>
                 <p className="text-gray-600 my-2, min-h-[120px]">
-                    {content.length > 200 ? `${content.slice(0, 200)}...` : content}
+                    {content.length > 170 ? `${content.slice(0, 170)}...` : content}
                 </p>
                 <div className="flex items-center mt-5 justify-between">
                     <div className="flex items-center">

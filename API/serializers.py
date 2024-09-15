@@ -79,12 +79,13 @@ class AmenitiesSerializer(ModelSerializer):
 
 class RoomsSerializer(ModelSerializer):
     created_at_humanized = serializers.SerializerMethodField()
+    room_type = RoomTypeSerializer()
     def get_created_at_humanized(self, obj):
         return timesince(obj.created_at) + ' trước'
     class Meta:
         model = Rooms
         fields = ['id', 'price', 'ward',
-                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized']
+                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized','room_type']
         extra_kwargs = {
             'landlord':
                 {'read_only': True},
@@ -94,7 +95,6 @@ class RoomsSerializer(ModelSerializer):
 class DetailRoomSerializer(RoomsSerializer):
     prices = SerializerMethodField()
     amenities = AmenitiesSerializer(many=True)
-    room_type = RoomTypeSerializer()
     landlord = UserSerializer()
 
     def get_prices(self, obj):
@@ -102,7 +102,7 @@ class DetailRoomSerializer(RoomsSerializer):
         return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'room_type', 'landlord']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord']
 
 
 class WriteRoomSerializer(RoomsSerializer):

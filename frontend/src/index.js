@@ -9,12 +9,6 @@ import reduxStore from './redux';
 import './output.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { PiHeartStraightFill } from 'react-icons/pi';
-import { PiHeartStraightLight } from 'react-icons/pi';
-import { SlUserFollow, SlUserFollowing } from 'react-icons/sl';
-import { PiMapPinAreaFill } from 'react-icons/pi';
-import { MdOutlineAttachMoney } from 'react-icons/md';
-import { BiArea } from 'react-icons/bi';
 const { store, persistor } = reduxStore();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -22,9 +16,7 @@ root.render(
     <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
             <React.StrictMode>
-                <GlobalStyles>
-                    <App />
-                </GlobalStyles>
+                <App />
             </React.StrictMode>
         </PersistGate>
     </Provider>,

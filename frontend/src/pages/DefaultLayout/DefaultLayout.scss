@@ -4,10 +4,17 @@
     justify-content: space-between;
     align-items: center;
     padding: 15px 20px;
-    background-color: white;
+    background-color: #fff;
     border-bottom: 1px solid #e0e0e0;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    box-sizing: border-box;
 }
-
+.header + div {
+    margin-top: 80px; /* Adjust this value to match the height of your header */
+}
 .header-logo {
     display: flex;
     align-items: center;
