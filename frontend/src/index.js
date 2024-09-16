@@ -1,28 +1,20 @@
 import React from 'react';
-import ReactDOM from 'react-dom/client';
+import ReactDOM from 'react-dom';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import GlobalStyles from './components/GlobalStyles';
-import { PersistGate } from 'redux-persist/integration/react';
-import { Provider } from 'react-redux';
-import reduxStore from './redux';
 import './output.css';
-import 'slick-carousel/slick/slick.css';
-import 'slick-carousel/slick/slick-theme.css';
-const { store, persistor } = reduxStore();
+import UserProvider from './context/UserProvider'; // Import the provider
+import PostProvider from './context/PostContext';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-    <Provider store={store}>
-        <PersistGate loading={null} persistor={persistor}>
-            <React.StrictMode>
-                <App />
-            </React.StrictMode>
-        </PersistGate>
-    </Provider>,
+ReactDOM.render(
+    <React.StrictMode>
+        <UserProvider>
+            <GlobalStyles />
+            <App />
+        </UserProvider>
+    </React.StrictMode>,
+    document.getElementById('root'),
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

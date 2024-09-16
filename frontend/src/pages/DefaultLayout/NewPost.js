@@ -28,7 +28,7 @@ const NewPost = () => {
     }, []);
 
     if (!posts.length) {
-        return <div>Loading...</div>;
+        return <div>Đang Loading...</div>;
     }
 
     return posts.map((post) => {
@@ -50,8 +50,8 @@ const NewPost = () => {
                         {post?.title.length > 40 ? `${post?.title.slice(0, 40)}...` : post?.title}
                     </h4>
                     <div className="flex items-center justify-between text-[15px]">
-                        <span className="text-green-500 font-semibold">{post.room.price} triệu/tháng</span>
-                        <span>
+                        <span className="text-green-500 font-medium text-[14x]">{post.room.price} triệu/tháng</span>
+                        <span className="text-[12px]">
                             {formatDistanceToNow(parseISO(post?.created_at), {
                                 addSuffix: true,
                                 locale: vi,

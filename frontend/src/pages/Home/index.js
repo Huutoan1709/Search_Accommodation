@@ -6,6 +6,8 @@ import { search } from '../DefaultLayout/Search';
 import Header from '../DefaultLayout/Header';
 import ListPost from '../Post/ListPost';
 import Sidebar from '../DefaultLayout/Sidebar';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
 function Home() {
     return (

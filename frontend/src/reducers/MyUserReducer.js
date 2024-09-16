@@ -1,10 +1,11 @@
-const initState = {
-    userData: {},
-};
-const MyUserReducer = (state = initState, action) => {
+const MyUserReducer = (currentState, action) => {
     switch (action.type) {
+        case 'login':
+            return action.payload;
+        case 'logout':
+            return null;
         default:
-            return state;
+            return currentState;
     }
 };
 

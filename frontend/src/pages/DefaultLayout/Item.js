@@ -50,19 +50,12 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                 <p className="text-gray-600 my-2, min-h-[120px]">
                     {content.length > 170 ? `${content.slice(0, 170)}...` : content}
                 </p>
-                <div className="flex items-center mt-5 justify-between">
+                <div className="flex items-center mt-5 justify-between  border-t border-gray-300 p-2">
                     <div className="flex items-center">
                         <img src={Logomotel} alt="avatar" className="w-[30px] h-[30px] rounded-full object-cover" />
                         <p>
                             {user?.first_name} {user?.last_name}
                         </p>
-                    </div>
-                    <div className="flex items-center">
-                        <button type="button" className=" border border-red-300 rounded-md pr-3">
-                            <div className="flex items-center p-1">
-                                Theo Dõi <SlUserFollow className="ml-2" />
-                            </div>
-                        </button>
                     </div>
 
                     <div className="flex items-center">

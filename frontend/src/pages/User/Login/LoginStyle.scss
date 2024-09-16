@@ -1,45 +1,75 @@
-.login-container {
-  background-color: white;
-  padding: 20px;
-  max-width: 400px;
-  margin: auto;
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
+.login-page {
+    display: flex;
+    height: 100vh;
 
-.login-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
-}
+    .login-banner {
+        background-image: url('/path-to-your-side-image.jpg');
+        background-size: cover;
+        background-position: center;
+        flex: 1;
+    }
 
-.error-message {
-  color: red;
-  margin-bottom: 10px;
-  text-align: center;
-}
+    .login-form-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
 
-.password-container {
-  position: relative;
-}
+        .login-container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
 
-.password-toggle {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  cursor: pointer;
-}
+            h2 {
+                color: #333;
+                margin-bottom: 20px;
+            }
 
-.register-link {
-  text-align: center;
-  margin-top: 10px;
-}
+            label {
+                display: block;
+                margin-bottom: 5px;
+            }
 
-.register-link a {
-  color: #007bff;
-  text-decoration: none;
-}
+            input[type='text'],
+            input[type='password'] {
+                width: 100%;
+                padding: 10px;
+                margin-bottom: 20px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+            }
 
-.register-link a:hover {
-  text-decoration: underline;
+            .password-toggle {
+                cursor: pointer;
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            button {
+                width: 100%;
+                padding: 10px;
+                background-color: #ffc107;
+                border: none;
+                border-radius: 4px;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .error-message {
+                color: red;
+                margin-bottom: 10px;
+            }
+
+            .register-link {
+                text-align: center;
+                margin-top: 20px;
+            }
+        }
+    }
 }
