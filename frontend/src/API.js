@@ -8,15 +8,14 @@ export const endpoints = {
     postdetail: (postId) => `/post/${postId}/`,
     room: '/room/',
     roomdetail: (roomId) => `/room/${roomId}/`,
-
     login: '/o/token/',
     register: '/user/',
+    currentuser: '/user/current_user/',
     roomtype: '/roomtype/',
     amenities: '/amenities/',
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
 };
 
-// Function to create an axios instance with the authorization token
 export const authApi = () => {
     const accessToken = localStorage.getItem('access-token');
     return axios.create({

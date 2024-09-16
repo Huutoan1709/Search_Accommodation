@@ -45,11 +45,11 @@ const NewPost = () => {
                     alt="ảnh"
                     className="w-[65px] h-[65px] object-cover rounded-md"
                 />
-                <div className="w-full">
-                    <h4 className="text-blue-500 text-2xl mb-3">
+                <div className="w-full pl-2">
+                    <h4 className="text-blue-500 text-[14px] mb-2">
                         {post?.title.length > 40 ? `${post?.title.slice(0, 40)}...` : post?.title}
                     </h4>
-                    <div className="flex items-center justify-between text-[15px]">
+                    <div className="flex items-center justify-between">
                         <span className="text-green-500 font-medium text-[14x]">{post.room.price} triệu/tháng</span>
                         <span className="text-[12px]">
                             {formatDistanceToNow(parseISO(post?.created_at), {

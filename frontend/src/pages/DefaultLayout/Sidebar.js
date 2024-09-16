@@ -48,7 +48,7 @@ const Sidebar = () => {
                     {roomtype.map((roomtype) => (
                         <p
                             key={roomtype.id}
-                            className="flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} /> Cho thuê {roomtype.name}
                         </p>
@@ -62,7 +62,7 @@ const Sidebar = () => {
                     {priceRanges.map((range, index) => (
                         <p
                             key={index}
-                            className="flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} /> {range}
                         </p>
@@ -76,7 +76,7 @@ const Sidebar = () => {
                     {areaRanges.map((range, index) => (
                         <p
                             key={index}
-                            className="flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} /> {range}
                         </p>

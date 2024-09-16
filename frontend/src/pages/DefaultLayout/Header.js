@@ -1,12 +1,23 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Logomotel from '../../assets/Logomotel.png';
-import './DefaultLayout.scss';
 import MyContext from '../../context/MyContext';
-
+import { FaCaretDown } from 'react-icons/fa';
+import { CiLogout } from 'react-icons/ci';
+import { FaHeart } from 'react-icons/fa';
+import { PiNotePencilBold } from 'react-icons/pi';
+import './DefaultLayout.scss';
+import { FaFileSignature } from 'react-icons/fa';
+import { CgProfile } from 'react-icons/cg';
 const Header = () => {
-    const { user, logout } = useContext(MyContext) || {};
+    const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            fetchUser();
+        }
+    }, []);
 
     const handleLoginClick = () => {
         navigate('/login');
@@ -19,6 +30,7 @@ const Header = () => {
     const handleLogoutClick = () => {
         if (logout) logout();
         navigate('/');
+        window.location.reload();
     };
 
     return (
@@ -28,7 +40,7 @@ const Header = () => {
                 <span></span>
             </div>
             <nav className="header-nav">
-                <a href="#" className="active">
+                <a href="#" className="active" onClick={handleLogoutClick}>
                     Trang Chủ
                 </a>
                 <a href="#">Nhà đất cho thuê</a>
@@ -36,15 +48,52 @@ const Header = () => {
                 <a href="#">Thông Báo</a>
                 <a href="#">Hỗ Trợ</a>
             </nav>
-            <div className="header-icons">
-                <button>❤</button>
+            <div className="header-icons mx-2">
+                <button className="border-r-2">❤</button>
                 {user ? (
-                    <>
-                        <button className="post-button" onClick={handleLogoutClick}>
-                            Đăng xuất
-                        </button>
-                        <button className="post-button">Chỉnh sửa hồ sơ</button>
-                    </>
+                    <div className="user-dropdown">
+                        <div className="user-info">
+                            <img src={user.avatar || 'default-avatar.png'} alt="Avatar" className="avatar" />
+                            <span className="user-name">
+                                {user.first_name} {user.last_name}
+                            </span>
+                            <FaCaretDown className="dropdown-icon" />
+                        </div>
+
+                        <div className="user-menu rounded-md">
+                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                <PiNotePencilBold size={20} className="text-blue-500" />
+                                <span href="#" onClick={handleLogoutClick}>
+                                    Đăng tin cho thuê
+                                </span>
+                            </div>
+                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                <FaFileSignature size={20} className="text-green-500" />
+                                <span href="#" onClick={handleLogoutClick}>
+                                    Quản lý tin đăng
+                                </span>
+                            </div>
+                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                <FaHeart size={20} className="text-red-500" />
+                                <span href="#" onClick={handleLogoutClick}>
+                                    Tin yêu thích
+                                </span>
+                            </div>
+                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                <CgProfile size={20} className="text-teal-600 b " />
+                                <span href="#" onClick={handleLogoutClick}>
+                                    Chỉnh sửa hồ sơ
+                                </span>
+                            </div>
+
+                            <div className="flex items-center cursor-pointer">
+                                <CiLogout size={20} />
+                                <span href="#" onClick={handleLogoutClick}>
+                                    Đăng xuất
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 ) : (
                     <>
                         <button className="post-button" onClick={handleLoginClick}>
@@ -55,7 +104,7 @@ const Header = () => {
                         </button>
                     </>
                 )}
-                <button className="post-button">Đăng tin</button>
+                <button className="post-buttons">Đăng tin</button>
             </div>
         </header>
     );

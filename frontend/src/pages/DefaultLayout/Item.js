@@ -15,7 +15,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
         navigate(`/post/${id}`);
     };
     return (
-        <div className="w-full flex  border-t border-orange-700 p-5 gap-1 bg-white " onClick={handlePostClick}>
+        <div className="w-full flex  border-t border-orange-700 p-3 gap-1 bg-white " onClick={handlePostClick}>
             <div className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer">
                 {images.slice(0, 4).map((image, index) => (
                     <img key={index} src={image.url} alt="image" className="w-[135px] h-[120px] object-cover" />
@@ -29,12 +29,12 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     {HoverHearth ? <PiHeartStraightFill size={25} color="red" /> : <PiHeartStraightLight size={25} />}
                 </span>
             </div>
-            <div className="w-[60%] pl-2">
+            <div className="w-[60%] pl-2 text-[15px]">
                 <div className="items-center">
                     <h3 className="text-red-600 font-semibold cursor-pointer">{title}</h3>
                 </div>
                 <div className="my-2 flex items-center">
-                    <span className="flex font-bold mr-2">
+                    <span className="flex font-semibold mr-3 text-[16px]">
                         <MdOutlineAttachMoney size={20} className="text-gray-500" />
                         <p className="text-green-500">{room?.price} triệu/tháng</p>
                     </span>
@@ -43,14 +43,14 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                         {room?.area}m2
                     </span>
                 </div>
-                <span className="flex items-center my-2">
+                <span className="flex items-center">
                     <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
-                    {`${room?.district}, ${room?.city}`}
+                    {`${room?.ward}, ${room?.district}, ${room?.city}`}
                 </span>
-                <p className="text-gray-600 my-2, min-h-[120px]">
+                <p className="text-gray-500 my-2, min-h-[120px] text-[14px]">
                     {content.length > 170 ? `${content.slice(0, 170)}...` : content}
                 </p>
-                <div className="flex items-center mt-5 justify-between  border-t border-gray-300 p-2">
+                <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <img src={Logomotel} alt="avatar" className="w-[30px] h-[30px] rounded-full object-cover" />
                         <p>

@@ -97,7 +97,7 @@ const ListPost = () => {
     return (
         <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
             <div className="flex items-centre justify-between my-3">
-                <h3 className="font-semibold text-4xl">TỔNG {count} KẾT QUẢ</h3>
+                <h3 className="font-semibold text-lg">TỔNG {count} KẾT QUẢ</h3>
                 <span>Cập nhập: 12:05</span>
             </div>
             <div className="flex items-center gap-3 my-4 px-4">

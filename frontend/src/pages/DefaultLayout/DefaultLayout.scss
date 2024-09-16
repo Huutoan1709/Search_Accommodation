@@ -13,7 +13,7 @@
     box-sizing: border-box;
 }
 .header + div {
-    margin-top: 80px; /* Adjust this value to match the height of your header */
+    margin-top: 80px;
 }
 .header-logo {
     display: flex;
@@ -39,8 +39,8 @@
 
 .header-nav a.active,
 .header-nav a:hover {
-    color: #e02020; /* Active color */
-    border-bottom: 2px solid #e02020; /* Underline active link */
+    color: #e02020;
+    border-bottom: 2px solid #e02020;
 }
 
 .header-icons {
@@ -55,8 +55,8 @@
     transition: color 0.3s ease;
     color: #2c2c2c;
     background: #fff;
-    border: solid 1px #2c2c2c;
     line-height: 20px;
+    border: 1px solid #2c2c2c;
     font-weight: bold;
     letter-spacing: -0.2px;
     padding: 13px 15px;
@@ -64,5 +64,92 @@
 }
 
 .header-icons button:hover {
-    color: #e02020; /* Hover color */
+    color: #e02020;
+}
+.header-icons button:last-child {
+    border: 1px solid #2c2c2c;
+    color: white;
+    background-color: rgba(254, 11, 11, 0.882);
+}
+/* New Styles for User Dropdown */
+.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.user-name {
+    margin-right: 8px;
+}
+
+.dropdown-icon {
+    font-size: 12px;
+    color: #2c2c2c;
+    transition: transform 0.2s ease;
+}
+
+.user-dropdown {
+    position: relative;
+    margin-left: 20px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.user-info img.avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.user-name {
+    margin-right: 5px;
+}
+
+.dropdown-icon {
+    font-size: 12px;
+}
+
+.user-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    z-index: 1;
+    padding: 10px;
+}
+
+/* Show the dropdown menu on hover */
+.user-dropdown:hover .user-menu {
+    display: block;
+}
+
+.user-menu span {
+    display: block;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: #333;
+    white-space: nowrap;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: normal;
+}
+
+.user-menu span:hover {
+    color: orange;
 }
