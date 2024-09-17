@@ -32,6 +32,9 @@ const Header = () => {
         navigate('/');
         window.location.reload();
     };
+    const hadleProfileClick = () => {
+        navigate('/profile');
+    };
 
     return (
         <header className="header">
@@ -81,7 +84,7 @@ const Header = () => {
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <CgProfile size={20} className="text-teal-600 b " />
-                                <span href="#" onClick={handleLogoutClick}>
+                                <span href="#" onClick={hadleProfileClick}>
                                     Chỉnh sửa hồ sơ
                                 </span>
                             </div>

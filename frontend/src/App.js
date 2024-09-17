@@ -1,23 +1,25 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { publicroutes, privateRoutes } from "./routes";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { publicroutes, privateRoutes } from './routes';
+import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
+
 function App() {
-  return (
-    <Router>
-      <div className="App">
-        <Routes>
-          {publicroutes.map((route, index) => {
-            return (
-              <Route
-                key={index}
-                path={route.path}
-                element={<route.component />}
-              />
-            );
-          })}
-        </Routes>
-      </div>
-    </Router>
-  );
+    return (
+        <Router>
+            <div className="App">
+                <Routes>
+                    {publicroutes.map((route, index) => {
+                        return <Route key={index} path={route.path} element={<route.component />} />;
+                    })}
+
+                    {privateRoutes.map((route, index) => {
+                        return (
+                            <Route key={index} path={route.path} element={<PrivateRoute element={route.component} />} />
+                        );
+                    })}
+                </Routes>
+            </div>
+        </Router>
+    );
 }
 
 export default App;
