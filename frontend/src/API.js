@@ -7,12 +7,18 @@ export const endpoints = {
     wait_post: '/post/wait-approved/',
     postdetail: (postId) => `/post/${postId}/`,
     room: '/room/',
+    updateroom: (roomId) => `/room/${roomId}/`,
+    deleteroom: (roomId) => `/room/${roomId}/`,
     roomdetail: (roomId) => `/room/${roomId}/`,
     login: '/o/token/',
     register: '/user/',
     currentuser: '/user/current_user/',
+    mypost: 'user/my-post/',
+    myfavorite: 'user/my-favorites/',
+    myrooms: 'user/my-rooms/',
     roomtype: '/roomtype/',
     amenities: '/amenities/',
+    addroomprices: (roomdID) => `/room/${roomdID}/prices/`,
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
 };
 

@@ -9,16 +9,18 @@ import { PiNotePencilBold } from 'react-icons/pi';
 import './DefaultLayout.scss';
 import { FaFileSignature } from 'react-icons/fa';
 import { CgProfile } from 'react-icons/cg';
+
 const Header = () => {
     const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
-
     useEffect(() => {
         if (user) {
             fetchUser();
         }
-    }, []);
-
+    }, [fetchUser]);
+    const handleHomeClick = () => {
+        navigate('/');
+    };
     const handleLoginClick = () => {
         navigate('/login');
     };
@@ -30,10 +32,12 @@ const Header = () => {
     const handleLogoutClick = () => {
         if (logout) logout();
         navigate('/');
-        window.location.reload();
     };
     const hadleProfileClick = () => {
         navigate('/profile');
+    };
+    const hadleCreatePostClick = () => {
+        navigate('/create-post');
     };
 
     return (
@@ -43,13 +47,13 @@ const Header = () => {
                 <span></span>
             </div>
             <nav className="header-nav">
-                <a href="#" className="active" onClick={handleLogoutClick}>
+                <span className="active cursor-pointer" onClick={handleHomeClick}>
                     Trang Chủ
-                </a>
-                <a href="#">Nhà đất cho thuê</a>
-                <a href="#">Tin tức</a>
-                <a href="#">Thông Báo</a>
-                <a href="#">Hỗ Trợ</a>
+                </span>
+                <span className="cursor-pointer">Nhà đất cho thuê</span>
+                <span className="cursor-pointer">Tin tức</span>
+                <span className="cursor-pointer">Thông Báo</span>
+                <span className="cursor-pointer">Hỗ Trợ</span>
             </nav>
             <div className="header-icons mx-2">
                 <button className="border-r-2">❤</button>
@@ -66,34 +70,24 @@ const Header = () => {
                         <div className="user-menu rounded-md">
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <PiNotePencilBold size={20} className="text-blue-500" />
-                                <span href="#" onClick={handleLogoutClick}>
-                                    Đăng tin cho thuê
-                                </span>
+                                <span onClick={hadleCreatePostClick}>Đăng tin cho thuê</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaFileSignature size={20} className="text-green-500" />
-                                <span href="#" onClick={handleLogoutClick}>
-                                    Quản lý tin đăng
-                                </span>
+                                <span onClick={handleLogoutClick}>Quản lý tin đăng</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaHeart size={20} className="text-red-500" />
-                                <span href="#" onClick={handleLogoutClick}>
-                                    Tin yêu thích
-                                </span>
+                                <span onClick={handleLogoutClick}>Tin yêu thích</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
-                                <CgProfile size={20} className="text-teal-600 b " />
-                                <span href="#" onClick={hadleProfileClick}>
-                                    Chỉnh sửa hồ sơ
-                                </span>
+                                <CgProfile size={20} className="text-yellow-500 " />
+                                <span onClick={hadleProfileClick}>Chỉnh sửa hồ sơ</span>
                             </div>
 
                             <div className="flex items-center cursor-pointer">
                                 <CiLogout size={20} />
-                                <span href="#" onClick={handleLogoutClick}>
-                                    Đăng xuất
-                                </span>
+                                <span onClick={handleLogoutClick}>Đăng xuất</span>
                             </div>
                         </div>
                     </div>

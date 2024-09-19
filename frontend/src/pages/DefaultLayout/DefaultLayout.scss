@@ -37,8 +37,8 @@
     transition: color 0.3s ease;
 }
 
-.header-nav a.active,
-.header-nav a:hover {
+.header-nav span.active,
+.header-nav span:hover {
     color: #e02020;
     border-bottom: 2px solid #e02020;
 }
