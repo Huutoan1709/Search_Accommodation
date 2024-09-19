@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
 import CreateRoom from '../CreateRoom';
+import Addprices from './Addprices';
 import { GrFormAdd } from 'react-icons/gr';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
+import { IoIosAddCircle } from 'react-icons/io';
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
@@ -166,7 +168,7 @@ const ManageRoom = () => {
                                 <td className="p-2 border">{room?.room_type?.name}</td>
                                 <td className="p-2 border">{room?.price} triệu/tháng</td>
                                 <td className="p-2 border">{room?.area} m²</td>
-                                <td className="p-2 border">{`${room.ward}, ${room.district}, ${room.city}`}</td>
+                                <td className="p-2 border">{`${room?.other_address},${room?.ward}, ${room?.district}, ${room?.city}`}</td>
                                 <td className="p-2 border">{formatDate(room?.created_at)}</td>
                                 <td className="p-2 border">{renderPrices(room?.prices)}</td>
                                 <td className="p-2 border">
@@ -185,7 +187,7 @@ const ManageRoom = () => {
                     ) : (
                         <tr>
                             <td colSpan="8" className="p-4 text-center">
-                                Chưa có phòng nào
+                                Chưa có phòng nào...
                             </td>
                         </tr>
                     )}

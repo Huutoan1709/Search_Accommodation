@@ -40,18 +40,15 @@ const ManagePost = () => {
 
     const calculateEndDate = (startDate) => {
         const start = new Date(startDate);
-        start.setMonth(start.getMonth() + 1); // Add 1 month to the start date
-        return formatDate(start); // Format the end date
+        start.setMonth(start.getMonth() + 1);
+        return formatDate(start);
     };
 
-    // Lọc bài đăng dựa trên trạng thái đã chọn
     const filteredPosts = posts.filter((post) => {
         const status = getStatus(post?.is_active, post?.is_approved);
 
-        // Nếu không chọn trạng thái (filterStatus là rỗng), hiển thị tất cả các bài đăng
         if (filterStatus === '') return true;
 
-        // Kiểm tra bài đăng có khớp với trạng thái lọc không
         return status === filterStatus;
     });
 
@@ -62,7 +59,7 @@ const ManagePost = () => {
                 <select
                     className="outline-none border border-gray-300 p-2 rounded-md"
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)} // Cập nhật trạng thái lọc
+                    onChange={(e) => setFilterStatus(e.target.value)}
                 >
                     <option value="">Tất cả trạng thái</option>
                     <option value="Đang hoạt động">Đang hoạt động</option>
@@ -119,7 +116,7 @@ const ManagePost = () => {
                     ) : (
                         <tr>
                             <td colSpan="8" className="p-4 text-center">
-                                Chưa có bài đăng nào
+                                Chưa có bài đăng nào...
                             </td>
                         </tr>
                     )}

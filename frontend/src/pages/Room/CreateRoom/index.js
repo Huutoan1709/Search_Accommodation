@@ -17,6 +17,74 @@ const CreateRoom = ({ onClose }) => {
     const [amenitiesList, setAmenitiesList] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [cities, setCities] = useState([]); // Danh sách tỉnh/thành
+    const [districts, setDistricts] = useState([]); // Danh sách quận/huyện
+    const [wards, setWards] = useState([]); // Danh sách phường/xã
+
+    // Fetch cities on component mount
+    useEffect(() => {
+        const fetchCities = async () => {
+            try {
+                const response = await fetch('https://provinces.open-api.vn/api/p');
+                const data = await response.json();
+                setCities(data); // Cập nhật danh sách tỉnh/thành
+            } catch (error) {
+                console.error('Failed to fetch cities:', error);
+            }
+        };
+
+        fetchCities();
+    }, []);
+
+    const handleCityChange = async (e) => {
+        const selectedCityCode = e.target.value;
+        const selectedCityName = e.target.options[e.target.selectedIndex].text;
+
+        setFormData((prevData) => ({
+            ...prevData,
+            city: selectedCityCode, // Lưu mã số
+            cityName: selectedCityName, // Lưu tên
+        }));
+
+        try {
+            const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedCityCode}?depth=2`);
+            const data = await response.json();
+            setDistricts(data.districts);
+            setWards([]); // Clear wards on city change
+        } catch (error) {
+            console.error('Failed to fetch districts:', error);
+        }
+    };
+
+    const handleDistrictChange = async (e) => {
+        const selectedDistrictCode = e.target.value;
+        const selectedDistrictName = e.target.options[e.target.selectedIndex].text;
+
+        setFormData((prevData) => ({
+            ...prevData,
+            district: selectedDistrictCode, // Lưu mã số
+            districtName: selectedDistrictName, // Lưu tên
+        }));
+
+        try {
+            const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrictCode}?depth=2`);
+            const data = await response.json();
+            setWards(data.wards);
+        } catch (error) {
+            console.error('Failed to fetch wards:', error);
+        }
+    };
+
+    const handleWardChange = (e) => {
+        const selectedWardCode = e.target.value;
+        const selectedWardName = e.target.options[e.target.selectedIndex].text;
+
+        setFormData((prevData) => ({
+            ...prevData,
+            ward: selectedWardCode, // Lưu mã số
+            wardName: selectedWardName, // Lưu tên
+        }));
+    };
 
     useEffect(() => {
         const fetchAmenities = async () => {
@@ -47,7 +115,7 @@ const CreateRoom = ({ onClose }) => {
             setFormData((prevData) => ({
                 ...prevData,
                 amenities: checked
-                    ? [...prevData.amenities, Number(value)] // Ensure value is a number
+                    ? [...prevData.amenities, Number(value)]
                     : prevData.amenities.filter((item) => item !== Number(value)),
             }));
         } else {
@@ -69,11 +137,12 @@ const CreateRoom = ({ onClose }) => {
             }
         } catch (error) {
             console.error('Failed to create room:', error);
-            alert('Lỗi!!!!!!!.');
+            alert('Lỗi khi tạo phòng!');
         } finally {
             setLoading(false);
         }
     };
+    const fullAddress = `${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
 
     return (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
@@ -112,39 +181,56 @@ const CreateRoom = ({ onClose }) => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Phường/Xã</label>
-                            <input
-                                type="text"
-                                name="ward"
-                                value={formData.ward}
-                                onChange={handleChange}
+                            <label className="block text-gray-700">Tỉnh/Thành phố</label>
+                            <select
+                                name="city"
+                                value={formData.city}
+                                onChange={handleCityChange}
                                 className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: Phường Linh Tây"
-                            />
+                            >
+                                <option value="">Chọn tỉnh/thành phố</option>
+                                {cities.map((city) => (
+                                    <option key={city.code} value={city.code}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label className="block text-gray-700">Quận/Huyện</label>
-                            <input
-                                type="text"
+                            <select
                                 name="district"
                                 value={formData.district}
-                                onChange={handleChange}
+                                onChange={handleDistrictChange}
                                 className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: Quận Thủ Đức"
-                            />
+                                disabled={!formData.city}
+                            >
+                                <option value="">Chọn quận/huyện</option>
+                                {districts.map((district) => (
+                                    <option key={district.code} value={district.code}>
+                                        {district.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Tỉnh/Thành phố</label>
-                            <input
-                                type="text"
-                                name="city"
-                                value={formData.city}
-                                onChange={handleChange}
+                            <label className="block text-gray-700">Phường/Xã</label>
+                            <select
+                                name="ward"
+                                value={formData.ward}
+                                onChange={handleWardChange}
                                 className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: TP.Hồ Chí Minh"
-                            />
+                                disabled={!formData.district}
+                            >
+                                <option value="">Chọn phường/xã</option>
+                                {wards.map((ward) => (
+                                    <option key={ward.code} value={ward.code}>
+                                        {ward.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label className="block text-gray-700">Địa chỉ khác</label>
@@ -155,6 +241,30 @@ const CreateRoom = ({ onClose }) => {
                                 onChange={handleChange}
                                 className="border border-gray-300 p-2 rounded w-full"
                                 placeholder="Vd: Số 10, Đường 3"
+                            />
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label className="block text-gray-700">Kinh độ</label>
+                            <input
+                                type="text"
+                                name="longitude"
+                                value={formData.longitude}
+                                onChange={handleChange}
+                                className="border border-gray-300 p-2 rounded w-full"
+                                placeholder="Vd: 106.682"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-gray-700">Vĩ độ</label>
+                            <input
+                                type="text"
+                                name="latitude"
+                                value={formData.latitude}
+                                onChange={handleChange}
+                                className="border border-gray-300 p-2 rounded w-full"
+                                placeholder="Vd: 10.762"
                             />
                         </div>
                     </div>
@@ -176,44 +286,29 @@ const CreateRoom = ({ onClose }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-gray-700">Latitude</label>
-                            <input
-                                type="number"
-                                name="latitude"
-                                value={formData.latitude}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-700">Longitude</label>
-                            <input
-                                type="number"
-                                name="longitude"
-                                value={formData.longitude}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                            />
+                            <label className="block text-gray-700">Tiện nghi</label>
+                            {amenitiesList.map((amenity) => (
+                                <label key={amenity.id} className="block">
+                                    <input
+                                        type="checkbox"
+                                        name="amenities"
+                                        value={amenity.id}
+                                        checked={formData.amenities.includes(amenity.id)}
+                                        onChange={handleChange}
+                                    />
+                                    {amenity.name}
+                                </label>
+                            ))}
                         </div>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Nội Thất</label>
-                        {amenitiesList.map((amenity) => (
-                            <div key={amenity.id} className="flex items-center mb-2">
-                                <input
-                                    type="checkbox"
-                                    value={amenity.id}
-                                    checked={formData.amenities.includes(amenity.id)} // Ensure checking is done correctly
-                                    onChange={handleChange}
-                                    className="h-5 w-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                />
-                                <label className="ml-2">{amenity.name}</label>
-                            </div>
-                        ))}
+                    <div className="flex justify-between">
+                        <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded" onClick={onClose}>
+                            Hủy
+                        </button>
+                        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={loading}>
+                            {loading ? 'Đang tạo...' : 'Tạo phòng'}
+                        </button>
                     </div>
-                    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded mt-4" disabled={loading}>
-                        {loading ? 'Submitting...' : 'Submit'}
-                    </button>
                 </form>
             </div>
         </div>

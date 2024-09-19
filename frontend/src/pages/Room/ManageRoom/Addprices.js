@@ -1,4 +1,5 @@
+import React from 'react';
 const Addprices = () => {
-    returnn();
+    return <div></div>;
 };
 export default Addprices;
