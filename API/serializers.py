@@ -102,7 +102,7 @@ class DetailRoomSerializer(RoomsSerializer):
         return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at']
 
 
 class WriteRoomSerializer(RoomsSerializer):
@@ -146,7 +146,7 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room','created_at_humanized']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room','created_at_humanized','is_active']
         extra_kwargs = {
             'user': {'read_only': True},
         }
@@ -157,7 +157,7 @@ class DetailPostSerializer(PostSerializer):
 
     class Meta(PostSerializer.Meta):
         model = Post
-        fields = PostSerializer.Meta.fields+['is_approved']
+        fields = PostSerializer.Meta.fields+['is_approved',]
 
 
 class CreatePostSerializer(ModelSerializer):

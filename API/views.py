@@ -201,8 +201,10 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return queryset
 
     def create(self, request, *args, **kwargs):
-        request.data['landlord'] = request.user.id
-        serializer = WriteRoomSerializer(data=request.data, context={'request': request})
+        # Sao chép dữ liệu từ request.data vào một từ điển Python thông thường
+        data = request.data.copy()
+        data['landlord'] = request.user.id
+        serializer = WriteRoomSerializer(data=data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -260,17 +262,31 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         data.update(request.data)
 
         room_id = data.get('room')
-        room = Rooms.objects.get(id=room_id)
+        if not room_id:
+            return response.Response({'error': 'Room ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            room = Rooms.objects.get(id=room_id)
+        except Rooms.DoesNotExist:
+            return response.Response({'error': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check if a post for this room already exists
+        if Post.objects.filter(room=room).exists():
+            return response.Response({'error': 'A post for this room has already been created'},
+                                     status=status.HTTP_400_BAD_REQUEST)
+
+        # Ensure the user is the landlord of the room
         if room.landlord.id != request.user.id:
             return response.Response({'error': 'Only the landlord of the room can create a post about it'},
-                                     status=status.HTTP_400_BAD_REQUEST)
+                                     status=status.HTTP_403_FORBIDDEN)
 
         data['user'] = request.user.id
         serializer = self.get_serializer(data=data)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
-        return response.Response(status=status.HTTP_400_BAD_REQUEST)
+
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         if request.user.role not in ['WEBMASTER', 'ADMIN']:
@@ -286,7 +302,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['post'], detail=True, url_path='images')
-    def images(self, request, pk):
+    def images(self, request, pk =None):
         if request.method == 'POST':
             post = self.get_object()
             images = request.FILES.getlist('images')
