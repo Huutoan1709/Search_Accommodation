@@ -1,23 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API'; // Adjust the path as needed
-import { memo } from 'react';
 
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [roomDetails, setRoomDetails] = useState({});
     const [currentUser, setCurrentUser] = useState({});
-    const [image, setImage] = useState(null);
+    const [images, setImages] = useState([]);
+    const [uploadedImages, setUploadedImages] = useState([]);
     const [postTitle, setPostTitle] = useState('');
     const [postContent, setPostContent] = useState('');
     const [loading, setLoading] = useState(false);
 
-    // Fetch user's rooms and current user on component mount
     useEffect(() => {
         const fetchRooms = async () => {
             try {
                 const response = await authApi().get(endpoints.myrooms);
-                setRooms(response.data);
+                // Lọc các phòng có has_post = false
+                const availableRooms = response.data.filter((room) => !room.has_post);
+                setRooms(availableRooms);
             } catch (error) {
                 console.error('Failed to fetch rooms:', error);
             }
@@ -50,23 +51,30 @@ const CreatePost = () => {
     // Handle image upload
     const handleImageUpload = async (e) => {
         e.preventDefault();
-        if (!image || !selectedRoom) {
-            alert('Please select a room and an image.');
+        if (images.length < 4) {
+            // Kiểm tra xem có ít nhất 4 ảnh không
+            alert('Bạn cần tải lên ít nhất 4 hình ảnh.');
+            return;
+        }
+        if (!selectedRoom) {
+            alert('Please select a room.');
             return;
         }
 
         const formData = new FormData();
-        formData.append('image', image);
+        images.forEach((image) => {
+            formData.append('images', image);
+        });
 
         try {
-            await authApi().post(endpoints.postimage(selectedRoom), formData, {
+            await authApi().post(endpoints.postimages(selectedRoom), formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-            alert('Image uploaded successfully!');
+            alert('Images uploaded successfully!');
         } catch (error) {
-            console.error('Failed to upload image:', error);
+            console.error('Failed to upload images:', error);
         }
     };
 
@@ -92,7 +100,7 @@ const CreatePost = () => {
             setPostTitle('');
             setPostContent('');
             setSelectedRoom(null);
-            setImage(null);
+            setImages(null);
         } catch (error) {
             console.error('Failed to create post:', error);
             alert('Failed to create post.');
@@ -102,14 +110,13 @@ const CreatePost = () => {
     };
 
     return (
-        <div className="px-4">
-            <h1 className="text-3xl font-medium py-4 border-b border-gray-200">Đăng Tin Mới</h1>
-            <div className="flex justify-center gap-4">
-                <div className="py-4 flex flex-col gap-4 flex-auto">
-                    <form onSubmit={handlePostCreation}>
+        <div>
+            <h1 className="text-3xl font-semibold mb-6">Tạo Bài Đăng Mới</h1>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <form onSubmit={handlePostCreation} className="space-y-6">
                         <div>
-                            {/* List of rooms */}
-                            <h2 className="text-xl font-semibold mb-2">Chọn phòng cần đăng</h2>
+                            <label className="block text-gray-700 font-medium mb-2">Chọn Phòng Cần Đăng</label>
                             <select
                                 className="border border-gray-300 p-2 rounded w-full"
                                 onChange={(e) => handleRoomSelect(e.target.value)}
@@ -123,98 +130,123 @@ const CreatePost = () => {
                                 ))}
                             </select>
                         </div>
-                        {selectedRoom && (
-                            <>
-                                {/* Room Details */}
-                                <div>
-                                    <h2 className="text-xl font-semibold mb-2">Thông tin chi tiết</h2>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col mb-6">
-                                            <span className="text-[14px] font-semibol">Giá (triệu/tháng)</span>
-                                            <span className="  border border-gray-500 rounded-sm p-1">
-                                                {roomDetails?.price}
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col mb-6">
-                                            <span className="text-[14px] font-semibol">Diện tích</span>
-                                            <span>{roomDetails?.area} m²</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex flex-col mb-6 ">
-                                        <h2 className="text-[14px] font-sem">Loại Phòng</h2>
-                                        <span className="rounded-sm items-center border border-gray-500 p-1 h-[30px] w-[300px]">
-                                            {roomDetails?.room_type.name}
-                                        </span>
-                                    </div>
 
+                        {selectedRoom && (
+                            <div className="space-y-4">
+                                <div className="bg-gray-100 p-4 rounded-lg">
+                                    <h2 className="text-2xl font-semibold mb-4">Thông Tin Phòng</h2>
                                     <p>
-                                        <strong>Địa chỉ:</strong> {roomDetails.address}
+                                        <strong>Giá:</strong> {roomDetails?.price} triệu/tháng
                                     </p>
-                                    {/* Add more room details here as needed */}
-                                </div>
-                                {/* Contact Information (read-only) */}
-                                <div className="mb-6">
-                                    <h2 className="text-xl font-semibold mb-2">Thông Tin Liên Hệ:</h2>
                                     <p>
-                                        <strong>Tên:</strong> {currentUser.first_name} {currentUser.last_name}
+                                        <strong>Diện tích:</strong> {roomDetails?.area} m²
+                                    </p>
+                                    <p>
+                                        <strong>Địa chỉ:</strong> {roomDetails?.ward}, {roomDetails?.district},{' '}
+                                        {roomDetails?.city}
+                                    </p>
+                                    <p>
+                                        <strong>Số nhà,đường:</strong> {roomDetails?.other_address}
+                                    </p>
+                                </div>
+
+                                <div className="bg-gray-100 p-4 rounded-lg">
+                                    <h2 className="text-2xl font-semibold mb-4">Thông Tin Liên Hệ</h2>
+                                    <p>
+                                        <strong>Tên:</strong> {roomDetails?.landlord?.first_name}{' '}
+                                        {roomDetails?.landlord?.last_name}
                                     </p>
                                     <p>
                                         <strong>Số điện thoại:</strong> {currentUser.phone}
                                     </p>
+                                    <p>
+                                        <strong>Email:</strong> {currentUser.email}
+                                    </p>
+                                </div>
+
+                                <div className="bg-gray-100 p-4 rounded-lg">
+                                    <h2 className="text-2xl font-semibold mb-4">Chi Phí Khác (/Tháng)</h2>
+                                    {roomDetails?.prices?.map((price) => (
+                                        <p key={price.id}>
+                                            <strong>{price.name}:</strong> {price.value} VNĐ
+                                        </p>
+                                    ))}
+                                </div>
+
+                                <div className="bg-gray-100 p-4 rounded-lg">
+                                    <h2 className="text-2xl font-semibold mb-4">Nội Thất Sẵn có</h2>
+                                    {roomDetails?.amenities?.map((amenity) => (
+                                        <p key={amenity.id}>
+                                            <strong>{amenity.name}</strong>
+                                        </p>
+                                    ))}
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700">Tiêu đề bài đăng</label>
+                                        <input
+                                            type="text"
+                                            value={postTitle}
+                                            onChange={(e) => setPostTitle(e.target.value)}
+                                            className="border border-gray-300 p-2 rounded w-full"
+                                            placeholder="Phòng trọ giá rẻ tại quận 1 đầy đủ tiện ích giá cả sinh viên ..."
+                                        />
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <label className="block text-gray-700">Nội dung bài đăng</label>
+                                        <textarea
+                                            value={postContent}
+                                            onChange={(e) => setPostContent(e.target.value)}
+                                            className="border border-gray-300 p-2 rounded w-full min-h-[150px]"
+                                            placeholder="Phòng trọ mặt tiền đường, gần trường học, siêu thị, thuận tiện đi lại..."
+                                        />
+                                    </div>
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded mt-4"
+                                    className="bg-blue-500 text-white px-4 py-2 rounded w-full"
                                     disabled={loading}
                                 >
                                     {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
                                 </button>
-                            </>
+                            </div>
                         )}
                     </form>
-                    {/* Image Upload */}
-                    <div>
-                        <h2 className="text-xl font-semibold mb-2">Thêm Hình Ảnh</h2>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Thêm Hình Ảnh</label>
                         <input
                             type="file"
-                            onChange={(e) => setImage(e.target.files[0])}
+                            multiple
+                            onChange={(e) => setImages(Array.from(e.target.files))}
                             className="border border-gray-300 p-2 rounded w-full"
                         />
-                        <button onClick={handleImageUpload} className="bg-blue-500 text-white px-4 py-2 rounded mt-4">
+                        <p className="text-gray-500 mt-2">
+                            Bạn đã tải lên {images.length} hình ảnh. Cần ít nhất 4 hình ảnh.
+                        </p>
+                        <button
+                            onClick={handleImageUpload}
+                            className="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full"
+                        >
                             Tải lên
                         </button>
                     </div>
-                    {/* Post Title and Content */}
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Tiêu đề bài đăng</label>
-                        <input
-                            type="text"
-                            value={postTitle}
-                            onChange={(e) => setPostTitle(e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                            placeholder="Phòng trọ giá rẻ tại quận 1 đầy đủ tiện ích giá cả sinh viên ..."
-                        />
+
+                    <div className="bg-gray-100 p-4 rounded-lg">
+                        <h2 className="text-xl font-semibold mb-4">Vị Trí Trên Google Map</h2>
+                        <div className="bg-gray-300 h-64 rounded-lg flex items-center justify-center">
+                            Google Map Placeholder
+                        </div>
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Nội dung bài đăng</label>
-                        <textarea
-                            value={postContent}
-                            onChange={(e) => setPostContent(e.target.value)}
-                            className="border border-gray-300 p-2 rounded w-full"
-                            placeholder="Phòng trọ mặt tiền đường, gần trường học, siêu thị, thuận tiện đi lại..."
-                        />
-                    </div>
-                </div>
-                <div className="w-[30%] flex-none">
-                    {/* Google Map Placeholder */}
-                    <h2 className="text-xl font-semibold mb-2">Vị Trí Trên Google Map</h2>
-                    {/* Add Google Maps integration here */}
-                    <div className="bg-gray-200 h-64">Google Map placeholder</div>
                 </div>
             </div>
         </div>
     );
 };
 
-export default memo(CreatePost);
+export default CreatePost;

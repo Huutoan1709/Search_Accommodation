@@ -100,6 +100,8 @@ class Rooms(BaseModel):
     room_type = models.ForeignKey('RoomType', related_name='Room_Type', on_delete=models.CASCADE)
     amenities= models.ManyToManyField('Amenities', blank=True, related_name='Room_Amenities')
 
+    def has_post(self):
+        return self.Room_Post.exists()
     def __str__(self):
         return f'Trọ {self.ward} - {self.district} - {self.city}'
 

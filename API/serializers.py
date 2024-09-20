@@ -85,7 +85,7 @@ class RoomsSerializer(ModelSerializer):
     class Meta:
         model = Rooms
         fields = ['id', 'price', 'ward',
-                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized','room_type']
+                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized','room_type','has_post']
         extra_kwargs = {
             'landlord':
                 {'read_only': True},

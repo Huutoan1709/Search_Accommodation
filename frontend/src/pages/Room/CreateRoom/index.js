@@ -130,7 +130,13 @@ const CreateRoom = ({ onClose }) => {
         e.preventDefault();
         setLoading(true);
         try {
-            await authApi().post(endpoints.room, formData);
+            const dataToSend = {
+                ...formData,
+                city: formData.cityName,
+                district: formData.districtName,
+                ward: formData.wardName,
+            };
+            await authApi().post(endpoints.room, dataToSend);
             alert('Tạo phòng thành công!');
             if (typeof onClose === 'function') {
                 onClose();
@@ -142,7 +148,6 @@ const CreateRoom = ({ onClose }) => {
             setLoading(false);
         }
     };
-    const fullAddress = `${formData.wardName}, ${formData.districtName}, ${formData.cityName}`;
 
     return (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
@@ -233,7 +238,7 @@ const CreateRoom = ({ onClose }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-gray-700">Địa chỉ khác</label>
+                            <label className="block text-gray-700">Số nhà, tên đường</label>
                             <input
                                 type="text"
                                 name="other_address"

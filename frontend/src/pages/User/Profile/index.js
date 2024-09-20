@@ -6,37 +6,23 @@ import Updateinfo from '../../User/Updateinfo'; // Component cho việc cập nh
 import ManageRoom from '../../Room/ManageRoom';
 import ManagePost from '../../Post/ManagePost'; // Component quản lý tin đăng
 
-const Profile = () => {
-    const [activeSection, setActiveSection] = useState('createPost');
+import { useRoutes } from 'react-router-dom';
 
-    const renderContent = () => {
-        switch (activeSection) {
-            case 'createPost':
-                return <CreatePost />;
-            case 'updateInfo':
-                return <Updateinfo />;
-            case 'manageroom':
-                return <ManageRoom />;
-            case 'managepost':
-                return <ManagePost />;
-            case 'resetpassword':
-                return (
-                    <div>
-                        <h1>Đổi mật khẩu</h1>
-                    </div>
-                );
-            default:
-                return <CreatePost />;
-        }
-    };
+const Profile = () => {
+    let element = useRoutes([
+        { path: 'createpost', element: <CreatePost /> },
+        { path: 'updateinfo', element: <Updateinfo /> },
+        { path: 'manageroom', element: <ManageRoom /> },
+        { path: 'managepost', element: <ManagePost /> },
+        // Thêm các route khác nếu cần
+    ]);
+
     return (
         <div className="w-full flex flex-col h-screen">
             <Header />
-            <div>
-                <div className="flex w-full flex-auto">
-                    <SidebarUser setActiveSection={setActiveSection} activeSection={activeSection} />
-                    <div className="flex-auto bg-[#fff] shadow-md h-[100vh] p-7">{renderContent()}</div>
-                </div>
+            <div className="flex w-full flex-auto">
+                <SidebarUser className="position-fixed" />
+                <div className="flex-auto bg-[#fff] shadow-md h-[130vh] p-7">{element}</div>
             </div>
         </div>
     );

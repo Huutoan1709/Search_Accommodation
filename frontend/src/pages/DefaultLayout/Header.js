@@ -33,13 +33,15 @@ const Header = () => {
         if (logout) logout();
         navigate('/');
     };
-    const hadleProfileClick = () => {
-        navigate('/profile');
+    const handleProfileClick = () => {
+        navigate('/profile/createpost');
     };
-    const hadleCreatePostClick = () => {
-        navigate('/create-post');
+    const handleManagePostClick = () => {
+        navigate('/profile/managepost');
     };
-
+    const hadleUpdateProfileClick = () => {
+        navigate('/profile/updateinfo');
+    };
     return (
         <header className="header">
             <div className="header-logo">
@@ -70,11 +72,11 @@ const Header = () => {
                         <div className="user-menu rounded-md">
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <PiNotePencilBold size={20} className="text-blue-500" />
-                                <span onClick={hadleCreatePostClick}>Đăng tin cho thuê</span>
+                                <span onClick={handleProfileClick}>Đăng tin cho thuê</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaFileSignature size={20} className="text-green-500" />
-                                <span onClick={handleLogoutClick}>Quản lý tin đăng</span>
+                                <span onClick={handleManagePostClick}>Quản lý tin đăng</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaHeart size={20} className="text-red-500" />
@@ -82,7 +84,7 @@ const Header = () => {
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <CgProfile size={20} className="text-yellow-500 " />
-                                <span onClick={hadleProfileClick}>Chỉnh sửa hồ sơ</span>
+                                <span onClick={hadleUpdateProfileClick}>Chỉnh sửa hồ sơ</span>
                             </div>
 
                             <div className="flex items-center cursor-pointer">
