@@ -127,6 +127,7 @@ function DetailPost() {
                                 <h3 className="font-semibold text-[20px] my-5">Thông tin mô tả: </h3>
                                 <div className="gap-3 flex flex-col">{post?.content}</div>
                             </div>
+
                             <div className="mt-8">
                                 <h3 className="font-semibold text-[20px] my-5">Đặc điểm tin đăng:</h3>
                                 <div className="grid grid-cols-2 gap-4">

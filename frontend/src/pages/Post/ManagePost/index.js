@@ -99,7 +99,7 @@ const ManagePost = () => {
                                 <td className="p-2 border">{post?.room?.price} triệu/tháng</td>
                                 <td className="p-2 border">{formatDate(post?.created_at)}</td>
                                 <td className="p-2 border">{calculateEndDate(post?.created_at)}</td>
-                                <td>{getStatus(post?.is_active, post?.is_approved)}</td>
+                                <td className="p-2 border">{getStatus(post?.is_active, post?.is_approved)}</td>
                                 <td className="p-2 border">
                                     <button className="bg-green-500 text-white px-4 py-2 rounded mr-2">
                                         <RiEditFill size={15} />

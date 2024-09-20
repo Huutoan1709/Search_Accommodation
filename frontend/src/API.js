@@ -6,6 +6,7 @@ export const endpoints = {
     post: '/post/',
     wait_post: '/post/wait-approved/',
     postdetail: (postId) => `/post/${postId}/`,
+    postimage: (postID) => '/post/${postID}/images/',
     room: '/room/',
     updateroom: (roomId) => `/room/${roomId}/`,
     deleteroom: (roomId) => `/room/${roomId}/`,
@@ -20,6 +21,7 @@ export const endpoints = {
     amenities: '/amenities/',
     addroomprices: (roomdID) => `/room/${roomdID}/prices/`,
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
+    createFavorite: '/user/favorite-post/',
 };
 
 export const authApi = () => {

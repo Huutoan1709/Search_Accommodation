@@ -8,6 +8,7 @@ import Updateinfo from '../pages/User/Updateinfo';
 import ManagePost from '../pages/Post/ManagePost';
 import ManageRoom from '../pages/Room/ManageRoom';
 import CreatePost from '../pages/Post/CreatePost';
+import FavoritePost from '../pages/Post/FavoritePost';
 
 const publicroutes = [
     { path: '/', component: Home },
@@ -22,6 +23,9 @@ const profileRoutes = [
     { path: 'manageroom', component: ManageRoom },
     { path: 'updateinfo', component: Updateinfo },
 ];
-const privateRoutes = [{ path: '/profile/*', component: Profile, children: profileRoutes }];
+const privateRoutes = [
+    { path: '/profile/*', component: Profile, children: profileRoutes },
+    { path: '/favorite', component: FavoritePost },
+];
 
 export { publicroutes, privateRoutes, profileRoutes };

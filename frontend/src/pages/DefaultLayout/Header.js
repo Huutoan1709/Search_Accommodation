@@ -42,6 +42,9 @@ const Header = () => {
     const hadleUpdateProfileClick = () => {
         navigate('/profile/updateinfo');
     };
+    const handleFavoritePostClick = () => {
+        navigate('/favorite');
+    };
     return (
         <header className="header">
             <div className="header-logo">
@@ -58,7 +61,9 @@ const Header = () => {
                 <span className="cursor-pointer">Hỗ Trợ</span>
             </nav>
             <div className="header-icons mx-2">
-                <button className="border-r-2">❤</button>
+                <button className="border-r-2" onClick={handleFavoritePostClick}>
+                    <FaHeart />
+                </button>
                 {user ? (
                     <div className="user-dropdown">
                         <div className="user-info">

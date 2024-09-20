@@ -6,49 +6,49 @@ import API, { endpoints, authApi } from '../API';
 const UserProvider = ({ children }) => {
     const [user, dispatch] = useReducer(MyUserReducer, null);
 
-    // Hàm lấy thông tin user từ API
+    // Fetch user info from API
     const fetchUser = useCallback(async () => {
         try {
             const result = await authApi().get(endpoints.currentuser);
             dispatch({ type: 'login', payload: result.data });
-            // Lưu thông tin user vào localStorage sau khi lấy từ API
+            // Save user info to localStorage after fetching from API
             localStorage.setItem('user', JSON.stringify(result.data));
         } catch (error) {
             console.error('Failed to fetch user', error);
-            // Xử lý logout nếu không thể lấy thông tin user (ví dụ token hết hạn)
             logout();
         }
     }, []);
 
     useEffect(() => {
-        // Kiểm tra xem có thông tin user trong localStorage hay không
+        // Check if there's user info in localStorage
         const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('accessoken');
+        const token = localStorage.getItem('access-token'); // Ensure correct token key
 
         if (storedUser) {
-            // Nếu đã có user trong localStorage thì login
+            // If user is already in localStorage, log them in
             dispatch({ type: 'login', payload: JSON.parse(storedUser) });
         } else if (token) {
-            // Nếu không có user nhưng có token, thì gọi API để lấy thông tin user
+            // If no user but there's a token, fetch user info from the API
             fetchUser();
         } else {
-            // Nếu không có token hoặc user thì xử lý logout (nếu cần)
+            // Handle logout if no token or user
             logout();
         }
     }, [fetchUser]);
 
-    // Hàm login
+    // Login function
     const login = (userData, token) => {
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('accessToken', token); // Lưu token nếu cần
+        localStorage.setItem('accessToken', token); // Save token with correct key
         dispatch({ type: 'login', payload: userData });
     };
 
-    // Hàm logout
+    // Logout function
     const logout = () => {
-        // Xoá user và token từ localStorage
+        // Clear user and token from localStorage
         localStorage.removeItem('user');
-        localStorage.removeItem('accessToken');
+        localStorage.removeItem('access-token'); // Correct token key
+        localStorage.removeItem('favorites');
         dispatch({ type: 'logout' });
     };
 
