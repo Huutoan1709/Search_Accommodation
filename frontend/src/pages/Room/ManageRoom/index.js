@@ -6,13 +6,16 @@ import { GrFormAdd } from 'react-icons/gr';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
+import EditRoom from '../EditRoom';
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
     const [priceFilter, setPriceFilter] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
-    const [showCreateRoom, setShowCreateRoom] = useState(false); // State to control form visibility
-    const [successMessage, setSuccessMessage] = useState(''); // State for success message
+    const [showCreateRoom, setShowCreateRoom] = useState(false);
+    const [currentRoomId, setCurrentRoomId] = useState(null);
+    const [showEdit, setShowEdit] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -55,9 +58,16 @@ const ManageRoom = () => {
         setShowCreateRoom(true);
     };
 
+    const handleCloseShowEdit = () => {
+        setCurrentRoomId(null);
+        setShowEdit(false);
+    };
+    const handleShowEditRoom = (roomId) => {
+        setCurrentRoomId(roomId);
+        setShowEdit(true);
+    };
     const handleCloseCreateRoom = () => {
         setShowCreateRoom(false);
-        window.location.reload(); // Reload the page to fetch the updated room list
     };
 
     const handleDeleteRoom = async (roomId) => {
@@ -172,7 +182,10 @@ const ManageRoom = () => {
                                 <td className="p-2 border">{formatDate(room?.created_at)}</td>
                                 <td className="p-2 border">{renderPrices(room?.prices)}</td>
                                 <td className="p-2 border">
-                                    <button className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+                                    <button
+                                        className="bg-green-500 text-white px-4 py-2 rounded mr-2"
+                                        onClick={() => handleShowEditRoom(room.id)}
+                                    >
                                         <RiEditFill size={15} />
                                     </button>
                                     <button
@@ -200,6 +213,19 @@ const ManageRoom = () => {
                         <div className="bg-white p-8 rounded-lg shadow-lg relative">
                             <CreateRoom onClose={handleCloseCreateRoom} />
                             <button className="absolute top-2 right-2 text-gray-600" onClick={handleCloseCreateRoom}>
+                                X
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+            {showEdit && (
+                <>
+                    <div className="fixed inset-0 bg-gray-500 opacity-50 z-40"></div>
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                        <div className="bg-white p-8 rounded-lg shadow-lg relative">
+                            <EditRoom roomId={currentRoomId} onClose={handleCloseShowEdit} />
+                            <button className="absolute top-2 right-2 text-gray-600" onClick={handleCloseShowEdit}>
                                 X
                             </button>
                         </div>

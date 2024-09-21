@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { authApi, endpoints } from '../../../API'; // Adjust the path as needed
+import { authApi, endpoints } from '../../../API';
+import uploadimage from '../../../assets/upload-image.png';
+import { notifyError, notifySuccess, notifyWarning } from '../../../components/ToastManager';
 
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
@@ -7,16 +9,15 @@ const CreatePost = () => {
     const [roomDetails, setRoomDetails] = useState({});
     const [currentUser, setCurrentUser] = useState({});
     const [images, setImages] = useState([]);
-    const [uploadedImages, setUploadedImages] = useState([]);
     const [postTitle, setPostTitle] = useState('');
     const [postContent, setPostContent] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Fetch rooms and current user
     useEffect(() => {
         const fetchRooms = async () => {
             try {
                 const response = await authApi().get(endpoints.myrooms);
-                // Lọc các phòng có has_post = false
                 const availableRooms = response.data.filter((room) => !room.has_post);
                 setRooms(availableRooms);
             } catch (error) {
@@ -37,7 +38,6 @@ const CreatePost = () => {
         fetchCurrentUser();
     }, []);
 
-    // Fetch room details when a room is selected
     const handleRoomSelect = async (roomId) => {
         try {
             const response = await authApi().get(endpoints.roomdetail(roomId));
@@ -48,41 +48,21 @@ const CreatePost = () => {
         }
     };
 
-    // Handle image upload
-    const handleImageUpload = async (e) => {
-        e.preventDefault();
-        if (images.length < 4) {
-            // Kiểm tra xem có ít nhất 4 ảnh không
-            alert('Bạn cần tải lên ít nhất 4 hình ảnh.');
-            return;
-        }
-        if (!selectedRoom) {
-            alert('Please select a room.');
-            return;
-        }
-
-        const formData = new FormData();
-        images.forEach((image) => {
-            formData.append('images', image);
-        });
-
-        try {
-            await authApi().post(endpoints.postimages(selectedRoom), formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-            });
-            alert('Images uploaded successfully!');
-        } catch (error) {
-            console.error('Failed to upload images:', error);
-        }
-    };
-
-    // Handle post creation
     const handlePostCreation = async (e) => {
         e.preventDefault();
-        if (!postTitle || !postContent || !selectedRoom) {
-            alert('Please fill in all fields and select a room.');
+
+        if (!selectedRoom) {
+            notifyWarning('Vui lòng chọn phòng.');
+            return;
+        }
+
+        if (images.length < 4) {
+            notifyError('Bạn cần tải lên ít nhất 4 hình ảnh.');
+            return;
+        }
+
+        if (!postTitle || !postContent) {
+            notifyWarning('Vui lòng điền đủ tiêu đề và nội dung.');
             return;
         }
 
@@ -95,15 +75,32 @@ const CreatePost = () => {
                 room: selectedRoom,
             };
 
+            // Tạo bài đăng
             const response = await authApi().post(endpoints.post, postData);
-            alert('Post created successfully!');
+            const postId = response.data.id; // Lấy ID của bài đăng
+
+            // Tải hình ảnh lên với ID của bài đăng
+            const formData = new FormData();
+            images.forEach((image) => {
+                formData.append('images', image);
+            });
+
+            await authApi().post(endpoints.postimage(postId), formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            notifySuccess('Tạo bài đăng và tải lên hình ảnh thành công!');
+
+            // Reset form sau khi thành công
             setPostTitle('');
             setPostContent('');
             setSelectedRoom(null);
-            setImages(null);
+            setImages([]);
         } catch (error) {
-            console.error('Failed to create post:', error);
-            alert('Failed to create post.');
+            console.error('Failed to create post or upload images:', error);
+            notifyError('Tạo bài đăng hoặc tải lên hình ảnh thất bại.');
         } finally {
             setLoading(false);
         }
@@ -116,7 +113,7 @@ const CreatePost = () => {
                 <div className="lg:col-span-2">
                     <form onSubmit={handlePostCreation} className="space-y-6">
                         <div>
-                            <label className="block text-gray-700 font-medium mb-2">Chọn Phòng Cần Đăng</label>
+                            <label className="block text-gray-700 font-medium mb-2">Danh sách phòng chưa đăng</label>
                             <select
                                 className="border border-gray-300 p-2 rounded w-full"
                                 onChange={(e) => handleRoomSelect(e.target.value)}
@@ -133,8 +130,9 @@ const CreatePost = () => {
 
                         {selectedRoom && (
                             <div className="space-y-4">
+                                {/* Thông tin phòng */}
                                 <div className="bg-gray-100 p-4 rounded-lg">
-                                    <h2 className="text-2xl font-semibold mb-4">Thông Tin Phòng</h2>
+                                    <h2 className="text-2xl font-semibold mb-4">Thông tin phòng</h2>
                                     <p>
                                         <strong>Giá:</strong> {roomDetails?.price} triệu/tháng
                                     </p>
@@ -146,63 +144,67 @@ const CreatePost = () => {
                                         {roomDetails?.city}
                                     </p>
                                     <p>
-                                        <strong>Số nhà,đường:</strong> {roomDetails?.other_address}
+                                        <strong>Số nhà, đường:</strong> {roomDetails?.other_address}
                                     </p>
                                 </div>
 
+                                {/* Upload hình ảnh */}
                                 <div className="bg-gray-100 p-4 rounded-lg">
-                                    <h2 className="text-2xl font-semibold mb-4">Thông Tin Liên Hệ</h2>
-                                    <p>
-                                        <strong>Tên:</strong> {roomDetails?.landlord?.first_name}{' '}
-                                        {roomDetails?.landlord?.last_name}
-                                    </p>
-                                    <p>
-                                        <strong>Số điện thoại:</strong> {currentUser.phone}
-                                    </p>
-                                    <p>
-                                        <strong>Email:</strong> {currentUser.email}
-                                    </p>
-                                </div>
-
-                                <div className="bg-gray-100 p-4 rounded-lg">
-                                    <h2 className="text-2xl font-semibold mb-4">Chi Phí Khác (/Tháng)</h2>
-                                    {roomDetails?.prices?.map((price) => (
-                                        <p key={price.id}>
-                                            <strong>{price.name}:</strong> {price.value} VNĐ
-                                        </p>
-                                    ))}
-                                </div>
-
-                                <div className="bg-gray-100 p-4 rounded-lg">
-                                    <h2 className="text-2xl font-semibold mb-4">Nội Thất Sẵn có</h2>
-                                    {roomDetails?.amenities?.map((amenity) => (
-                                        <p key={amenity.id}>
-                                            <strong>{amenity.name}</strong>
-                                        </p>
-                                    ))}
-                                </div>
-
-                                <div className="space-y-4">
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700">Tiêu đề bài đăng</label>
+                                    <h2 className="text-2xl font-semibold mb-4">Hình ảnh</h2>
+                                    <p>Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn</p>
+                                    <div className="min-h-[180px] border-dashed border-2 border-gray-300 p-4 flex justify-center items-center">
+                                        <label htmlFor="upload" className="cursor-pointer flex flex-col items-center">
+                                            <img src={uploadimage} alt="Upload" className="w-20 h-20" />
+                                            <span className="mt-2 font-semibold">Thêm Ảnh</span>
+                                        </label>
                                         <input
-                                            type="text"
-                                            value={postTitle}
-                                            onChange={(e) => setPostTitle(e.target.value)}
-                                            className="border border-gray-300 p-2 rounded w-full"
-                                            placeholder="Phòng trọ giá rẻ tại quận 1 đầy đủ tiện ích giá cả sinh viên ..."
+                                            id="upload"
+                                            type="file"
+                                            multiple
+                                            onChange={(e) => setImages(Array.from(e.target.files))}
+                                            className="hidden"
                                         />
                                     </div>
+                                    <div className="mt-4 grid grid-cols-4 gap-4">
+                                        {images.map((image, index) => (
+                                            <div key={index} className="relative">
+                                                <img
+                                                    src={URL.createObjectURL(image)}
+                                                    alt="Uploaded"
+                                                    className="w-full h-40 object-cover"
+                                                />
+                                                <button
+                                                    onClick={() => setImages(images.filter((_, i) => i !== index))}
+                                                    className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-gray-500 mt-2">
+                                        Bạn đã tải lên {images.length} hình ảnh. Cần ít nhất 4 hình ảnh.
+                                    </p>
+                                </div>
 
-                                    <div className="mb-4">
-                                        <label className="block text-gray-700">Nội dung bài đăng</label>
-                                        <textarea
-                                            value={postContent}
-                                            onChange={(e) => setPostContent(e.target.value)}
-                                            className="border border-gray-300 p-2 rounded w-full min-h-[150px]"
-                                            placeholder="Phòng trọ mặt tiền đường, gần trường học, siêu thị, thuận tiện đi lại..."
-                                        />
-                                    </div>
+                                {/* Tiêu đề bài đăng */}
+                                <div className="space-y-4">
+                                    <label className="block text-gray-700">Tiêu đề bài đăng</label>
+                                    <input
+                                        type="text"
+                                        value={postTitle}
+                                        onChange={(e) => setPostTitle(e.target.value)}
+                                        className="border border-gray-300 p-2 rounded w-full"
+                                        placeholder="Phòng trọ giá rẻ tại quận 1..."
+                                    />
+
+                                    <label className="block text-gray-700">Nội dung bài đăng</label>
+                                    <textarea
+                                        value={postContent}
+                                        onChange={(e) => setPostContent(e.target.value)}
+                                        className="border border-gray-300 p-2 rounded w-full min-h-[150px]"
+                                        placeholder="Phòng trọ mặt tiền đường, gần trường học, siêu thị..."
+                                    />
                                 </div>
 
                                 <button
@@ -215,34 +217,6 @@ const CreatePost = () => {
                             </div>
                         )}
                     </form>
-                </div>
-
-                <div className="space-y-4">
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Thêm Hình Ảnh</label>
-                        <input
-                            type="file"
-                            multiple
-                            onChange={(e) => setImages(Array.from(e.target.files))}
-                            className="border border-gray-300 p-2 rounded w-full"
-                        />
-                        <p className="text-gray-500 mt-2">
-                            Bạn đã tải lên {images.length} hình ảnh. Cần ít nhất 4 hình ảnh.
-                        </p>
-                        <button
-                            onClick={handleImageUpload}
-                            className="bg-blue-500 text-white px-4 py-2 rounded mt-4 w-full"
-                        >
-                            Tải lên
-                        </button>
-                    </div>
-
-                    <div className="bg-gray-100 p-4 rounded-lg">
-                        <h2 className="text-xl font-semibold mb-4">Vị Trí Trên Google Map</h2>
-                        <div className="bg-gray-300 h-64 rounded-lg flex items-center justify-center">
-                            Google Map Placeholder
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

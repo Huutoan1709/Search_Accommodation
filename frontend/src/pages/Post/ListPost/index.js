@@ -118,6 +118,7 @@ const ListPost = () => {
                             images={item?.images}
                             user={item?.user}
                             id={item?.id}
+                            created_at_humanized={item?.created_at_humanized}
                         />
                     ))
                 ) : (

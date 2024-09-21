@@ -57,7 +57,6 @@ const SidebarUser = () => {
                         { icon: <BsHouseCheck size={20} />, label: 'Quản lý phòng', section: 'manageroom' },
                         { icon: <FaRegEdit size={20} />, label: 'Sửa thông tin cá nhân', section: 'updateinfo' },
                         { icon: <RiLockPasswordLine size={20} />, label: 'Đổi mật khẩu', section: 'resetpassword' },
-                        { icon: <LuFileHeart size={20} />, label: 'Bài viết yêu thích', section: 'favorites' },
                     ].map((item) => (
                         <div
                             key={item.section}

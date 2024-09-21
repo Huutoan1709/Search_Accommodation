@@ -9,6 +9,7 @@ import ManagePost from '../pages/Post/ManagePost';
 import ManageRoom from '../pages/Room/ManageRoom';
 import CreatePost from '../pages/Post/CreatePost';
 import FavoritePost from '../pages/Post/FavoritePost';
+import EditRoom from '../pages/Room/EditRoom';
 
 const publicroutes = [
     { path: '/', component: Home },

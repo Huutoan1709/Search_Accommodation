@@ -85,7 +85,7 @@ const Header = () => {
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaHeart size={20} className="text-red-500" />
-                                <span onClick={handleLogoutClick}>Tin yêu thích</span>
+                                <span onClick={handleFavoritePostClick}>Tin yêu thích</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <CgProfile size={20} className="text-yellow-500 " />
@@ -108,7 +108,9 @@ const Header = () => {
                         </button>
                     </>
                 )}
-                <button className="post-buttons">Đăng tin</button>
+                <button className="post-buttons" onClick={handleProfileClick}>
+                    Đăng tin
+                </button>
             </div>
         </header>
     );

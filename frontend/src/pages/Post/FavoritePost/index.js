@@ -7,19 +7,19 @@ import { PiHeartStraightFill, PiHeartStraightLight } from 'react-icons/pi';
 import { MdOutlineAttachMoney } from 'react-icons/md';
 import { BiArea } from 'react-icons/bi';
 import { PiMapPinAreaFill } from 'react-icons/pi';
-
-// Tạo component PostItem
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
+import { CiStopwatch } from 'react-icons/ci';
 const PostItem = ({ post }) => {
+    const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: vi });
     const [HoverHearth, setHoverHearth] = useState(false);
     const [favorite, setFavorite] = useState(post.is_active);
     const navigate = useNavigate();
 
-    // Handle post click to navigate to post details
     const handlePostClick = () => {
         navigate(`/post/${post.id}`);
     };
 
-    // Handle favorite click to add/remove favorite
     const handleFavoriteClick = async (e) => {
         e.stopPropagation();
         try {
@@ -35,18 +35,17 @@ const PostItem = ({ post }) => {
     };
 
     return (
-        <div
-            key={post.id}
-            className="w-full flex border-t border-orange-700 p-3 gap-1 bg-white"
-            onClick={handlePostClick}
-        >
-            <div className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer">
+        <div key={post.id} className="w-full flex border-t border-orange-700 p-3 gap-1 bg-white">
+            <div
+                className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer"
+                onClick={handlePostClick}
+            >
                 {post.images.slice(0, 4).map((image, index) => (
                     <img
                         key={index}
                         src={image.url || Logomotel}
                         alt="image"
-                        className="w-[135px] h-[120px] object-cover"
+                        className="w-[135px] h-[125px] object-cover"
                     />
                 ))}
                 <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1">{`${post.images.length} ảnh`}</span>
@@ -65,25 +64,31 @@ const PostItem = ({ post }) => {
                     )}
                 </span>
             </div>
-            <div className="w-[60%] pl-2 text-[15px]">
+            <div className="w-[60%] pl-2 text-[15px] gap-1 flex flex-col">
                 <div className="items-center">
-                    <h3 className="text-red-600 font-semibold cursor-pointer">{post.title}</h3>
+                    <h3 className="text-red-600 font-semibold cursor-pointer" onClick={handlePostClick}>
+                        {post.title}
+                    </h3>
                 </div>
-                <div className="my-2 flex items-center">
-                    <span className="flex font-semibold mr-3 text-[16px]">
+                <div className=" flex items-center gap-5">
+                    <span className="flex font-semibold text-[16px]">
                         <MdOutlineAttachMoney size={20} className="text-gray-500" />
                         <p className="text-green-500">{post.room?.price} triệu/tháng</p>
                     </span>
-                    <span className="flex ml-4">
+                    <span className="flex">
                         <BiArea size={20} className="text-gray-500" />
                         {post.room?.area}m²
                     </span>
                 </div>
+                <span className=" flex items-center">
+                    <CiStopwatch size={20} className="text-gray-500" />
+                    {timeAgo}
+                </span>
                 <span className="flex items-center">
                     <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
                     {`${post.room?.ward}, ${post.room?.district}, ${post.room?.city}`}
                 </span>
-                <p className="text-gray-500 my-2 min-h-[120px] text-[14px]">
+                <p className="text-gray-500 min-h-[100px] text-[14px]">
                     {post.content.length > 170 ? `${post.content.slice(0, 170)}...` : post.content}
                 </p>
                 <div className="flex items-center justify-between">
@@ -94,7 +99,7 @@ const PostItem = ({ post }) => {
                         </p>
                     </div>
                     <div className="flex items-center">
-                        <button type="button" className="border border-red-300 rounded-md pr-3">
+                        <button type="button" className="border border-red-300 rounded-md">
                             <div className="flex items-center p-1">{`Gọi ${post.user?.phone}`}</div>
                         </button>
                     </div>

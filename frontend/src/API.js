@@ -6,7 +6,7 @@ export const endpoints = {
     post: '/post/',
     wait_post: '/post/wait-approved/',
     postdetail: (postId) => `/post/${postId}/`,
-    postimage: (postID) => '/post/${postID}/images/',
+    postimage: (postID) => `/post/${postID}/images/`,
     room: '/room/',
     updateroom: (roomId) => `/room/${roomId}/`,
     deleteroom: (roomId) => `/room/${roomId}/`,
@@ -19,7 +19,7 @@ export const endpoints = {
     myrooms: 'user/my-rooms/',
     roomtype: '/roomtype/',
     amenities: '/amenities/',
-    addroomprices: (roomdID) => `/room/${roomdID}/prices/`,
+    addroomprices: (roomdId) => `/room/${roomdId}/prices/`,
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
     createFavorite: '/user/favorite-post/',
 };

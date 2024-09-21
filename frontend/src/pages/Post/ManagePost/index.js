@@ -53,7 +53,7 @@ const ManagePost = () => {
     });
 
     return (
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 relative">
             <div className="py-4 border-b border-gray-200 flex items-center justify-between">
                 <h1 className="text-3xl font-medium">Quản lý tin đăng</h1>
                 <select

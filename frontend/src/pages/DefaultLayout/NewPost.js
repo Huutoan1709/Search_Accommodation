@@ -16,7 +16,7 @@ const NewPost = () => {
                     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .filter((post) => {
                         let differenceInHours = (new Date() - new Date(post.created_at)) / (1000 * 60 * 60);
-                        return differenceInHours <= 48;
+                        return differenceInHours <= 72;
                     });
 
                 setPosts(sortedPosts.slice(0, 10));
@@ -28,7 +28,7 @@ const NewPost = () => {
     }, []);
 
     if (!posts.length) {
-        return <div>Đang Loading...</div>;
+        return <div>Không có bài đăng nào gần đây</div>;
     }
 
     return posts.map((post) => {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
 
-const CreateRoom = ({ onClose }) => {
+const CreateRoom = ({ onClose, showEdit }) => {
     const [formData, setFormData] = useState({
         price: '',
         ward: '',
@@ -20,6 +20,7 @@ const CreateRoom = ({ onClose }) => {
     const [cities, setCities] = useState([]); // Danh sách tỉnh/thành
     const [districts, setDistricts] = useState([]); // Danh sách quận/huyện
     const [wards, setWards] = useState([]); // Danh sách phường/xã
+    const [errors, setErrors] = useState({});
 
     // Fetch cities on component mount
     useEffect(() => {
@@ -158,7 +159,7 @@ const CreateRoom = ({ onClose }) => {
                 >
                     &times;
                 </button>
-                <h2 className="text-3xl font-semibold mb-4">Tạo phòng mới</h2>
+                <h2 className="text-3xl font-semibold mb-4">{showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
