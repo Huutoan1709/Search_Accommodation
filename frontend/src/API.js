@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const HOST = 'http://127.0.0.1:8000/';
+const HOST = 'http://127.0.0.1:8000';
 
 export const endpoints = {
     post: '/post/',
@@ -14,14 +14,15 @@ export const endpoints = {
     login: '/o/token/',
     register: '/user/',
     currentuser: '/user/current_user/',
-    mypost: 'user/my-post/',
-    myfavorite: 'user/my-favorites/',
-    myrooms: 'user/my-rooms/',
+    mypost: '/user/my-post/',
+    myfavorite: '/user/my-favorites/',
+    myrooms: '/user/my-rooms/',
     roomtype: '/roomtype/',
     amenities: '/amenities/',
     addroomprices: (roomdId) => `/room/${roomdId}/prices/`,
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
     createFavorite: '/user/favorite-post/',
+    resetpassword: '/reset-password/',
 };
 
 export const authApi = () => {

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 
-from .views import UserViewSet,ReviewViewSet,RoomViewSet,RoomTypeViewSet,PriceViewSet,PostViewSet,AmenitiesViewSet,SupportRequestsViewSet
+from .views import UserViewSet,ReviewViewSet,ResetPasswordViewSet,RoomViewSet,RoomTypeViewSet,PriceViewSet,PostViewSet,AmenitiesViewSet,SupportRequestsViewSet
 
 router = routers.DefaultRouter()
 router.register('user', UserViewSet, 'user')
@@ -13,6 +13,7 @@ router.register('review', ReviewViewSet, 'review')
 router.register('roomtype',RoomTypeViewSet,'roomtype')
 router.register('room/prices', PriceViewSet, 'price')
 router.register('amenities', AmenitiesViewSet, 'amenities')
+router.register('reset-password', ResetPasswordViewSet, basename='reset-password')
 
 urlpatterns = [
     path('', include(router.urls))

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
-
+import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 const CreateRoom = ({ onClose, showEdit }) => {
     const [formData, setFormData] = useState({
         price: '',
@@ -138,13 +138,13 @@ const CreateRoom = ({ onClose, showEdit }) => {
                 ward: formData.wardName,
             };
             await authApi().post(endpoints.room, dataToSend);
-            alert('Tạo phòng thành công!');
+            notifySuccess('Tạo phòng thành công!');
             if (typeof onClose === 'function') {
                 onClose();
             }
         } catch (error) {
             console.error('Failed to create room:', error);
-            alert('Lỗi khi tạo phòng!');
+            notifyWarning('Lỗi khi tạo phòng!');
         } finally {
             setLoading(false);
         }

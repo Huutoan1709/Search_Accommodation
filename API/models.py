@@ -5,6 +5,9 @@ from cloudinary.models import CloudinaryField
 from enum import Enum
 from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+import random
+import string
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 EXPIRATION_BOOKING = 2
@@ -148,3 +151,24 @@ class SupportRequests(BaseModel):
     def __str__(self):
         return f"Yêu cầu {self.subject} Từ {str(self.user.get_full_name())}"
 
+User = get_user_model()
+
+class PasswordResetOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timezone.timedelta(minutes=15)  # Ví dụ: thiết lập giá trị mặc định
+        super().save(*args, **kwargs)
+
+    def generate_otp(self):
+        self.otp = ''.join(random.choices(string.digits, k=6))
+        self.expires_at = timezone.now() + timezone.timedelta(minutes=10)
+        self.save()
+
+    def __str__(self):
+        return f"OTP for {self.user.email}"

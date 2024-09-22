@@ -1,76 +1,100 @@
 .register-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 24px 15px rgba(0, 0, 0, 0.1);
-  font-family: "Roboto", sans-serif;
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 24px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Roboto', sans-serif;
 }
 
 .register-container h2 {
-  text-align: center;
-  margin-bottom: 20px;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
 .error-message {
-  color: red;
-  text-align: center;
-  margin-bottom: 10px;
+    color: red;
+    text-align: center;
+    margin-bottom: 10px;
 }
 
 .register-form {
-  display: flex;
-  flex-direction: column;
+    display: flex;
+    flex-direction: column;
 }
 
 .form-group {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 .form-group div {
-  flex: 1;
-  margin-right: 10px;
+    flex: 1;
+    margin-right: 10px;
 }
 
 .form-group div:last-child {
-  margin-right: 0;
+    margin-right: 0;
 }
 
 .register-form label {
-  margin-bottom: 5px;
-  display: block;
-  font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+    font-weight: bold;
 }
 
 .register-form input,
 .register-form select {
-  width: 100%;
-  padding: 10px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  font-size: 14px;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
 }
 
 .radio-group {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 15px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
 }
 
 .register-form button {
-  padding: 10px;
-  background-color: #f76c6c;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: background-color 0.3s ease;
+    padding: 10px;
+    background-color: #f76c6c;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
 }
 
 .register-form button:hover {
-  background-color: #e05555;
+    background-color: #e05555;
+}
+.password-field {
+    position: relative; // Cho phép icon nằm đè lên input
+    display: flex;
+    align-items: center;
+
+    input {
+        width: 100%;
+        padding-right: 40px; // Tạo khoảng trống bên phải cho icon
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 10px; // Đặt icon sát lề phải
+        cursor: pointer;
+        color: #aaa; // Màu nhạt hơn cho icon
+        transition: color 0.2s ease-in-out;
+        font-size: 20px;
+        margin-bottom: 15px;
+
+        &:hover {
+            color: #333; // Màu đậm hơn khi hover
+        }
+    }
 }

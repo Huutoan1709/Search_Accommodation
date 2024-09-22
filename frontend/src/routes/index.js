@@ -10,6 +10,7 @@ import ManageRoom from '../pages/Room/ManageRoom';
 import CreatePost from '../pages/Post/CreatePost';
 import FavoritePost from '../pages/Post/FavoritePost';
 import EditRoom from '../pages/Room/EditRoom';
+import ResetPassword from '../pages/User/ResetPassword';
 
 const publicroutes = [
     { path: '/', component: Home },
@@ -17,6 +18,7 @@ const publicroutes = [
     { path: '/register', component: Register },
     { path: '/post/:postId', component: DetailPost },
     { path: '/search', component: search },
+    { path: '/reset-password', component: ResetPassword },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },

@@ -6,9 +6,10 @@ from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
-    Amenities
+    Amenities, PasswordResetOTP
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
+from django.core.mail import send_mail
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -351,3 +352,54 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
 class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ReviewSerializer
     queryset = Reviews.objects.all()
+
+from rest_framework import viewsets, status
+from rest_framework.response import Response
+from django.core.mail import send_mail
+from django.utils import timezone
+from .models import User, PasswordResetOTP
+
+class ResetPasswordViewSet(viewsets.ViewSet):
+    def create(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        new_password = request.data.get('new_password')
+
+        try:
+            user = User.objects.get(email=email)
+
+            if otp:  # Nếu người dùng đã nhập OTP, thực hiện xác thực và reset mật khẩu
+                otp_instance = PasswordResetOTP.objects.filter(user=user, otp=otp, is_used=False).last()
+
+                if not otp_instance:
+                    return Response({'error': 'OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                if otp_instance.expires_at < timezone.now():
+                    return Response({'error': 'OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                # Đặt lại mật khẩu
+                user.set_password(new_password)
+                user.save()
+
+                # Đánh dấu OTP đã sử dụng
+                otp_instance.is_used = True
+                otp_instance.save()
+
+                return Response({'message': 'Mật khẩu đã được đặt lại thành công.'}, status=status.HTTP_200_OK)
+
+            else:  # Nếu chưa có OTP, gửi OTP qua email
+                otp_instance = PasswordResetOTP.objects.create(user=user)
+                otp_instance.generate_otp()
+
+                send_mail(
+                    'OTP để đặt lại mật khẩu',
+                    f'Mã OTP của bạn là: {otp_instance.otp}',
+                    'noreply@example.com',
+                    [email],
+                    fail_silently=False,
+                )
+                return Response({'message': 'OTP đã được gửi đến email của bạn.'}, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({'error': 'Email không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+

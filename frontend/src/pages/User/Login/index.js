@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../DefaultLayout/Header';
 import MyContext from '../../../context/MyContext'; // Import context
+import { notifySuccess } from '../../../components/ToastManager';
 
 function Login() {
     const [username, setUsername] = useState('');
@@ -37,7 +38,7 @@ function Login() {
             if (response.status === 200) {
                 const userData = response.data; // Get the user data from response
                 localStorage.setItem('access-token', userData.access_token);
-                alert('Đăng nhập thành công!');
+                notifySuccess('Đăng nhập thành công');
                 login(userData); // Call login from context to save user data
                 navigate('/');
             }
@@ -93,6 +94,12 @@ function Login() {
                             Đăng nhập{' '}
                         </button>{' '}
                     </form>{' '}
+                    <p className="mt-4 text-sm text-center">
+                        Bạn quên mật khẩu?{' '}
+                        <a href="/reset-password" className="text-yellow-600 hover:text-yellow-500">
+                            Đặt lại mật khẩu
+                        </a>
+                    </p>
                     <p className="mt-4 text-sm text-center">
                         {' '}
                         Bạn chưa có tài khoản?{' '}
