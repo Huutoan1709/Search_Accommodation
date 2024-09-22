@@ -290,18 +290,34 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
-        if request.user.role not in ['WEBMASTER', 'ADMIN']:
-            return response.Response({'error': 'Only admin and webmaster can update this attribute'},
-                                     status=status.HTTP_403_FORBIDDEN)
+        post = self.get_object()
 
+        # Kiểm tra quyền chỉnh sửa
+        if request.user != post.user:
+            if request.user.role not in ['WEBMASTER', 'ADMIN']:
+                return response.Response(
+                    {'error': 'Chỉ người đăng bài hoặc admin/webmaster mới có thể chỉnh sửa bài viết này.'},
+                    status=status.HTTP_403_FORBIDDEN)
+
+        # Nếu người dùng không phải là admin hoặc webmaster, không cho phép chỉnh sửa các trường is_approved và is_block
+        if 'is_approved' in request.data or 'is_block' in request.data:
+            if request.user.role not in ['WEBMASTER', 'ADMIN']:
+                return response.Response({'error': 'Chỉ admin và webmaster mới có thể chỉnh sửa các trường này.'},
+                                         status=status.HTTP_403_FORBIDDEN)
+
+        # Cập nhật bài viết
         return super().update(request, *args, **kwargs)
-
     @action(methods=['get'], detail=False, url_path='wait-approved')
     def wait_approved(self, request):
         approved = Post.objects.filter(is_approved=False).all()
         serializer = DetailPostSerializer(approved, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+    @action(methods=['get'], detail=False, url_path='block')
+    def wait_approved(self, request):
+        block = Post.objects.filter(isblock=True).all()
+        serializer = DetailPostSerializer(block, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
     @action(methods=['post'], detail=True, url_path='images')
     def images(self, request, pk =None):
         if request.method == 'POST':

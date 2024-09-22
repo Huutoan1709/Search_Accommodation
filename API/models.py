@@ -76,6 +76,7 @@ class Post(BaseModel):
     title = models.CharField(max_length=400)
     content = models.TextField()
     is_approved = models.BooleanField(default=False)
+    is_block = models.BooleanField(default= False)
     user = models.ForeignKey('User', related_name='User_Post', on_delete=models.CASCADE)
     room = models.ForeignKey('Rooms', related_name='Room_Post', on_delete=models.CASCADE)
 
