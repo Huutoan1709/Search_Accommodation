@@ -94,22 +94,21 @@ class RoomsSerializer(ModelSerializer):
 
 class DetailRoomSerializer(RoomsSerializer):
     prices = SerializerMethodField()
-    amenities = AmenitiesSerializer(many=True)
+    amenities = serializers.PrimaryKeyRelatedField(many=True, queryset=Amenities.objects.all())
     landlord = UserSerializer()
+    room_type = RoomTypeSerializer(read_only=True)
 
     def get_prices(self, obj):
         active_prices = obj.prices.filter(is_active=True)
         return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at','room_type']
 
 
 class WriteRoomSerializer(RoomsSerializer):
     room_type = serializers.PrimaryKeyRelatedField(queryset=RoomType.objects.filter(is_active=True))
     landlord = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
-
-    # amenities = serializers.PrimaryKeyRelatedField(queryset=Amenities.objects.all(), many=True)
 
     class Meta(RoomsSerializer.Meta):
         fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'room_type', 'landlord', 'amenities']
@@ -203,6 +202,3 @@ class ReviewSerializer(ModelSerializer):
         model = Reviews
         fields = ['id', 'customer', 'post', 'rating', 'comment']
 
-# class DetailReviewSerializer(ModelSerializer):
-#     customer = UserSerializer(read_only=True)
-#     post = PostSerializer()

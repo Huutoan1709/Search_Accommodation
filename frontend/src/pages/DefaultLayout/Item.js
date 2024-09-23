@@ -1,4 +1,4 @@
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useContext } from 'react';
 import '../../output.css';
 import Logomotel from '../../assets/Logomotel.png';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,10 @@ import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { CiStopwatch } from 'react-icons/ci';
 import { notifySuccess, notifyWarning } from '../../components/ToastManager';
-const Item = ({ images, title, content, room, created_at, created_at_humanized, user, id }) => {
+import MyContext from '../../context/MyContext';
+
+const Item = ({ images, title, content, room, created_at, user, id }) => {
+    const { user: loggedInUser } = useContext(MyContext);
     const timeAgo = formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: vi });
     const [HoverHearth, setHoverHearth] = useState(false);
     const [favorite, setFavorite] = useState(false);
@@ -20,6 +23,8 @@ const Item = ({ images, title, content, room, created_at, created_at_humanized, 
     useEffect(() => {
         const checkIfFavorited = async () => {
             try {
+                if (!loggedInUser) return;
+
                 const res = await authApi().get(endpoints['myfavorite']);
                 const favoritePosts = res.data.map((favorite) => favorite.id);
                 setFavorite(favoritePosts.includes(id));
@@ -27,8 +32,9 @@ const Item = ({ images, title, content, room, created_at, created_at_humanized, 
                 console.error('Error fetching favorite posts:', error);
             }
         };
+
         checkIfFavorited();
-    }, [id]);
+    }, [id, loggedInUser]);
 
     const handlePostClick = () => {
         navigate(`/post/${id}`);
@@ -36,6 +42,11 @@ const Item = ({ images, title, content, room, created_at, created_at_humanized, 
 
     const handleFavoriteClick = async (e) => {
         e.stopPropagation();
+
+        if (!loggedInUser) {
+            notifyWarning('Đăng nhập để thêm bài viết yêu thích');
+            return;
+        }
 
         try {
             const res = await authApi().post(endpoints.createFavorite, { post_id: id });

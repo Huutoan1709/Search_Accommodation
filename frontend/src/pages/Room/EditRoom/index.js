@@ -21,8 +21,7 @@ const EditRoom = ({ roomId, onClose }) => {
         }
     }, [roomId]);
 
-    //Fetch được data chi tiết của từng thằng.
-    return <CreateRoom showEdit roomData={roomData} />;
+    return <CreateRoom showEdit roomData={roomData} onClose={onClose} />;
 };
 
 export default EditRoom;

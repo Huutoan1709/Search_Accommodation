@@ -22,7 +22,7 @@ const Profile = () => {
             <Header />
             <div className="flex w-full flex-auto">
                 <SidebarUser />
-                <div className="flex-auto bg-[#fff] shadow-md h-[130vh] p-7">{element}</div>
+                <div className="flex-auto bg-[#fff] shadow-md p-7 overflow-auto">{element}</div>
             </div>
         </div>
     );

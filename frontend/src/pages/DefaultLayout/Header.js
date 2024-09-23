@@ -33,7 +33,7 @@ const Header = () => {
         if (logout) logout();
         navigate('/');
     };
-    const handleProfileClick = () => {
+    const handlecreateClick = () => {
         navigate('/profile/createpost');
     };
     const handleManagePostClick = () => {
@@ -77,7 +77,7 @@ const Header = () => {
                         <div className="user-menu rounded-md">
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <PiNotePencilBold size={20} className="text-blue-500" />
-                                <span onClick={handleProfileClick}>Đăng tin cho thuê</span>
+                                <span onClick={handlecreateClick}>Đăng tin cho thuê</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaFileSignature size={20} className="text-green-500" />
@@ -89,7 +89,7 @@ const Header = () => {
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <CgProfile size={20} className="text-yellow-500 " />
-                                <span onClick={hadleUpdateProfileClick}>Chỉnh sửa hồ sơ</span>
+                                <span onClick={hadleUpdateProfileClick}>Thông tin cá nhân</span>
                             </div>
 
                             <div className="flex items-center cursor-pointer">
@@ -108,7 +108,7 @@ const Header = () => {
                         </button>
                     </>
                 )}
-                <button className="post-buttons" onClick={handleProfileClick}>
+                <button className="post-buttons" onClick={handlecreateClick}>
                     Đăng tin
                 </button>
             </div>

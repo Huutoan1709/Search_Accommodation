@@ -211,6 +211,23 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=['patch'], detail=True)
+    def edit_room(self, request, pk=None):
+        try:
+            room = self.get_object()
+        except Rooms.DoesNotExist:
+            return response.Response({'error': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        if room.landlord != request.user:
+            return response.Response({'error': 'You do not have permission to edit this room.'},
+                                     status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.get_serializer(room, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     # context = {
     #     'user': self.request.user,
     #     'room': serializer.data
@@ -369,8 +386,7 @@ class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retri
     serializer_class = ReviewSerializer
     queryset = Reviews.objects.all()
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+
 from django.core.mail import send_mail
 from django.utils import timezone
 from .models import User, PasswordResetOTP

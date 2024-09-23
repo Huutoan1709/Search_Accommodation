@@ -4,6 +4,7 @@ import UpdatePost from '../UpdatePost';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
 import { BiSolidHide } from 'react-icons/bi';
+import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 
 const ManagePost = () => {
     const [posts, setPosts] = useState([]);
@@ -51,6 +52,31 @@ const ManagePost = () => {
 
         return status === filterStatus;
     });
+    const handleDelete = async (postId) => {
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bài đăng này không?');
+        if (confirmDelete) {
+            try {
+                await authApi().delete(endpoints.deletepost(postId)); // Gọi API để xóa bài đăng
+                notifySuccess('Xóa bài đăng thành công');
+                setPosts(posts.filter((post) => post.id !== postId)); // Cập nhật lại danh sách bài đăng
+            } catch (error) {
+                console.error('Failed to delete post:', error);
+            }
+        }
+    };
+
+    const handleHide = async (postId) => {
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bài đăng này không?');
+        if (confirmDelete) {
+            try {
+                await authApi().patch(endpoints.updatepost(postId), { is_active: false }); // Gọi API để cập nhật trạng thái
+                notifySuccess('Đã ẩn bài đăng');
+                setPosts(posts.map((post) => (post.id === postId ? { ...post, is_active: false } : post))); // Cập nhật trạng thái bài đăng trong danh sách
+            } catch (error) {
+                console.error('Failed to hide post:', error);
+            }
+        }
+    };
 
     return (
         <div className="px-4 py-6 relative">
@@ -64,7 +90,6 @@ const ManagePost = () => {
                     <option value="">Tất cả trạng thái</option>
                     <option value="Đang hoạt động">Đang hoạt động</option>
                     <option value="Chờ duyệt">Chờ duyệt</option>
-
                     <option value="Đã ẩn">Đã ẩn</option>
                 </select>
             </div>
@@ -104,10 +129,16 @@ const ManagePost = () => {
                                     <button className="bg-green-500 text-white px-4 py-2 rounded mr-2">
                                         <RiEditFill size={15} />
                                     </button>
-                                    <button className="bg-red-500 text-white px-4 py-2 rounded mr-2">
+                                    <button
+                                        className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                                        onClick={() => handleDelete(post.id)}
+                                    >
                                         <MdDelete size={15} />
                                     </button>
-                                    <button className="bg-yellow-500 text-white px-4 py-2 rounded">
+                                    <button
+                                        className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                        onClick={() => handleHide(post.id)}
+                                    >
                                         <BiSolidHide size={15} />
                                     </button>
                                 </td>

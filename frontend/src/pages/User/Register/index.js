@@ -5,6 +5,7 @@ import './RegisterStyle.scss';
 import Header from '../../DefaultLayout/Header';
 import { FaEye } from 'react-icons/fa';
 import * as yup from 'yup';
+import Footer from '../../DefaultLayout/footer';
 import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 
 function Register() {
@@ -212,6 +213,7 @@ function Register() {
                     <button type="submit">Đăng ký</button>
                 </form>
             </div>
+            <Footer />
         </div>
     );
 }

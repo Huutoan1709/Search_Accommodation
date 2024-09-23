@@ -10,16 +10,18 @@ import { MdOutlineAttachMoney } from 'react-icons/md';
 import { BiArea } from 'react-icons/bi';
 import { CiStopwatch } from 'react-icons/ci';
 import { CiHashtag } from 'react-icons/ci';
-import { BiBed, BiRuler, BiMoney } from 'react-icons/bi'; // thêm icon cho đẹp
-import { MdOutlineGavel } from 'react-icons/md'; // icon pháp lý
+import { BiBed, BiRuler, BiMoney } from 'react-icons/bi';
+import { MdOutlineGavel } from 'react-icons/md';
 import { RiFridgeLine } from 'react-icons/ri';
-import { FaCouch, FaSnowflake, FaTv } from 'react-icons/fa'; // ví dụ các icon
-import { GiWashingMachine } from 'react-icons/gi'; // máy giặt, tủ lạnh
+import { FaCouch, FaSnowflake, FaTv } from 'react-icons/fa';
+import { GiWashingMachine } from 'react-icons/gi';
 
 function DetailPost() {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
+    const [amenitiesList, setAmenitiesList] = useState([]);
     const [error, setError] = useState('');
+
     useEffect(() => {
         const fetchPost = async () => {
             try {
@@ -30,7 +32,17 @@ function DetailPost() {
             }
         };
 
+        const fetchAmenities = async () => {
+            try {
+                let res = await API.get(endpoints['amenities']); // Assuming you have an endpoint for amenities
+                setAmenitiesList(res.data);
+            } catch (err) {
+                setError(err.message);
+            }
+        };
+
         fetchPost();
+        fetchAmenities();
     }, [postId]);
 
     if (error) {
@@ -49,8 +61,9 @@ function DetailPost() {
         { label: 'Mức giá', value: `${post?.room?.price} triệu/tháng`, icon: <BiMoney size={20} /> },
         { label: 'Mã tin', value: post?.id, icon: <CiHashtag size={20} /> },
     ];
+
     const getAmenityIcon = (name) => {
-        const lowercasedName = name.toLowerCase(); // Chuyển tên về chữ thường để dễ kiểm tra
+        const lowercasedName = name.toLowerCase();
 
         switch (lowercasedName) {
             case 'tủ lạnh':
@@ -65,11 +78,18 @@ function DetailPost() {
                 return <FaCouch size={20} />;
         }
     };
-    const amenities = post?.room?.amenities?.map((amenity) => ({
-        label: amenity.name,
-        value: '',
-        icon: getAmenityIcon(amenity.name),
-    }));
+
+    const amenities = post?.room?.amenities
+        ?.map((amenityId) => {
+            const amenity = amenitiesList.find((a) => a.id === amenityId);
+            return amenity
+                ? {
+                      label: amenity.name,
+                      icon: getAmenityIcon(amenity.name),
+                  }
+                : null;
+        })
+        .filter(Boolean); // Loại bỏ các giá trị null
 
     const prices = post?.room?.prices?.map((price) => ({
         label: price.name,
@@ -77,7 +97,6 @@ function DetailPost() {
         icon: <BiMoney size={20} />,
     }));
 
-    const PostDetails = ({ post, features, amenities, prices }) => {};
     return (
         <div>
             <Header />
@@ -86,30 +105,25 @@ function DetailPost() {
                     <div className="w-[70%]">
                         <SliderCustom images={post?.images} />
                         <div className="rounded-md shadow-md bg-white p-4">
-                            <div>
-                                <h2 className="text-[25px] font-bold text-red-600 ">{post?.title}</h2>
-                            </div>
-                            <div>
-                                <span className="flex items-center gap-2 my-3">
-                                    <PiMapPinAreaFill className="text-blue-700 mx-1" size={20} />
-                                    <span className="text-[18px] ">
-                                        {post?.room.ward} , {post?.room.district} , {post?.room.city}{' '}
-                                    </span>
+                            <h2 className="text-[25px] font-semibold text-red-600">{post?.title}</h2>
+                            <span className="flex items-center gap-2 my-3">
+                                <PiMapPinAreaFill className="text-blue-700 mx-1" size={20} />
+                                <span className="text-[18px] ">
+                                    {post?.room.ward}, {post?.room.district}, {post?.room.city}
                                 </span>
-                            </div>
-                            <div className=" h-[40px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
+                            </span>
+                            <div className="h-[40px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
                                 <span className="flex items-center gap-1">
-                                    <MdOutlineAttachMoney size={20} className="text-gray-500 text-blue-500" />
+                                    <MdOutlineAttachMoney size={20} className="text-blue-500" />
                                     <span className="font-semibold text-[20px] text-blue-500">
                                         {post?.room?.price} triệu/tháng
                                     </span>
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <BiArea size={20} className="text-gray-500" />
-                                    <span>{post?.room?.area}m2</span>
+                                    <span>{post?.room?.area} m²</span>
                                 </span>
                                 <span className="flex items-center gap-1">
-                                    {' '}
                                     <CiStopwatch />
                                     <span>
                                         {formatDistanceToNow(parseISO(post?.created_at), {
@@ -124,7 +138,7 @@ function DetailPost() {
                                 </span>
                             </div>
                             <div className="mt-8">
-                                <h3 className="font-semibold text-[20px] my-5">Thông tin mô tả: </h3>
+                                <h3 className="font-semibold text-[20px] my-5">Thông tin mô tả:</h3>
                                 <div className="gap-3 flex flex-col">{post?.content}</div>
                             </div>
 

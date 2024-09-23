@@ -7,6 +7,7 @@ import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
 import EditRoom from '../EditRoom';
+import { notifySuccess } from '../../../components/ToastManager';
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
@@ -76,26 +77,11 @@ const ManageRoom = () => {
             try {
                 await authApi().delete(endpoints.deleteroom(roomId)); // Call API to delete room
                 setRooms(rooms.filter((room) => room.id !== roomId));
-                setSuccessMessage('Xóa phòng thành công!'); // Set success message
-                setTimeout(() => setSuccessMessage(''), 3000); // Clear success message after 3 seconds
+                notifySuccess('Xóa phòng thành công');
             } catch (error) {
                 console.error('Failed to delete room:', error);
             }
         }
-    };
-
-    const renderPrices = (prices) => {
-        if (!prices || prices.length === 0) {
-            return 'Không';
-        }
-
-        return prices.map((price, index) => (
-            <div key={index}>
-                <span>
-                    {price.name}: {price.value} đ
-                </span>
-            </div>
-        ));
     };
 
     const formatDate = (dateString) => {
@@ -166,7 +152,7 @@ const ManageRoom = () => {
                         <th className="p-2 border">Diện tích (m²)</th>
                         <th className="p-2 border">Địa chỉ</th>
                         <th className="p-2 border">Ngày đăng</th>
-                        <th className="p-2 border">Giá bổ sung</th> {/* Cột cho prices[] */}
+                        {/* <th className="p-2 border">Giá bổ sung</th> Cột cho prices[] */}
                         <th className="p-2 border">Tùy chọn</th>
                     </tr>
                 </thead>
@@ -176,11 +162,11 @@ const ManageRoom = () => {
                             <tr key={room.id} className="text-center">
                                 <td className="p-2 border">#{room?.id}</td>
                                 <td className="p-2 border">{room?.room_type?.name}</td>
-                                <td className="p-2 border">{room?.price} triệu/tháng</td>
-                                <td className="p-2 border">{room?.area} m²</td>
+                                <td className="p-2 border">{room?.price}</td>
+                                <td className="p-2 border">{room?.area}</td>
                                 <td className="p-2 border">{`${room?.other_address},${room?.ward}, ${room?.district}, ${room?.city}`}</td>
                                 <td className="p-2 border">{formatDate(room?.created_at)}</td>
-                                <td className="p-2 border">{renderPrices(room?.prices)}</td>
+                                {/* <td className="p-2 border">{renderPrices(room?.prices)}</td> */}
                                 <td className="p-2 border">
                                     <button
                                         className="bg-green-500 text-white px-4 py-2 rounded mr-2"

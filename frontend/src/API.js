@@ -8,6 +8,8 @@ export const endpoints = {
     postdetail: (postId) => `/post/${postId}/`,
     postimage: (postID) => `/post/${postID}/images/`,
     room: '/room/',
+    deletepost: (postId) => `/post/${postId}/`,
+    updatepost: (postId) => `/post/${postId}/`,
     updateroom: (roomId) => `/room/${roomId}/`,
     deleteroom: (roomId) => `/room/${roomId}/`,
     roomdetail: (roomId) => `/room/${roomId}/`,
@@ -23,6 +25,7 @@ export const endpoints = {
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
     createFavorite: '/user/favorite-post/',
     resetpassword: '/reset-password/',
+    updateamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
 };
 
 export const authApi = () => {

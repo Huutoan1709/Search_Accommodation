@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
 import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
-const CreateRoom = ({ onClose, showEdit }) => {
+const CreateRoom = ({ onClose, showEdit, roomData }) => {
     const [formData, setFormData] = useState({
         price: '',
         ward: '',
@@ -14,21 +14,40 @@ const CreateRoom = ({ onClose, showEdit }) => {
         longitude: '',
         amenities: [],
     });
+
     const [amenitiesList, setAmenitiesList] = useState([]);
     const [roomTypes, setRoomTypes] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [cities, setCities] = useState([]); // Danh sách tỉnh/thành
-    const [districts, setDistricts] = useState([]); // Danh sách quận/huyện
-    const [wards, setWards] = useState([]); // Danh sách phường/xã
-    const [errors, setErrors] = useState({});
+    const [cities, setCities] = useState([]);
+    const [districts, setDistricts] = useState([]);
+    const [wards, setWards] = useState([]);
 
-    // Fetch cities on component mount
+    useEffect(() => {
+        if (roomData) {
+            setFormData({
+                price: roomData.price || '',
+                ward: roomData.ward || '',
+                district: roomData.district || '',
+                city: roomData.city || '',
+                other_address: roomData.other_address || '',
+                area: roomData.area || '',
+                room_type: roomData.room_type?.id || '',
+                latitude: roomData.latitude || '',
+                longitude: roomData.longitude || '',
+                amenities: roomData.amenities || [],
+            });
+
+            handleCityChange({ target: { value: roomData.city } });
+            handleDistrictChange({ target: { value: roomData.district } });
+        }
+    }, [roomData]);
+
     useEffect(() => {
         const fetchCities = async () => {
             try {
                 const response = await fetch('https://provinces.open-api.vn/api/p');
                 const data = await response.json();
-                setCities(data); // Cập nhật danh sách tỉnh/thành
+                setCities(data);
             } catch (error) {
                 console.error('Failed to fetch cities:', error);
             }
@@ -36,35 +55,38 @@ const CreateRoom = ({ onClose, showEdit }) => {
 
         fetchCities();
     }, []);
-
     const handleCityChange = async (e) => {
+        if (!e.target || !e.target.options) return;
+
         const selectedCityCode = e.target.value;
-        const selectedCityName = e.target.options[e.target.selectedIndex].text;
+        const selectedCityName = e.target.options[e.target.selectedIndex]?.text;
 
         setFormData((prevData) => ({
             ...prevData,
-            city: selectedCityCode, // Lưu mã số
-            cityName: selectedCityName, // Lưu tên
+            city: selectedCityCode,
+            cityName: selectedCityName,
         }));
 
         try {
             const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedCityCode}?depth=2`);
             const data = await response.json();
             setDistricts(data.districts);
-            setWards([]); // Clear wards on city change
+            setWards([]);
         } catch (error) {
             console.error('Failed to fetch districts:', error);
         }
     };
 
     const handleDistrictChange = async (e) => {
+        if (!e.target || !e.target.options) return;
+
         const selectedDistrictCode = e.target.value;
-        const selectedDistrictName = e.target.options[e.target.selectedIndex].text;
+        const selectedDistrictName = e.target.options[e.target.selectedIndex]?.text;
 
         setFormData((prevData) => ({
             ...prevData,
-            district: selectedDistrictCode, // Lưu mã số
-            districtName: selectedDistrictName, // Lưu tên
+            district: selectedDistrictCode,
+            districtName: selectedDistrictName,
         }));
 
         try {
@@ -77,13 +99,15 @@ const CreateRoom = ({ onClose, showEdit }) => {
     };
 
     const handleWardChange = (e) => {
+        if (!e.target || !e.target.options || !e.target.selectedIndex) return;
+
         const selectedWardCode = e.target.value;
         const selectedWardName = e.target.options[e.target.selectedIndex].text;
 
         setFormData((prevData) => ({
             ...prevData,
-            ward: selectedWardCode, // Lưu mã số
-            wardName: selectedWardName, // Lưu tên
+            ward: selectedWardCode,
+            wardName: selectedWardName,
         }));
     };
 
@@ -131,25 +155,44 @@ const CreateRoom = ({ onClose, showEdit }) => {
         e.preventDefault();
         setLoading(true);
         try {
+            if (!formData.city || !formData.district || !formData.ward) {
+                setLoading(false);
+                notifyWarning('Vui lòng chọn đầy đủ Tỉnh/Thành, Quận/Huyện, Phường/Xã');
+                return;
+            }
+
             const dataToSend = {
                 ...formData,
                 city: formData.cityName,
                 district: formData.districtName,
                 ward: formData.wardName,
+                room_type: { id: formData.room_type },
+                amenities: formData.amenities,
             };
-            await authApi().post(endpoints.room, dataToSend);
-            notifySuccess('Tạo phòng thành công!');
+
+            if (showEdit) {
+                await authApi().patch(endpoints.updateroom(roomData.id), dataToSend);
+                notifySuccess('Cập nhật phòng thành công!');
+            } else {
+                await authApi().post(endpoints.room, dataToSend);
+                notifySuccess('Tạo phòng thành công!');
+            }
+
             if (typeof onClose === 'function') {
                 onClose();
             }
         } catch (error) {
-            console.error('Failed to create room:', error);
-            notifyWarning('Lỗi khi tạo phòng!');
+            if (error.response) {
+                console.error('Response data:', error.response.data);
+                notifyWarning(`Error: ${error.response.data.detail || 'Lỗi khi xử lý!'}`);
+            } else {
+                console.error('Failed to submit room:', error);
+                notifyWarning('Lỗi khi xử lý!');
+            }
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-[1100px] w-full relative">
@@ -281,6 +324,7 @@ const CreateRoom = ({ onClose, showEdit }) => {
                                 name="room_type"
                                 value={formData.room_type}
                                 onChange={handleChange}
+                                disabled={showEdit}
                                 className="border border-gray-300 p-2 rounded w-full"
                             >
                                 <option value="">Chọn loại phòng</option>
@@ -312,7 +356,13 @@ const CreateRoom = ({ onClose, showEdit }) => {
                             Hủy
                         </button>
                         <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={loading}>
-                            {loading ? 'Đang tạo...' : 'Tạo phòng'}
+                            {loading
+                                ? showEdit
+                                    ? 'Đang cập nhật...'
+                                    : 'Đang tạo...'
+                                : showEdit
+                                ? 'Cập nhật'
+                                : 'Tạo phòng'}
                         </button>
                     </div>
                 </form>
