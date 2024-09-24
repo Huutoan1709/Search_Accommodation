@@ -133,7 +133,7 @@ class UserPostSerializer(ModelSerializer):
 
 class PostSerializer(ModelSerializer):
     images = SerializerMethodField()
-    user = UserPostSerializer()
+    user = UserInfoSerializer()
     room = RoomsSerializer()
     created_at_humanized = SerializerMethodField()
     def get_created_at_humanized(self, obj):

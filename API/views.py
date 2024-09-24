@@ -10,6 +10,7 @@ from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, 
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
 from django.core.mail import send_mail
+from django.contrib.auth.hashers import check_password, make_password
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -52,6 +53,23 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             return [perms.IsOwner()]
 
         return [permissions.AllowAny()]
+
+    @action(methods=['post'], detail=False, url_path='change-password',
+            permission_classes=[permissions.IsAuthenticated])
+    def change_password(self, request):
+        user = request.user
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+
+        if not check_password(old_password, user.password):
+            return response.Response({'error': 'Old password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not new_password:
+            return response.Response({'error': 'New password is not provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.password = make_password(new_password)
+        user.save()
+        return response.Response({'success': 'Password updated successfully'}, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
@@ -228,6 +246,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response(serializer.data, status=status.HTTP_200_OK)
 
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     # context = {
     #     'user': self.request.user,
     #     'room': serializer.data
@@ -265,6 +284,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             return Post.objects.filter(is_active=True, is_approved=True)
         else:
             return Post.objects.filter(is_active=True)
+
     def get_serializer_class(self):
         serializers = {
             'list': PostSerializer,
@@ -324,6 +344,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         # Cập nhật bài viết
         return super().update(request, *args, **kwargs)
+
     @action(methods=['get'], detail=False, url_path='wait-approved')
     def wait_approved(self, request):
         approved = Post.objects.filter(is_approved=False).all()
@@ -335,8 +356,9 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         block = Post.objects.filter(isblock=True).all()
         serializer = DetailPostSerializer(block, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(methods=['post'], detail=True, url_path='images')
-    def images(self, request, pk =None):
+    def images(self, request, pk=None):
         if request.method == 'POST':
             post = self.get_object()
             images = request.FILES.getlist('images')
@@ -391,6 +413,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from .models import User, PasswordResetOTP
 
+
 class ResetPasswordViewSet(viewsets.ViewSet):
     def create(self, request):
         email = request.data.get('email')
@@ -430,8 +453,7 @@ class ResetPasswordViewSet(viewsets.ViewSet):
                     [email],
                     fail_silently=False,
                 )
-                return Response({'message': 'OTP đã được gửi đến email của bạn.'}, status=status.HTTP_200_OK)
+                return response.Response({'message': 'OTP đã được gửi đến email của bạn.'}, status=status.HTTP_200_OK)
 
         except User.DoesNotExist:
-            return Response({'error': 'Email không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
-
+            return response.Response({'error': 'Email không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
