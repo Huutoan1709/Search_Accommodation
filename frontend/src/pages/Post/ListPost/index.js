@@ -39,6 +39,7 @@ const ListPost = () => {
 
             const pageFromUrl = getPageNumber(url);
             setCurrentPage(pageFromUrl);
+            window.scrollTo(0, 0);
         } catch (err) {
             setError(err.message);
         }
@@ -125,9 +126,8 @@ const ListPost = () => {
                     <p>No posts available.</p>
                 )}
             </div>
-
             {/* Pagination Component */}
-            <div className="pagination flex justify-center my-4">
+            <div className="pagination flex justify-center my-4 border-t-2 border-red-300">
                 <button
                     disabled={!previousPage}
                     onClick={() => handlePageChange(previousPage)}

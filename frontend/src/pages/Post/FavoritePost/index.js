@@ -10,6 +10,8 @@ import { PiMapPinAreaFill } from 'react-icons/pi';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { CiStopwatch } from 'react-icons/ci';
+import Footer from '../../DefaultLayout/footer';
+import NewPost from '../../DefaultLayout/NewPost';
 const PostItem = ({ post }) => {
     const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: vi });
     const [HoverHearth, setHoverHearth] = useState(false);
@@ -144,7 +146,7 @@ const FavoritePost = () => {
                     </div>
                     <div className="w-[30%] flex flex-col gap-4 justify-start items-center">
                         {/* Placeholder for extra info or widgets */}
-                        <div className="w-[70%] bg-white p-4 shadow-lg rounded-md">
+                        <div className="w-full bg-white p-4 shadow-lg rounded-md">
                             <h3 className="font-bold">Hỗ trợ tiện ích</h3>
                             <ul className="mt-2 space-y-2">
                                 <li>Tư vấn phong thủy</li>
@@ -154,9 +156,16 @@ const FavoritePost = () => {
                                 <li>Xem tuổi làm nhà</li>
                             </ul>
                         </div>
+                        <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
+                            <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">
+                                Tin mới đăng
+                            </h3>
+                            <NewPost />
+                        </div>
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 };

@@ -161,7 +161,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                 return;
             }
 
-            const dataToSend = {
+            const dataToUpdate = {
                 ...formData,
                 city: formData.cityName,
                 district: formData.districtName,
@@ -170,11 +170,20 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                 amenities: formData.amenities,
             };
 
+            const dataToCreate = {
+                ...formData,
+                city: formData.cityName,
+                district: formData.districtName,
+                ward: formData.wardName,
+                room_type: formData.room_type,
+                amenities: formData.amenities,
+            };
+
             if (showEdit) {
-                await authApi().patch(endpoints.updateroom(roomData.id), dataToSend);
+                await authApi().patch(endpoints.updateroom(roomData.id), dataToUpdate);
                 notifySuccess('Cập nhật phòng thành công!');
             } else {
-                await authApi().post(endpoints.room, dataToSend);
+                await authApi().post(endpoints.room, dataToCreate);
                 notifySuccess('Tạo phòng thành công!');
             }
 

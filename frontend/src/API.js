@@ -26,6 +26,7 @@ export const endpoints = {
     createFavorite: '/user/favorite-post/',
     resetpassword: '/reset-password/',
     updateamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
+    changepassword: '/user/change-password/',
 };
 
 export const authApi = () => {

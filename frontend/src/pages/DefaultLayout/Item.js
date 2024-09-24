@@ -109,7 +109,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                 </span>
                 <span className=" flex items-center">
                     <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
-                    {`${room?.ward}, ${room?.district}, ${room?.city}`}
+                    {`${room?.district}, ${room?.city}`}
                 </span>
                 <p className="text-gray-500, min-h-[90px] text-[14px]">
                     {content.length > 170 ? `${content.slice(0, 170)}...` : content}

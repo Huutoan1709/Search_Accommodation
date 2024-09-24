@@ -1,23 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import API, { endpoints } from '../../../API';
 import { useNavigate } from 'react-router-dom';
 
 import { notifyError, notifySuccess } from '../../../components/ToastManager';
+
 const ResetPassword = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
     const [newPassword, setNewPassword] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const [isOtpSent, setIsOtpSent] = useState(false); // Trạng thái OTP đã được gửi hay chưa
+    const [isOtpSent, setIsOtpSent] = useState(false);
+    const [timer, setTimer] = useState(0);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        let interval;
+        if (timer > 0) {
+            interval = setInterval(() => {
+                setTimer((prevTimer) => prevTimer - 1);
+            }, 1000);
+        } else {
+            clearInterval(interval);
+        }
+
+        return () => clearInterval(interval);
+    }, [timer]);
 
     const handleResetPassword = async (event) => {
         event.preventDefault();
         const formData = new FormData();
 
         if (isOtpSent) {
-            // Đã nhập OTP, tiếp tục reset mật khẩu
             formData.append('email', email);
             formData.append('otp', otp);
             formData.append('new_password', newPassword);
@@ -32,18 +46,32 @@ const ResetPassword = () => {
                 setError('Có lỗi xảy ra khi đặt lại mật khẩu.');
             }
         } else {
-            // Chưa nhập OTP, gửi yêu cầu gửi OTP
             formData.append('email', email);
 
             try {
                 const response = await API.post(endpoints.resetpassword, formData);
                 if (response.status === 200) {
                     notifySuccess('OTP đã được gửi đến email của bạn.');
-                    setIsOtpSent(true); // Cập nhật trạng thái OTP đã được gửi
+                    setIsOtpSent(true);
+                    setTimer(60);
                 }
             } catch (err) {
-                setError('Có lỗi xảy ra khi gửi OTP.');
+                notifyError('Email không đúng hoặc không tồn tại!!!');
             }
+        }
+    };
+
+    const handleResendOTP = async () => {
+        try {
+            const formData = new FormData();
+            formData.append('email', email);
+            const response = await API.post(endpoints.resetpassword, formData);
+            if (response.status === 200) {
+                notifySuccess('Một OTP mới đã được gửi đến email của bạn.');
+                setTimer(60);
+            }
+        } catch (err) {
+            setError('Có lỗi xảy ra khi gửi lại OTP.');
         }
     };
 
@@ -87,11 +115,19 @@ const ResetPassword = () => {
                                     className="block w-full px-3 py-2 mt-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 />
                             </div>
+                            <button
+                                type="button"
+                                onClick={handleResendOTP}
+                                className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md shadow hover:bg-blue-600 focus:outline-none"
+                                disabled={timer > 0}
+                            >
+                                Gửi lại mã ({timer})
+                            </button>
                         </>
                     )}
                     <button
                         type="submit"
-                        className="w-full px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-md shadow hover focus"
+                        className="w-full px-4 py-2 text-sm font-medium text-white bg-yellow-500 rounded-md shadow hover:bg-yellow-600 focus:outline-none"
                     >
                         {isOtpSent ? 'Đặt lại mật khẩu' : 'Gửi OTP'}
                     </button>

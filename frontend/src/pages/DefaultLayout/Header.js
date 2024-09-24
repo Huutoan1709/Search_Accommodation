@@ -18,6 +18,7 @@ const Header = () => {
             fetchUser();
         }
     }, [fetchUser]);
+
     const handleHomeClick = () => {
         navigate('/');
     };
@@ -32,6 +33,7 @@ const Header = () => {
     const handleLogoutClick = () => {
         if (logout) logout();
         navigate('/');
+        window.location.reload();
     };
     const handlecreateClick = () => {
         navigate('/profile/createpost');
