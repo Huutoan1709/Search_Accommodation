@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicroutes, privateRoutes } from './routes';
 import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
 import { ToastManager } from './components/ToastManager';
-
+import 'mapbox-gl/dist/mapbox-gl.css';
 function App() {
     return (
         <Router>

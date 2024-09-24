@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
 import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
+import ReactMapGL, { Marker } from 'react-map-gl';
+import MapBox from '../../../components/MapBox';
+import axios from 'axios';
 const CreateRoom = ({ onClose, showEdit, roomData }) => {
     const [formData, setFormData] = useState({
         price: '',
@@ -13,6 +16,11 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
         latitude: '',
         longitude: '',
         amenities: [],
+    });
+    const [viewport, setViewport] = useState({
+        latitude: roomData?.latitude || 10.762622,
+        longitude: roomData?.longitude || 106.660172,
+        zoom: 14,
     });
 
     const [amenitiesList, setAmenitiesList] = useState([]);
@@ -29,12 +37,17 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                 ward: roomData.ward || '',
                 district: roomData.district || '',
                 city: roomData.city || '',
-                other_address: roomData.other_address || '',
-                area: roomData.area || '',
-                room_type: roomData.room_type?.id || '',
-                latitude: roomData.latitude || '',
-                longitude: roomData.longitude || '',
-                amenities: roomData.amenities || [],
+                other_address: roomData?.other_address || '',
+                area: roomData?.area || '',
+                room_type: roomData?.room_type?.id || '',
+                latitude: roomData?.latitude || '',
+                longitude: roomData?.longitude || '',
+                amenities: roomData?.amenities || [],
+            });
+            setViewport({
+                latitude: roomData?.latitude || 10.762622,
+                longitude: roomData?.longitude || 106.660172,
+                zoom: 18,
             });
 
             handleCityChange({ target: { value: roomData.city } });
@@ -103,7 +116,6 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
 
         const selectedWardCode = e.target.value;
         const selectedWardName = e.target.options[e.target.selectedIndex].text;
-
         setFormData((prevData) => ({
             ...prevData,
             ward: selectedWardCode,
@@ -150,7 +162,47 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             }));
         }
     };
+    const handleGeocode = async () => {
+        const { other_address, wardName, districtName, cityName } = formData;
 
+        if (!other_address || !wardName || !districtName || !cityName) {
+            notifyWarning('Vui lòng điền đầy đủ địa chỉ.');
+            return;
+        }
+
+        const address = `${other_address}, ${wardName}, ${districtName}, ${cityName}`;
+        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
+
+        try {
+            const response = await axios.get(geocodingUrl);
+            const { features } = response.data;
+
+            if (features.length > 0) {
+                const [longitude, latitude] = features[0].center;
+                setFormData((prevData) => ({
+                    ...prevData,
+                    latitude,
+                    longitude,
+                }));
+                setViewport({
+                    latitude,
+                    longitude,
+                    zoom: 18,
+                });
+            } else {
+                notifyWarning('Không tìm thấy tọa độ cho địa chỉ này.');
+            }
+        } catch (error) {
+            console.error('Failed to fetch geocoding data:', error);
+            notifyWarning('Lỗi khi lấy tọa độ.');
+        }
+    };
+
+    useEffect(() => {
+        if (formData.other_address && formData.ward && formData.district && formData.city) {
+            handleGeocode();
+        }
+    }, [formData.other_address, formData.ward, formData.district, formData.city]);
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
@@ -204,18 +256,20 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
     };
     return (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-[1100px] w-full relative">
-                <button
-                    className="absolute size-5 top-0 right-5 text-gray-500 hover:text-gray-800 text-[40px]"
-                    onClick={onClose}
-                >
-                    &times;
-                </button>
-                <h2 className="text-3xl font-semibold mb-4">{showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}</h2>
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-[1100px] w-full mt-[200px]">
+                <div className="flex items-center justify-between">
+                    <h2 className="text-3xl font-semibold mb-4">{showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}</h2>
+                    <h2
+                        className="text-[20px] mb-3 font-semibold cursor-pointer text-gray-500 hover:text-gray-800"
+                        onClick={onClose}
+                    >
+                        X
+                    </h2>
+                </div>
                 <form onSubmit={handleSubmit}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Giá (triệu/tháng)</label>
+                            <label className="block text-gray-600 font-semibold">Giá (triệu/tháng)</label>
                             <input
                                 type="number"
                                 name="price"
@@ -226,7 +280,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-700">Diện tích (m²)</label>
+                            <label className="block text-gray-600 font-semibold">Diện tích (m²)</label>
                             <input
                                 type="number"
                                 name="area"
@@ -239,7 +293,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Tỉnh/Thành phố</label>
+                            <label className="block text-gray-600 font-semibold">Tỉnh/Thành phố</label>
                             <select
                                 name="city"
                                 value={formData.city}
@@ -255,7 +309,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-gray-700">Quận/Huyện</label>
+                            <label className="block text-gray-600 font-semibold">Quận/Huyện</label>
                             <select
                                 name="district"
                                 value={formData.district}
@@ -274,7 +328,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Phường/Xã</label>
+                            <label className="block text-gray-600 font-semibold">Phường/Xã</label>
                             <select
                                 name="ward"
                                 value={formData.ward}
@@ -291,62 +345,68 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-gray-700">Số nhà, tên đường</label>
+                            <label htmlFor="other_address" className="text-gray-600 font-semibold">
+                                Số nhà, tên đường
+                            </label>
                             <input
                                 type="text"
                                 name="other_address"
+                                id="other_address"
                                 value={formData.other_address}
                                 onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: Số 10, Đường 3"
+                                className="w-full p-2 mt-1 border rounded"
+                                placeholder="Số nhà, tên đường"
                             />
                         </div>
                     </div>
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                         <div>
-                            <label className="block text-gray-700">Kinh độ</label>
+                            <label className="block text-gray-600 font-semibold">Kinh độ</label>
                             <input
                                 type="text"
                                 name="longitude"
                                 value={formData.longitude}
                                 onChange={handleChange}
                                 className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: 106.682"
+                                placeholder="Tự động lấy hoặc chỉnh sửa"
                             />
                         </div>
                         <div>
-                            <label className="block text-gray-700">Vĩ độ</label>
+                            <label className="block text-gray-600 font-semibold">Vĩ độ</label>
                             <input
                                 type="text"
                                 name="latitude"
                                 value={formData.latitude}
                                 onChange={handleChange}
                                 className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: 10.762"
+                                placeholder="Tự động lấy hoặc chỉnh sửa"
                             />
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-gray-700">Loại phòng</label>
-                            <select
-                                name="room_type"
-                                value={formData.room_type}
-                                onChange={handleChange}
-                                disabled={showEdit}
-                                className="border border-gray-300 p-2 rounded w-full"
-                            >
-                                <option value="">Chọn loại phòng</option>
-                                {roomTypes.map((type) => (
-                                    <option key={type.id} value={type.id}>
-                                        {type.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label className="block text-gray-700">Tiện nghi</label>
-                            {amenitiesList.map((amenity) => (
+                    <div>
+                        <label className="block text-gray-600 font-semibold">Loại phòng</label>
+                        <select
+                            name="room_type"
+                            value={formData.room_type}
+                            onChange={handleChange}
+                            disabled={showEdit}
+                            className="border border-gray-300 p-2 rounded w-full"
+                        >
+                            <option value="" className="text-gray-600 font-semibold">
+                                Chọn loại phòng
+                            </option>
+                            {roomTypes.map((type) => (
+                                <option key={type.id} value={type.id}>
+                                    {type.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-gray-700">Tiện nghi</label>
+                        <div className="grid grid-cols-2 gap-4">
+                            {amenitiesList.slice(0, 4).map((amenity) => (
                                 <label key={amenity.id} className="block">
                                     <input
                                         type="checkbox"
@@ -360,11 +420,27 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             ))}
                         </div>
                     </div>
+                    <MapBox
+                        viewport={viewport}
+                        onViewportChange={setViewport}
+                        latitude={formData.latitude}
+                        longitude={formData.longitude}
+                        interactive={true}
+                        zoom={viewport.zoom}
+                        onCoordinatesChange={(newLatitude, newLongitude) => {
+                            setFormData((prevData) => ({
+                                ...prevData,
+                                latitude: newLatitude,
+                                longitude: newLongitude,
+                            }));
+                        }}
+                    />
                     <div className="flex justify-between">
-                        <button type="button" className="bg-gray-500 text-white px-4 py-2 rounded" onClick={onClose}>
-                            Hủy
-                        </button>
-                        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded" disabled={loading}>
+                        <button
+                            type="submit"
+                            className="bg-blue-500 text-white px-4 py-2 rounded-md left-auto right-0"
+                            disabled={loading}
+                        >
                             {loading
                                 ? showEdit
                                     ? 'Đang cập nhật...'

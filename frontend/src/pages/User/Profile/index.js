@@ -21,7 +21,7 @@ const Profile = () => {
 
     return (
         <div className="w-full flex flex-col h-screen">
-            <Header />
+            <Header className="" />
             <div className="flex w-full flex-auto">
                 <SidebarUser />
                 <div className="flex-auto bg-[#fff] shadow-md p-7 overflow-auto">{element}</div>

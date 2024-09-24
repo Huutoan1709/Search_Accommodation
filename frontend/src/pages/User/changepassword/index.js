@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { authApi, endpoints } from '../../../API';
+import { authApi } from '../../../API';
 import { notifyWarning, notifySuccess } from '../../../components/ToastManager';
 import { useNavigate } from 'react-router-dom';
 import MyContext from '../../../context/MyContext';

@@ -17,6 +17,7 @@ import { FaCouch, FaSnowflake, FaTv } from 'react-icons/fa';
 import { GiWashingMachine } from 'react-icons/gi';
 import zalo from '../../../assets/zalo.png';
 import NewPost from '../../DefaultLayout/NewPost';
+import MapBox from '../../../components/MapBox';
 
 function DetailPost() {
     const { postId } = useParams();
@@ -197,8 +198,9 @@ function DetailPost() {
                                         </div>
                                     </>
                                 )}
-                                <div>
+                                <div className="w-[668px] h-[300px] p-2">
                                     <h3 className="font-semibold text-[20px] my-5">Bản Đồ:</h3>
+                                    <MapBox />
                                 </div>
                             </div>
                         </div>
