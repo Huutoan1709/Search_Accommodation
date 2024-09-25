@@ -11,6 +11,7 @@ import CreatePost from '../pages/Post/CreatePost';
 import FavoritePost from '../pages/Post/FavoritePost';
 import ResetPassword from '../pages/User/ResetPassword';
 import MapBox from '../components/MapBox';
+import RoomSearch from '../components/RoomSearch';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -19,6 +20,7 @@ const publicroutes = [
     { path: '/search', component: search },
     { path: '/reset-password', component: ResetPassword },
     { path: '/map', component: MapBox },
+    { path: '/roomsearch', component: RoomSearch },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },
