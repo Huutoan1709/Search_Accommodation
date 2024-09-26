@@ -7,7 +7,7 @@ function MapBox({ latitude, longitude, onViewportChange }) {
         height: '100%',
         latitude: latitude || 21.0244246, // Giá trị mặc định nếu không có props
         longitude: longitude || 105.84117,
-        zoom: 16,
+        zoom: 14,
     });
 
     useEffect(() => {

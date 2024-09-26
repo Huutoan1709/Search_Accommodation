@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import '../../../output.css';
 import Item from '../../DefaultLayout/Item';
-import Button from '../../DefaultLayout/Button';
 import API, { endpoints } from '../../../API';
 
-const ListPost = () => {
+const ListPost = ({ searchParams }) => {
     const [data, setData] = useState([]);
     const [error, setError] = useState('');
     const [nextPage, setNextPage] = useState(null);
@@ -13,40 +12,35 @@ const ListPost = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const postsPerPage = 5; // =page_size (pagination django)
+    const [loading, setLoading] = useState(false);
 
-    const getPageNumber = (url) => {
-        if (!url) return currentPage;
-
-        try {
-            const absoluteUrl = new URL(url, window.location.origin);
-            const urlParams = new URLSearchParams(absoluteUrl.search);
-            return parseInt(urlParams.get('page')) || 1;
-        } catch (error) {
-            console.error('Invalid URL:', url);
-            return currentPage;
-        }
-    };
-
-    // Function to fetch data from the API
     const fetchData = async (url) => {
+        setLoading(true);
         try {
-            const result = await API.get(url);
+            const params = new URLSearchParams(searchParams).toString();
+
+            const fetchUrl = params ? `${url}?${params}` : url;
+            const result = await API.get(fetchUrl);
             setData(result.data.results);
             setNextPage(result.data.next);
             setPreviousPage(result.data.previous);
             setCount(result.data.count);
             setTotalPages(Math.ceil(result.data.count / postsPerPage));
 
-            const pageFromUrl = getPageNumber(url);
-            setCurrentPage(pageFromUrl);
+            const pageFromUrl = new URL(fetchUrl, window.location.origin).searchParams.get('page') || 1;
+            setCurrentPage(parseInt(pageFromUrl, 10));
             window.scrollTo(0, 0);
         } catch (err) {
             setError(err.message);
+            setData([]);
+        } finally {
+            setLoading(false);
         }
     };
+
     useEffect(() => {
         fetchData(endpoints['post']);
-    }, []);
+    }, [searchParams]);
 
     const handlePageChange = (url) => {
         if (url) {
@@ -91,13 +85,18 @@ const ListPost = () => {
             {pageNumber}
         </button>
     );
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     if (error) {
         return <div>Error: {error}</div>;
     }
 
     return (
         <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
-            <div className="flex items-centre justify-between my-3">
+            <div className="flex items-center justify-between my-3">
                 <h3 className="font-semibold text-2xl px-4">TỔNG {count} KẾT QUẢ</h3>
             </div>
 

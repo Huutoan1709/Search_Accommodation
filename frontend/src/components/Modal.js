@@ -10,6 +10,9 @@ function Modal({ field, setIsModal, handleApply }) {
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
+    const [selectedCityName, setSelectedCityName] = useState('');
+    const [selectedDistrictName, setSelectedDistrictName] = useState('');
+    const [selectedWardName, setSelectedWardName] = useState('');
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
@@ -66,17 +69,20 @@ function Modal({ field, setIsModal, handleApply }) {
     }, [field]);
 
     const handleCityChange = async (e) => {
-        if (!e.target || !e.target.options) return;
-
         const selectedCityCode = e.target.value;
-        const selectedCityName = e.target.options[e.target.selectedIndex]?.text;
+        const selectedCityName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected city
         setSelectedCity(selectedCityCode);
+        setSelectedCityName(selectedCityName); // Store the city name
 
         try {
             const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedCityCode}?depth=2`);
             const data = await response.json();
             setDistricts(data.districts);
             setWards([]);
+            setSelectedDistrict(''); // Reset selected district
+            setSelectedWard(''); // Reset selected ward
+            setSelectedDistrictName(''); // Reset district name
+            setSelectedWardName(''); // Reset ward name
         } catch (error) {
             console.error('Failed to fetch districts:', error);
         }
@@ -84,12 +90,16 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleDistrictChange = async (e) => {
         const selectedDistrictCode = e.target.value;
+        const selectedDistrictName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected district
         setSelectedDistrict(selectedDistrictCode);
+        setSelectedDistrictName(selectedDistrictName); // Store the district name
 
         try {
             const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrictCode}?depth=2`);
             const data = await response.json();
             setWards(data.wards);
+            setSelectedWard(''); // Reset selected ward
+            setSelectedWardName(''); // Reset ward name
         } catch (error) {
             console.error('Failed to fetch wards:', error);
         }
@@ -97,280 +107,120 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleWardChange = (e) => {
         const selectedWardCode = e.target.value;
+        const selectedWardName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected ward
         setSelectedWard(selectedWardCode);
+        setSelectedWardName(selectedWardName); // Store the ward name
     };
 
-    const handleCloseModal = () => {
-        setIsModal(false);
-    };
-
-    const handleApplyChanges = () => {
-        // Validate inputs for price
+    const handleSubmit = (e) => {
+        e.preventDefault();
         if (field === 'price') {
-            const min = parseFloat(minPrice);
-            const max = parseFloat(maxPrice);
-            if (min < 0 || max < 0 || (min && max && min > max)) {
+            if (!minPrice && !maxPrice) {
                 setIsValid(false);
                 return;
             }
-            let selectedRange;
-            if (selected === 'Dưới 1 triệu') {
-                selectedRange = 'Dưới 1 triệu';
-            } else if (selected === 'Trên 10 triệu') {
-                selectedRange = 'Trên 10 triệu';
-            } else {
-                selectedRange = min || max ? `Từ ${min || 0} triệu đến ${max || ''} triệu` : 'Tất cả mức giá';
-            }
-
-            handleApply(field, selectedRange, minPrice, maxPrice); // Pass the selected range
-        }
-
-        // Validate inputs for area
-        else if (field === 'area') {
-            const min = parseFloat(minArea);
-            const max = parseFloat(maxArea);
-            if (min < 0 || max < 0 || (min && max && min > max)) {
-                setIsValid(false);
-                return;
-            }
-            const selectedRange = min || max ? `Từ ${min || 0} m² đến ${max || ''} m²` : 'Tất cả diện tích';
-            handleApply(field, selectedRange, minArea, maxArea); // Pass the selected range
-        }
-
-        // Validate inputs for region
-        else if (field === 'region') {
-            if (!selectedCity || !selectedDistrict || !selectedWard) {
-                setIsValid(false);
-                return;
-            }
-            const selectedRegion = {
-                city: selectedCity,
-                district: selectedDistrict,
-                ward: selectedWard,
-            };
-            handleApply(field, selectedRegion); // Pass selectedRegion as an argument
-        }
-
-        setIsModal(false);
-    };
-
-    const handleRadioChange = (option) => {
-        setSelected(option);
-        // Update min/max fields based on selected option
-        if (field === 'price') {
-            switch (option) {
-                case 'Dưới 1 triệu':
-                    setMaxPrice('1');
-                    setMinPrice('');
-                    break;
-                case 'Từ 1 - 3 triệu':
-                    setMinPrice('1');
-                    setMaxPrice('3');
-                    break;
-                case 'Từ 3 - 5 triệu':
-                    setMinPrice('3');
-                    setMaxPrice('5');
-                    break;
-                case 'Từ 5 - 7 triệu':
-                    setMinPrice('5');
-                    setMaxPrice('7');
-                    break;
-                case 'Từ 7 - 10 triệu':
-                    setMinPrice('7');
-                    setMaxPrice('10');
-                    break;
-                case 'Trên 10 triệu':
-                    setMinPrice('10');
-                    setMaxPrice('');
-                    break;
-                case 'Tất cả mức giá':
-                default:
-                    setMinPrice('');
-                    setMaxPrice('');
-                    break;
-            }
+            handleApply(field, selected, minPrice, maxPrice);
         } else if (field === 'area') {
-            switch (option) {
-                case 'Dưới 20 m²':
-                    setMaxArea('20');
-                    setMinArea('');
-                    break;
-                case 'Từ 20 - 30m²':
-                    setMinArea('20');
-                    setMaxArea('30');
-                    break;
-                case 'Từ 30 - 40m²':
-                    setMinArea('30');
-                    setMaxArea('40');
-                    break;
-                case 'Từ 40 - 60m²':
-                    setMinArea('40');
-                    setMaxArea('60');
-                    break;
-                case 'Từ 60 - 90 m²':
-                    setMinArea('60');
-                    setMaxArea('90');
-                    break;
-                case 'Trên 90 m²':
-                    setMinArea('90');
-                    setMaxArea('');
-                    break;
-                case 'Tất cả diện tích':
-                default:
-                    setMinArea('');
-                    setMaxArea('');
-                    break;
+            if (!minArea && !maxArea) {
+                setIsValid(false);
+                return;
             }
+            handleApply(field, selected, minArea, maxArea);
+        } else if (field === 'region') {
+            const selectedRange = {
+                city: selectedCityName,
+                district: selectedDistrictName,
+                ward: selectedWardName,
+            };
+            handleApply(field, selectedRange);
         }
+        setIsModal(false);
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center z-20">
-            <div className="bg-white p-5 rounded-lg shadow-lg w-[360px] h-[auto]">
-                <div className="flex items-center justify-between border-b border-gray-300 mb-4">
-                    <h2 className="text-2xl font-semibold">
-                        {field === 'area' ? 'CHỌN DIỆN TÍCH' : field === 'price' ? 'CHỌN GIÁ' : 'CHỌN KHU VỰC'}
-                    </h2>
-                    <h2 className="cursor-pointer" onClick={handleCloseModal}>
-                        X
-                    </h2>
-                </div>
-                <div className="flex flex-col space-y-4">
-                    {/* Handle for area */}
-                    {field === 'area' && (
-                        <>
-                            {options.area.map((option) => (
-                                <label key={option} className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        value={option}
-                                        checked={selected === option}
-                                        onChange={() => handleRadioChange(option)}
-                                    />
-                                    <span className="ml-2">{option}</span>
-                                </label>
+        <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
+            <form onSubmit={handleSubmit} className="modal-content bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-semibold mb-4 border-b border-gray-300 border-dashed">
+                    {field === 'region' ? 'CHỌN KHU VỰC' : field === 'price' ? 'CHỌN MỨC GIÁ' : 'CHỌN DIỆN TÍCH'}
+                </h2>
+                {field === 'region' && (
+                    <>
+                        <select onChange={handleCityChange} className="border p-2 mb-2 rounded">
+                            <option value="">Chọn tỉnh</option>
+                            {cities.map((city) => (
+                                <option key={city.code} value={city.code}>
+                                    {city.name}
+                                </option>
                             ))}
-                            <div className="mt-2 flex space-x-2">
-                                <input
-                                    type="number"
-                                    value={minArea}
-                                    onChange={(e) => setMinArea(e.target.value)}
-                                    placeholder="Min (m²)"
-                                    className="w-full border border-gray-300 rounded p-2"
-                                />
-                                <input
-                                    type="number"
-                                    value={maxArea}
-                                    onChange={(e) => setMaxArea(e.target.value)}
-                                    placeholder="Max (m²)"
-                                    className="w-full border border-gray-300 rounded p-2"
-                                />
-                            </div>
-                        </>
-                    )}
-
-                    {/* Handle for price */}
-                    {field === 'price' && (
-                        <>
-                            {options.price.map((option) => (
-                                <label key={option} className="flex items-center">
-                                    <input
-                                        type="radio"
-                                        value={option}
-                                        checked={selected === option}
-                                        onChange={() => handleRadioChange(option)}
-                                    />
-                                    <span className="ml-2">{option}</span>
-                                </label>
+                        </select>
+                        <select onChange={handleDistrictChange} className="border p-2 mb-2 rounded">
+                            <option value="">Chọn quận</option>
+                            {districts.map((district) => (
+                                <option key={district.code} value={district.code}>
+                                    {district.name}
+                                </option>
                             ))}
-                            <div className="mt-2 flex space-x-2">
-                                <input
-                                    type="number"
-                                    value={minPrice}
-                                    onChange={(e) => setMinPrice(e.target.value)}
-                                    placeholder="Min (triệu)"
-                                    className="w-full border border-gray-300 rounded p-2"
-                                />
-                                <input
-                                    type="number"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(e.target.value)}
-                                    placeholder="Max (triệu)"
-                                    className="w-full border border-gray-300 rounded p-2"
-                                />
-                            </div>
-                        </>
-                    )}
-
-                    {/* Handle for region */}
-                    {field === 'region' && (
-                        <div>
-                            <div>
-                                <label>Chọn thành phố:</label>
-                                <select
-                                    value={selectedCity}
-                                    onChange={handleCityChange}
-                                    className="w-full border border-gray-300 rounded p-2"
-                                >
-                                    <option value="">Chọn thành phố</option>
-                                    {cities.map((city) => (
-                                        <option key={city.code} value={city.code}>
-                                            {city.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="mt-2">
-                                <label>Chọn quận/huyện:</label>
-                                <select
-                                    value={selectedDistrict}
-                                    onChange={handleDistrictChange}
-                                    className="w-full border border-gray-300 rounded p-2"
-                                >
-                                    <option value="">Chọn quận/huyện</option>
-                                    {districts.map((district) => (
-                                        <option key={district.code} value={district.code}>
-                                            {district.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                            <div className="mt-2">
-                                <label>Chọn phường/xã:</label>
-                                <select
-                                    value={selectedWard}
-                                    onChange={handleWardChange}
-                                    className="w-full border border-gray-300 rounded p-2"
-                                >
-                                    <option value="">Chọn phường/xã</option>
-                                    {wards.map((ward) => (
-                                        <option key={ward.code} value={ward.code}>
-                                            {ward.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {!isValid && <p className="text-red-500 text-center mt-2">Vui lòng nhập đúng dữ liệu!</p>}
-
-                <div className="flex justify-end space-x-4 mt-6">
+                        </select>
+                        <select onChange={handleWardChange} className="border p-2 mb-2 rounded">
+                            <option value="">Chọn phường</option>
+                            {wards.map((ward) => (
+                                <option key={ward.code} value={ward.code}>
+                                    {ward.name}
+                                </option>
+                            ))}
+                        </select>
+                    </>
+                )}
+                {field === 'price' && (
+                    <>
+                        <input
+                            type="number"
+                            placeholder="Giá tối thiểu"
+                            value={minPrice}
+                            onChange={(e) => setMinPrice(e.target.value)}
+                            className="border p-2 mb-2 rounded w-full"
+                        />
+                        <input
+                            type="number"
+                            placeholder="Giá tối đa"
+                            value={maxPrice}
+                            onChange={(e) => setMaxPrice(e.target.value)}
+                            className="border p-2 mb-2 rounded w-full"
+                        />
+                    </>
+                )}
+                {field === 'area' && (
+                    <>
+                        <input
+                            type="number"
+                            placeholder="Diện tích tối thiểu"
+                            value={minArea}
+                            onChange={(e) => setMinArea(e.target.value)}
+                            className="border p-2 mb-2 rounded w-full"
+                        />
+                        <input
+                            type="number"
+                            placeholder="Diện tích tối đa"
+                            value={maxArea}
+                            onChange={(e) => setMaxArea(e.target.value)}
+                            className="border p-2 mb-2 rounded w-full"
+                        />
+                    </>
+                )}
+                <div className="flex items-center justify-between mt-3">
+                    {!isValid && <p className="text-red-500 mt-2">Vui lòng điền ít nhất một trường.</p>}
                     <button
-                        className="bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400"
-                        onClick={handleCloseModal}
+                        type="button"
+                        onClick={() => setIsModal(false)}
+                        className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
                     >
-                        Hủy bỏ
+                        Đóng
                     </button>
-                    <button
-                        className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
-                        onClick={handleApplyChanges}
-                    >
+                    <button type="submit" className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">
                         Áp dụng
                     </button>
                 </div>
-            </div>
+            </form>
         </div>
     );
 }

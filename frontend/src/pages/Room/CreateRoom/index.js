@@ -4,6 +4,7 @@ import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import MapBox from '../../../components/MapBox';
 import axios from 'axios';
+import debounce from 'lodash.debounce';
 const CreateRoom = ({ onClose, showEdit, roomData }) => {
     const [formData, setFormData] = useState({
         price: '',
@@ -171,11 +172,15 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
         }
 
         const address = `${other_address}, ${wardName}, ${districtName}, ${cityName}`;
-        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${address}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
+        console.log('Geocoding address:', address);
+        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
+            address,
+        )}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
 
         try {
             const response = await axios.get(geocodingUrl);
             const { features } = response.data;
+            console.log('Geocoding data:', features);
 
             if (features.length > 0) {
                 const [longitude, latitude] = features[0].center;
@@ -203,6 +208,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             handleGeocode();
         }
     }, [formData.other_address, formData.ward, formData.district, formData.city]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);

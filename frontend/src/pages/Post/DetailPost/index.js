@@ -18,6 +18,7 @@ import { GiWashingMachine } from 'react-icons/gi';
 import zalo from '../../../assets/zalo.png';
 import NewPost from '../../DefaultLayout/NewPost';
 import MapBox from '../../../components/MapBox';
+import Footer from '../../DefaultLayout/footer';
 
 function DetailPost() {
     const { postId } = useParams();
@@ -112,16 +113,15 @@ function DetailPost() {
                         <div className="rounded-md shadow-md bg-white p-4">
                             <h2 className="text-[25px] font-semibold text-red-600">{post?.title}</h2>
                             <span className="flex items-center gap-2 my-3">
-                                <PiMapPinAreaFill className="text-blue-700 mx-1" size={20} />
-                                <span className="text-[18px] ">
-                                    Địa chỉ: {''}
+                                <PiMapPinAreaFill className="text-red-500 mx-1" size={20} />
+                                <span className="text-[15px] ">
                                     {post?.room.ward}, {post?.room.district}, {post?.room.city}
                                 </span>
                             </span>
                             <div className="h-[40px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
                                 <span className="flex items-center gap-1">
-                                    <MdOutlineAttachMoney size={20} className="text-blue-500" />
-                                    <span className="font-semibold text-[20px] text-blue-500">
+                                    <MdOutlineAttachMoney size={20} className="text-green-500" />
+                                    <span className="font-semibold text-[20px] text-green-500">
                                         {post?.room?.price} triệu/tháng
                                     </span>
                                 </span>
@@ -246,6 +246,7 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }

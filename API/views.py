@@ -280,11 +280,46 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     ordering = ['-created_at']
 
     def get_queryset(self):
-        if self.action == 'list':
-            return Post.objects.filter(is_active=True, is_approved=True)
-        else:
-            return Post.objects.filter(is_active=True)
+        queryset = Post.objects.filter(is_active=True)
 
+        # Lấy các giá trị từ query params
+        min_price = self.request.query_params.get('min_price', None)
+        max_price = self.request.query_params.get('max_price', None)
+        min_area = self.request.query_params.get('min_area', None)
+        max_area = self.request.query_params.get('max_area', None)
+        ward = self.request.query_params.get('ward', None)
+        district = self.request.query_params.get('district', None)
+        city = self.request.query_params.get('city', None)
+
+        # Lọc theo price
+        if min_price and max_price:
+            queryset = queryset.filter(room__price__range=(min_price, max_price))
+        elif min_price:
+            queryset = queryset.filter(room__price__gte=min_price)
+        elif max_price:
+            queryset = queryset.filter(room__price__lte=max_price)
+
+        # Lọc theo area
+        if min_area and max_area:
+            queryset = queryset.filter(room__area__range=(min_area, max_area))
+        elif min_area:
+            queryset = queryset.filter(room__area__gte=min_area)
+        elif max_area:
+            queryset = queryset.filter(room__area__lte=max_area)
+
+        # Lọc theo ward, district, city (sử dụng exact match)
+        if ward:
+            queryset = queryset.filter(room__ward__iexact=ward.strip())
+        if district:
+            queryset = queryset.filter(room__district__iexact=district.strip())
+        if city:
+            queryset = queryset.filter(room__city__iexact=city.strip())
+
+        # Chỉ lọc những bài đăng đã duyệt khi action là 'list'
+        if self.action == 'list':
+            queryset = queryset.filter(is_approved=True)
+
+        return queryset
     def get_serializer_class(self):
         serializers = {
             'list': PostSerializer,
