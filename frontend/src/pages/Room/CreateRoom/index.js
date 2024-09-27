@@ -4,6 +4,7 @@ import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import MapBox from '../../../components/MapBox';
 import axios from 'axios';
+import removeAccents from 'remove-accents';
 import debounce from 'lodash.debounce';
 const CreateRoom = ({ onClose, showEdit, roomData }) => {
     const [formData, setFormData] = useState({
@@ -163,7 +164,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             }));
         }
     };
-    const handleGeocode = async () => {
+    const debouncedHandleGeocode = debounce(async () => {
         const { other_address, wardName, districtName, cityName } = formData;
 
         if (!other_address || !wardName || !districtName || !cityName) {
@@ -171,8 +172,9 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             return;
         }
 
-        const address = `${other_address}, ${wardName}, ${districtName}, ${cityName}`;
-        console.log('Geocoding address:', address);
+        // Loại bỏ dấu tiếng Việt
+        const address = removeAccents(`${other_address}, ${wardName}, ${districtName}, ${cityName}`);
+
         const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
             address,
         )}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
@@ -201,13 +203,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             console.error('Failed to fetch geocoding data:', error);
             notifyWarning('Lỗi khi lấy tọa độ.');
         }
-    };
-
-    useEffect(() => {
-        if (formData.other_address && formData.ward && formData.district && formData.city) {
-            handleGeocode();
-        }
-    }, [formData.other_address, formData.ward, formData.district, formData.city]);
+    }, 500);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -412,7 +408,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                     <div>
                         <label className="block text-gray-700">Tiện nghi</label>
                         <div className="grid grid-cols-2 gap-4">
-                            {amenitiesList.slice(0, 4).map((amenity) => (
+                            {amenitiesList.slice(0, 8).map((amenity) => (
                                 <label key={amenity.id} className="block">
                                     <input
                                         type="checkbox"
@@ -426,35 +422,42 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             ))}
                         </div>
                     </div>
-                    <MapBox
-                        viewport={viewport}
-                        onViewportChange={setViewport}
-                        latitude={formData.latitude}
-                        longitude={formData.longitude}
-                        interactive={true}
-                        zoom={viewport.zoom}
-                        onCoordinatesChange={(newLatitude, newLongitude) => {
-                            setFormData((prevData) => ({
-                                ...prevData,
-                                latitude: newLatitude,
-                                longitude: newLongitude,
-                            }));
-                        }}
-                    />
+                    <div className="w-full h-[300px]">
+                        <MapBox
+                            latitude={formData.latitude}
+                            longitude={formData.longitude}
+                            onCoordinatesChange={(newLatitude, newLongitude) => {
+                                setFormData((prevData) => ({
+                                    ...prevData,
+                                    latitude: newLatitude,
+                                    longitude: newLongitude,
+                                }));
+                            }}
+                        />
+                    </div>
                     <div className="flex justify-between">
-                        <button
-                            type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded-md left-auto right-0"
-                            disabled={loading}
-                        >
-                            {loading
-                                ? showEdit
-                                    ? 'Đang cập nhật...'
-                                    : 'Đang tạo...'
-                                : showEdit
-                                ? 'Cập nhật'
-                                : 'Tạo phòng'}
-                        </button>
+                        <div className="flex justify-between">
+                            <button
+                                type="button"
+                                onClick={debouncedHandleGeocode}
+                                className="bg-green-500 text-white px-4 py-2 rounded-md"
+                            >
+                                Xem trên map
+                            </button>
+                            <button
+                                type="submit"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                disabled={loading}
+                            >
+                                {loading
+                                    ? showEdit
+                                        ? 'Đang cập nhật...'
+                                        : 'Đang tạo...'
+                                    : showEdit
+                                    ? 'Cập nhật'
+                                    : 'Tạo phòng'}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

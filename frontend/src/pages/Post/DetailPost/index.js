@@ -18,6 +18,7 @@ import { GiWashingMachine } from 'react-icons/gi';
 import zalo from '../../../assets/zalo.png';
 import NewPost from '../../DefaultLayout/NewPost';
 import MapBox from '../../../components/MapBox';
+import { IoNavigate } from 'react-icons/io5';
 import Footer from '../../DefaultLayout/footer';
 
 function DetailPost() {
@@ -198,10 +199,41 @@ function DetailPost() {
                                         </div>
                                     </>
                                 )}
-                                <div className="w-[668px] h-[300px] p-2">
-                                    <h3 className="font-semibold text-[20px] my-5">Bản Đồ:</h3>
-                                    <MapBox />
+                            </div>
+                            <div className="w-full mt-8">
+                                <h3 className="font-semibold text-[20px] my-5">Bản đồ</h3>
+                                <div className="border border-gray-300 rounded-lg shadow-md overflow-hidden">
+                                    <div className="flex items-center justify-between bg-gray-100 p-2">
+                                        <span className="text-[14px] text-gray-700">
+                                            Địa chỉ: {post?.room?.other_address}, {post?.room?.ward},{' '}
+                                            {post?.room?.district}, {post?.room?.city}
+                                        </span>
+                                    </div>
+                                    <div className="relative h-[300px]">
+                                        <MapBox latitude={post?.room?.latitude} longitude={post?.room?.longitude} />
+                                        <div className="absolute top-2 left-2 bg-white p-3 rounded-lg shadow-lg">
+                                            <h4 className="font-semibold">{post?.room?.other_address}</h4>
+                                            <p className="text-lg text-gray-500">
+                                                {post?.room?.ward}, {post?.room?.district}, {post?.room?.city}
+                                            </p>
+
+                                            <a
+                                                href={`https://www.google.com/maps/dir/?api=1&destination=${post?.room?.latitude},${post?.room?.longitude}`}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-blue-500 text-base mt-2 hover:underline flex items-center gap-1"
+                                            >
+                                                Chỉ đường
+                                            </a>
+                                        </div>
+                                    </div>
                                 </div>
+                                <p className="mt-4 text-xl">
+                                    Bạn đang xem nội dung tin đăng: "{post?.title} - Mã tin: {post?.id}". Mọi thông tin
+                                    liên quan đến tin đăng này chỉ mang tính chất tham khảo. Nếu bạn có phản hồi với tin
+                                    đăng này (báo xấu, tin đã cho thuê, không liên lạc được,...), vui lòng thông báo để
+                                    có thể xử lý.
+                                </p>
                             </div>
                         </div>
                     </div>

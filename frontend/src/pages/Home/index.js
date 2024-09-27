@@ -99,7 +99,7 @@ function Home() {
                         >
                             <img src={danang} alt="Đà Nẵng" className="rounded-lg object-cover w-full h-[150px]" />
                             <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
-                                <h3 className="text-2xl font-bold text-orange-700">Đà Nẵng</h3>
+                                <h3 className="text-2xl font-bold ">Đà Nẵng</h3>
                                 <p className="text-lg">1.260 tin đăng</p>
                             </div>
                         </div>

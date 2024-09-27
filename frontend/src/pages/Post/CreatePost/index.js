@@ -4,6 +4,8 @@ import uploadimage from '../../../assets/upload-image.png';
 import { notifyError, notifySuccess, notifyWarning } from '../../../components/ToastManager';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
+import { FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
@@ -15,7 +17,6 @@ const CreatePost = () => {
     const [loading, setLoading] = useState(false);
     const [amenities, setAmenities] = useState({});
 
-    // Fetch rooms and current user
     useEffect(() => {
         const fetchRooms = async () => {
             try {
@@ -35,18 +36,20 @@ const CreatePost = () => {
                 console.error('Failed to fetch user details:', error);
             }
         };
+
         const fetchAmenities = async () => {
             try {
                 const response = await authApi().get(endpoints.amenities);
                 const amenitiesMap = {};
                 response.data.forEach((amenity) => {
-                    amenitiesMap[amenity.id] = amenity.name; // Create a mapping of ID to name
+                    amenitiesMap[amenity.id] = amenity.name;
                 });
                 setAmenities(amenitiesMap);
             } catch (error) {
                 console.error('Failed to fetch amenities:', error);
             }
         };
+
         fetchAmenities();
         fetchRooms();
         fetchCurrentUser();
@@ -116,17 +119,23 @@ const CreatePost = () => {
             setLoading(false);
         }
     };
-
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-semibold mb-6">Tạo Bài Đăng Mới</h1>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
-                    <form onSubmit={handlePostCreation} className="space-y-6">
-                        <div>
-                            <label className="block text-gray-700 font-medium mb-2">Danh sách phòng chưa đăng</label>
+            <h1 className="text-4xl font-semibold mb-8 text-gray-800">Tạo Bài Đăng Mới</h1>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                    <form onSubmit={handlePostCreation} className="space-y-8">
+                        <div className="space-y-2">
+                            <label className="block text-gray-700 font-medium">Danh sách phòng chưa đăng</label>
                             <select
-                                className="border border-gray-300 p-2 rounded w-full"
+                                className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
                                 onChange={(e) => handleRoomSelect(e.target.value)}
                             >
                                 <option value="">Chọn phòng</option>
@@ -140,47 +149,130 @@ const CreatePost = () => {
                         </div>
 
                         {selectedRoom && (
-                            <div className="space-y-4">
+                            <div className="w-full">
                                 {/* Thông tin phòng */}
-                                <div className="bg-gray-100 p-4 rounded-lg shadow">
-                                    <h2 className="text-2xl font-semibold mb-4">Thông tin phòng</h2>
-                                    <p>
-                                        <strong>Giá:</strong> {roomDetails?.price} triệu/tháng
-                                    </p>
-                                    <p>
-                                        <strong>Diện tích:</strong> {roomDetails?.area} m²
-                                    </p>
-                                    <p>
-                                        <strong>Địa chỉ:</strong> {roomDetails?.ward}, {roomDetails?.district},{' '}
-                                        {roomDetails?.city}
-                                    </p>
-                                    <p>
-                                        <strong>Số nhà, đường:</strong> {roomDetails?.other_address}
-                                    </p>
-                                    <p>
-                                        <strong>Loại phòng:</strong> {roomDetails.room_type?.name}
-                                    </p>
-                                    <div className="mt-2">
-                                        <strong>Giá khác:</strong>
-                                        {roomDetails.prices?.map((price) => (
-                                            <div key={price.id}>
-                                                {price.name}: {price.value} VND
+                                <div>
+                                    <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center">
+                                        <i className="fas fa-info-circle mr-2"></i> Thông Tin Phòng
+                                    </h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-gray-600">Giá (triệu/tháng)</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    className="border border-gray-300 p-3 rounded-lg w-full"
+                                                    value={roomDetails?.price}
+                                                    readOnly
+                                                />
+                                                <span className="absolute inset-y-0 right-4 flex items-center">
+                                                    <FaLock className="text-gray-400" />
+                                                </span>
                                             </div>
-                                        ))}
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600">Diện tích (m2)</label>
+                                            <input
+                                                type="text"
+                                                className="border border-gray-300 p-3 rounded-lg w-full"
+                                                value={roomDetails?.area}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600">Loại Phòng</label>
+                                            <input
+                                                type="text"
+                                                className="border border-gray-300 p-3 rounded-lg w-full"
+                                                value={roomDetails?.room_type?.name}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600">Mã tin</label>
+                                            <input
+                                                type="text"
+                                                className="border border-gray-300 p-3 rounded-lg w-full"
+                                                value={roomDetails?.id}
+                                                readOnly
+                                            />
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600">Ngày tạo</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    className="border border-gray-300 p-3 rounded-lg w-full"
+                                                    value={formatDate(roomDetails?.created_at)}
+                                                    readOnly
+                                                />
+                                                <span className="absolute inset-y-0 right-4 flex items-center">
+                                                    <FaCalendarAlt className="text-gray-400" />
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-gray-600">Địa chỉ</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    className="border border-gray-300 p-3 rounded-lg w-full"
+                                                    value={`${roomDetails?.ward}, ${roomDetails?.district}, ${roomDetails?.city}`}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-gray-600">Số nhà</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    className="border border-gray-300 p-3 rounded-lg w-full"
+                                                    value={`${roomDetails?.other_address}`}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="inline-block bg-blue-200 rounded-full px-2 py-1 text-xs font-semibold mr-2">
-                                        {roomDetails?.amenities?.map((id) => amenities[id]).join(', ')}
-                                    </span>
                                 </div>
 
-                                {/* Upload hình ảnh */}
-                                <div className="bg-gray-100 p-4 rounded-lg shadow">
-                                    <h2 className="text-2xl font-semibold mb-4">Hình ảnh</h2>
-                                    <p className="mb-2">Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn</p>
-                                    <div className="min-h-[180px] border-dashed border-2 border-gray-300 p-4 flex justify-center items-center">
+                                {/* Liên hệ */}
+                                <div className="mt-6">
+                                    <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center">
+                                        <i className="fas fa-user-circle mr-2"></i> Liên Hệ
+                                    </h2>
+                                    <div className="bg-gray-100 p-4 rounded-lg shadow">
+                                        <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                                            <p>{currentUser?.first_name}</p>
+                                            <p>{currentUser?.last_name}</p>
+                                        </h3>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center">
+                                                <FaPhone className="text-pink-500 mr-2" />
+                                                <span>{currentUser?.phone}</span>
+                                            </div>
+                                            <div className="flex items-center">
+                                                <FaEnvelope className="text-pink-500 mr-2" />
+                                                <span>{currentUser?.email}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+                                    <h2 className="text-2xl font-bold text-blue-500">Hình ảnh</h2>
+                                    <p className="text-md text-gray-500 mb-2">
+                                        Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn
+                                    </p>
+                                    <div className="min-h-[180px] border-dashed border-2 border-gray-300 p-6 flex justify-center items-center">
                                         <label htmlFor="upload" className="cursor-pointer flex flex-col items-center">
-                                            <img src={uploadimage} alt="Upload" className="w-30 h-20 object-cover" />
-                                            <span className="mt-2 font-semibold">Thêm Ảnh</span>
+                                            <img src={uploadimage} alt="Upload" className="w-32 h-24 object-cover" />
+                                            <span className="mt-2 font-medium text-blue-500">Thêm Ảnh</span>
                                         </label>
                                         <input
                                             id="upload"
@@ -196,11 +288,11 @@ const CreatePost = () => {
                                                 <img
                                                     src={URL.createObjectURL(image)}
                                                     alt="Uploaded"
-                                                    className="w-full h-40 object-cover border border-gray-950 rounded"
+                                                    className="w-full h-40 object-cover border border-gray-300 rounded"
                                                 />
                                                 <button
                                                     onClick={() => setImages(images.filter((_, i) => i !== index))}
-                                                    className="absolute top-0 right-0 bg-red-500 text-white p-1 rounded"
+                                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded"
                                                 >
                                                     Xóa
                                                 </button>
@@ -212,18 +304,21 @@ const CreatePost = () => {
                                     </p>
                                 </div>
 
-                                {/* Tiêu đề bài đăng */}
-                                <div className="space-y-4">
-                                    <label className="block text-gray-700 font-semibold">Tiêu đề bài đăng</label>
+                                <div className="space-y-4 mt-6">
+                                    <label className="block text-blue-500 font-semibold text-2xl">
+                                        Tiêu đề bài đăng
+                                    </label>
                                     <input
                                         type="text"
                                         value={postTitle}
                                         onChange={(e) => setPostTitle(e.target.value)}
-                                        className="border border-gray-300 p-2 rounded w-full"
+                                        className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
                                         placeholder="Phòng trọ giá rẻ tại quận 1..."
                                     />
 
-                                    <label className="block text-gray-700 font-semibold">Nội dung bài đăng</label>
+                                    <label className="block text-blue-500 font-semibold text-2xl">
+                                        Nội dung bài đăng
+                                    </label>
                                     <CKEditor
                                         editor={ClassicEditor}
                                         data={postContent}
@@ -231,13 +326,13 @@ const CreatePost = () => {
                                             const data = editor.getData();
                                             setPostContent(data);
                                         }}
-                                        className="border border-gray-300 rounded w-full"
+                                        className="border border-gray-300 rounded-lg w-full"
                                     />
                                 </div>
 
                                 <button
                                     type="submit"
-                                    className="bg-blue-500 text-white px-4 py-2 rounded w-full"
+                                    className="bg-blue-500 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-600 transition duration-300"
                                     disabled={loading}
                                 >
                                     {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
