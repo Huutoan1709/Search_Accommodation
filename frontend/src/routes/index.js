@@ -12,6 +12,8 @@ import FavoritePost from '../pages/Post/FavoritePost';
 import ResetPassword from '../pages/User/ResetPassword';
 import MapBox from '../components/MapBox';
 import RoomSearch from '../components/RoomSearch';
+import changepassword from '../pages/User/ResetPassword';
+import SupportRequest from '../pages/SupportRequest';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -21,6 +23,7 @@ const publicroutes = [
     { path: '/reset-password', component: ResetPassword },
     { path: '/map', component: MapBox },
     { path: '/roomsearch', component: RoomSearch },
+    { path: '/changepassword', component: changepassword },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },
@@ -31,6 +34,7 @@ const profileRoutes = [
 const privateRoutes = [
     { path: '/profile/*', component: Profile, children: profileRoutes },
     { path: '/favorite', component: FavoritePost },
+    { path: '/supportrequest', component: SupportRequest },
 ];
 
 export { publicroutes, privateRoutes, profileRoutes };

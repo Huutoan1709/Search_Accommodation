@@ -15,7 +15,6 @@ const Profile = () => {
         { path: 'updateinfo', element: <Updateinfo /> },
         { path: 'manageroom', element: <ManageRoom /> },
         { path: 'managepost', element: <ManagePost /> },
-        { path: 'changepassword', element: <ChangePassword /> },
         // Thêm các route khác nếu cần
     ]);
 

@@ -47,6 +47,9 @@ const Header = () => {
     const handleFavoritePostClick = () => {
         navigate('/favorite');
     };
+    const handleToRequest = () => {
+        navigate('/supportrequest');
+    };
     return (
         <header className="header">
             <div className="header-logo">
@@ -57,10 +60,13 @@ const Header = () => {
                 <span className="active cursor-pointer" onClick={handleHomeClick}>
                     Trang Chủ
                 </span>
-                <span className="cursor-pointer">Nhà đất cho thuê</span>
-                <span className="cursor-pointer">Tin tức</span>
-                <span className="cursor-pointer">Thông Báo</span>
-                <span className="cursor-pointer">Hỗ Trợ</span>
+                <span className="cursor-pointer">Phòng trọ nhà trọ</span>
+                <span className="cursor-pointer">Nhà Nguyên căn</span>
+                <span className="cursor-pointer">Căn hộ Mini</span>
+                <span className="cursor-pointer">Căn hộ dịch vụ</span>
+                <span className="cursor-pointer" onClick={handleToRequest}>
+                    Hỗ Trợ
+                </span>
             </nav>
             <div className="header-icons mx-2">
                 <button className="border-r-2" onClick={handleFavoritePostClick}>

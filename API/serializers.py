@@ -49,7 +49,7 @@ class UserInfoSerializer(UserSerializer):
         return Follow.objects.filter(follower=obj, is_active=True).count()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ['id', 'gender', 'date_joined', 'last_login', 'email', 'phone',
+        fields = UserSerializer.Meta.fields + ['id', 'gender', 'date_joined', 'last_login', 'email', 'phone','address',
                                                'follower_count', 'following_count', 'password']
         extra_kwargs = {
             'password':

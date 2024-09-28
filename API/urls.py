@@ -14,6 +14,7 @@ router.register('roomtype',RoomTypeViewSet,'roomtype')
 router.register('room/prices', PriceViewSet, 'price')
 router.register('amenities', AmenitiesViewSet, 'amenities')
 router.register('reset-password', ResetPasswordViewSet, basename='reset-password')
+router.register('support-request', SupportRequestsViewSet,'support-request')
 
 urlpatterns = [
     path('', include(router.urls))

@@ -5,6 +5,7 @@ import { notifyError, notifySuccess, notifyWarning } from '../../../components/T
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import MapBox from '../../../components/MapBox';
 
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
@@ -133,7 +134,7 @@ const CreatePost = () => {
                 <div className="lg:col-span-2 space-y-8">
                     <form onSubmit={handlePostCreation} className="space-y-8">
                         <div className="space-y-2">
-                            <label className="block text-gray-700 font-medium">Danh sách phòng chưa đăng</label>
+                            <label className="block text-red-400 font-semibold">Danh sách phòng chưa đăng</label>
                             <select
                                 className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
                                 onChange={(e) => handleRoomSelect(e.target.value)}
@@ -152,7 +153,7 @@ const CreatePost = () => {
                             <div className="w-full">
                                 {/* Thông tin phòng */}
                                 <div>
-                                    <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center">
+                                    <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center">
                                         <i className="fas fa-info-circle mr-2"></i> Thông Tin Phòng
                                     </h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,14 +244,14 @@ const CreatePost = () => {
 
                                 {/* Liên hệ */}
                                 <div className="mt-6">
-                                    <h2 className="text-2xl font-bold text-blue-600 mb-4 flex items-center">
+                                    <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center">
                                         <i className="fas fa-user-circle mr-2"></i> Liên Hệ
                                     </h2>
                                     <div className="bg-gray-100 p-4 rounded-lg shadow">
-                                        <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                                        <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
                                             <p>{currentUser?.first_name}</p>
                                             <p>{currentUser?.last_name}</p>
-                                        </h3>
+                                        </h2>
                                         <div className="space-y-2">
                                             <div className="flex items-center">
                                                 <FaPhone className="text-pink-500 mr-2" />
@@ -265,7 +266,7 @@ const CreatePost = () => {
                                 </div>
 
                                 <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-                                    <h2 className="text-2xl font-bold text-blue-500">Hình ảnh</h2>
+                                    <h2 className="text-2xl font-bold text-red-400">Hình ảnh</h2>
                                     <p className="text-md text-gray-500 mb-2">
                                         Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn
                                     </p>
@@ -292,7 +293,7 @@ const CreatePost = () => {
                                                 />
                                                 <button
                                                     onClick={() => setImages(images.filter((_, i) => i !== index))}
-                                                    className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded"
+                                                    className="absolute top-1 right-1 bg-red-400 text-white p-1 rounded"
                                                 >
                                                     Xóa
                                                 </button>
@@ -305,18 +306,18 @@ const CreatePost = () => {
                                 </div>
 
                                 <div className="space-y-4 mt-6">
-                                    <label className="block text-blue-500 font-semibold text-2xl">
+                                    <label className="block text-red-400 font-semibold text-2xl">
                                         Tiêu đề bài đăng
                                     </label>
                                     <input
                                         type="text"
                                         value={postTitle}
                                         onChange={(e) => setPostTitle(e.target.value)}
-                                        className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
+                                        className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-red-400"
                                         placeholder="Phòng trọ giá rẻ tại quận 1..."
                                     />
 
-                                    <label className="block text-blue-500 font-semibold text-2xl">
+                                    <label className="block text-red-500 font-semibold text-2xl">
                                         Nội dung bài đăng
                                     </label>
                                     <CKEditor
@@ -332,7 +333,7 @@ const CreatePost = () => {
 
                                 <button
                                     type="submit"
-                                    className="bg-blue-500 text-white px-6 py-3 rounded-lg w-full hover:bg-blue-600 transition duration-300"
+                                    className="font-semibold mt-8 bg-red-500 text-white px-6 py-3 rounded-lg w-full hover:bg-red-600 transition duration-300"
                                     disabled={loading}
                                 >
                                     {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
@@ -341,6 +342,13 @@ const CreatePost = () => {
                         )}
                     </form>
                 </div>
+                {/* Right column for the map */}
+                {selectedRoom && roomDetails.latitude && roomDetails.longitude && (
+                    <div className="lg:col-span-1">
+                        <h2 className="text-2xl font-bold mb-4">Bản đồ</h2>
+                        <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
+                    </div>
+                )}
             </div>
         </div>
     );

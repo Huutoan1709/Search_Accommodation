@@ -459,18 +459,18 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                             }}
                         />
                     </div>
-                    <div className="flex justify-between">
-                        <div className="flex justify-between">
+                    <div className="flex justify-between mt-4">
+                        <div className="flex items-center gap-3">
                             <button
                                 type="button"
                                 onClick={debouncedHandleGeocode}
-                                className="bg-green-500 text-white px-4 py-2 rounded-md"
+                                className="bg-green-500 text-white px-4 py-2 rounded-md font-base"
                             >
                                 Xem trên map
                             </button>
                             <button
                                 type="submit"
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                className="bg-red-500 text-white px-4 py-2 rounded-md font-base"
                                 disabled={loading}
                             >
                                 {loading

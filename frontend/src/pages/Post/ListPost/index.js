@@ -54,6 +54,7 @@ const ListPost = ({ searchParams }) => {
             setTitle(`Danh sách bài đăng toàn quốc hiện có ${count} bài đăng.`);
         } else {
             let titleText = 'Danh sách bài đăng';
+            if (searchParams.room_type) titleText += ` cho thuê ${searchParams.room_type}`;
             if (searchParams.ward) titleText += ` phường ${searchParams.ward}`;
             if (searchParams.district) titleText += `, ${searchParams.district}`;
             if (searchParams.city) titleText += `, ${searchParams.city}`;

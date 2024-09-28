@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SearchItem from '../../components/SearchItem';
 import { IoPricetagsOutline } from 'react-icons/io5';
-import { MdNavigateNext } from 'react-icons/md';
+import { MdLocationOn, MdNavigateNext } from 'react-icons/md';
 import { RiCrop2Line } from 'react-icons/ri';
 import { PiBuildingApartmentBold } from 'react-icons/pi';
 import { LiaSearchSolid } from 'react-icons/lia';
@@ -9,7 +9,6 @@ import Modal from '../../components/Modal';
 import { LuRefreshCcw } from 'react-icons/lu';
 
 function Search({ setSearchParams }) {
-    // Destructure setSearchParams from props
     const [isModal, setIsModal] = useState(false);
     const [field, setField] = useState('');
     const [selectedValues, setSelectedValues] = useState({
@@ -18,13 +17,13 @@ function Search({ setSearchParams }) {
         ward: '',
         price: 'Chọn giá',
         area: 'Chọn diện tích',
+        room_type: 'Chọn loại phòng',
         min_price: undefined,
         max_price: undefined,
         min_area: undefined,
         max_area: undefined,
     });
     const [selectedField, setSelectedField] = useState('');
-    const [searchParamsState, setSearchParamsState] = useState(''); // Renamed to avoid confusion
 
     const openModal = (field) => {
         setSelectedField(field);
@@ -55,11 +54,11 @@ function Search({ setSearchParams }) {
             const maxArea = maxValue ? parseFloat(maxValue) : undefined;
 
             if (minArea !== undefined && maxArea !== undefined) {
-                updatedValues.area = `Từ ${minArea}m2 - ${maxArea}m2`;
+                updatedValues.area = `Từ ${minArea}m² - ${maxArea}m²`;
             } else if (minArea !== undefined) {
-                updatedValues.area = `Từ ${minArea}m2`;
+                updatedValues.area = `Từ ${minArea}m²`;
             } else if (maxArea !== undefined) {
-                updatedValues.area = `${maxArea}m2 trở xuống`;
+                updatedValues.area = `${maxArea}m² trở xuống`;
             } else {
                 updatedValues.area = selectedRange;
             }
@@ -73,11 +72,12 @@ function Search({ setSearchParams }) {
             updatedValues.district = district || '';
             updatedValues.ward = ward || '';
         }
+        if (field === 'room_type') {
+            updatedValues.room_type = selectedRange || 'Chọn loại phòng';
+        }
 
-        // Cập nhật selectedValues với các giá trị mới
         setSelectedValues(updatedValues);
 
-        // Construct searchParams here, ensuring only defined values are included
         const params = {
             min_price: updatedValues.min_price !== undefined ? updatedValues.min_price : '',
             max_price: updatedValues.max_price !== undefined ? updatedValues.max_price : '',
@@ -86,18 +86,15 @@ function Search({ setSearchParams }) {
             city: updatedValues.city || '',
             district: updatedValues.district || '',
             ward: updatedValues.ward || '',
+            room_type: updatedValues.room_type !== 'Chọn loại phòng' ? updatedValues.room_type : '', // Only include if not default
         };
 
-        // Log the params for debugging
-
-        // Build the query string
         const queryString = Object.entries(params)
-            .filter(([_, value]) => value !== '') // Only include entries with non-empty values
+            .filter(([_, value]) => value !== '')
             .map(([key, value]) => `${key}=${value}`)
             .join('&');
 
-        // Set searchParams in the parent component
-        setSearchParams(queryString); // Update the search parameters
+        setSearchParams(queryString);
         console.log('Search Parameters:', queryString);
     };
 
@@ -112,57 +109,66 @@ function Search({ setSearchParams }) {
             max_price: undefined,
             min_area: undefined,
             max_area: undefined,
+            room_type: 'Chọn loại phòng',
         });
-        setSearchParams(''); // Reset search params as well
+        setSearchParams('');
     };
-
+    const truncateText = (text) => {
+        return text.length > 20 ? text.slice(0, 20) + '...' : text;
+    };
     return (
         <>
-            <div className="w-[1024px] h-[60px] p-[10px] bg-white border shadow-lg rounded-lg flex items-center justify-around gap-2">
-                <span onClick={() => openModal('region')} className="w-50% cursor-pointer">
+            <div className="w-[1024px] h-[60px] p-[10px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
+                <span onClick={() => openModal('room_type')} className="flex-1 cursor-pointer gap-1">
                     <SearchItem
-                        iconBf={<PiBuildingApartmentBold size={15} className="text-gray-400" />}
-                        iconAf={<MdNavigateNext size={15} className="text-gray-400" />}
-                        text={
+                        iconBf={<PiBuildingApartmentBold size={15} />}
+                        iconAf={<MdNavigateNext size={15} />}
+                        text={selectedValues.room_type}
+                        className={selectedValues.room_type !== 'Chọn loại phòng' ? 'font-semibol ' : ''}
+                    />
+                </span>
+                <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1">
+                    <SearchItem
+                        iconBf={<MdLocationOn size={15} />}
+                        iconAf={<MdNavigateNext size={15} />}
+                        text={truncateText(
                             selectedValues.ward
-                                ? `${selectedValues.ward},${selectedValues.district}`
+                                ? `${selectedValues.ward}, ${selectedValues.district}.`
                                 : selectedValues.district
-                                ? `${selectedValues.district},${selectedValues.city}`
+                                ? `${selectedValues.district}, ${selectedValues.city}`
                                 : selectedValues.city
                                 ? selectedValues.city
-                                : 'Toàn quốc'
+                                : 'Toàn quốc',
+                        )}
+                        className={
+                            selectedValues.city || selectedValues.district || selectedValues.ward ? 'font-semibold' : ''
                         }
                     />
                 </span>
-                <span onClick={() => openModal('price')} className="flex-1 cursor-pointer">
+                <span onClick={() => openModal('price')} className="flex-1 cursor-pointer gap-1">
                     <SearchItem
-                        iconBf={<IoPricetagsOutline size={15} className="text-gray-400" />}
-                        iconAf={<MdNavigateNext size={15} className="text-gray-400" />}
+                        iconBf={<IoPricetagsOutline size={15} />}
+                        iconAf={<MdNavigateNext size={15} />}
                         text={selectedValues.price}
+                        className={selectedValues.price !== 'Chọn giá' ? 'font-semibold' : ''}
                     />
                 </span>
-                <span onClick={() => openModal('area')} className="flex-1 cursor-pointer">
+                <span onClick={() => openModal('area')} className="flex-1 cursor-pointer gap-1">
                     <SearchItem
-                        iconBf={<RiCrop2Line size={15} className="text-gray-400" />}
-                        iconAf={<MdNavigateNext size={15} className="text-gray-400" />}
+                        iconBf={<RiCrop2Line size={15} />}
+                        iconAf={<MdNavigateNext size={15} />}
                         text={selectedValues.area}
+                        className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibol' : ''}
                     />
                 </span>
                 <span
                     type="button"
                     onClick={handleReset}
-                    className=" cursor-pointer text-center bg-slate-300 py-2 px-2 rounded-md text-[13px] gap-2 text-gray-600 font-medium flex items-center justify-center"
+                    className="cursor-pointer text-center bg-red-500 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
                 >
                     <LuRefreshCcw />
                     Đặt lại
                 </span>
-                {/* <span
-                    type="button"
-                    className="cursor-pointer text-center bg-red-500 py-2 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
-                >
-                    <LiaSearchSolid />
-                    Tìm kiếm
-                </span> */}
             </div>
             {isModal && <Modal field={selectedField} setIsModal={setIsModal} handleApply={handleApply} />}
         </>

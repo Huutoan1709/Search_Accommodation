@@ -66,7 +66,7 @@ const ManagePost = () => {
     };
 
     const handleHide = async (postId) => {
-        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bài đăng này không?');
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn ẩn bài đăng này không?');
         if (confirmDelete) {
             try {
                 await authApi().patch(endpoints.updatepost(postId), { is_active: false }); // Gọi API để cập nhật trạng thái

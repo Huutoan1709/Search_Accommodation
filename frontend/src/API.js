@@ -27,6 +27,7 @@ export const endpoints = {
     resetpassword: '/reset-password/',
     updateamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
     changepassword: '/user/change-password/',
+    supportrequest: '/support-request/',
 };
 
 export const authApi = () => {

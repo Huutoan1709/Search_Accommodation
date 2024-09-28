@@ -56,7 +56,7 @@ const SidebarUser = () => {
                         { icon: <LuFileEdit size={20} />, label: 'Quản lý tin đăng', section: 'managepost' },
                         { icon: <BsHouseCheck size={20} />, label: 'Quản lý phòng', section: 'manageroom' },
                         { icon: <FaRegEdit size={20} />, label: 'Sửa thông tin cá nhân', section: 'updateinfo' },
-                        { icon: <RiLockPasswordLine size={20} />, label: 'Đổi mật khẩu', section: 'changepassword' },
+                        { icon: <RiLockPasswordLine size={20} />, label: 'Trang cá nhân', section: 'personalpage' },
                     ].map((item) => (
                         <div
                             key={item.section}

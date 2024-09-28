@@ -439,6 +439,16 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
+    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải xác thực
+
+    def create(self, request, *args, **kwargs):
+        # Thêm thông tin người dùng hiện tại vào dữ liệu yêu cầu
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)  # Lưu user hiện tại
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
@@ -484,8 +494,9 @@ class ResetPasswordViewSet(viewsets.ViewSet):
                 otp_instance.generate_otp()
 
                 send_mail(
-                    'OTP để đặt lại mật khẩu',
-                    f'Mã OTP của bạn là: {otp_instance.otp}',
+                    'TO_ACCOMMODATION OTP RESET PASSWORD',
+                    f'Xin Chào'
+                    f'Chúng tôi gửi bạn mã OTP dùng để cập nhập mật khẩu,hiệu lực trong 1 phút. Mã OTP của bạn là: {otp_instance.otp}',
                     'noreply@example.com',
                     [email],
                     fail_silently=False,

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import { FaMapMarkerAlt } from 'react-icons/fa';
-
 function MapBox({ latitude, longitude, onCoordinatesChange }) {
     const [viewport, setViewport] = useState({
         width: '100%', // Chỉnh width

@@ -40,6 +40,12 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
             max_area: maxArea,
         });
     };
+    const handleRoomTypeClick = (roomType) => {
+        setSearchParams({
+            ...searchParams,
+            room_type: roomType,
+        });
+    };
     const priceRanges = [
         { label: 'Dưới 1 triệu', min: 0, max: 1 },
         { label: 'Từ 1 - 2 triệu', min: 1, max: 2 },
@@ -63,12 +69,14 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
             <div className="w-full bg-[#fff] rounded-xl border border-gray-300 p-5 shadow-xl">
                 <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Danh mục cho thuê</h3>
                 <div className="flex flex-col gap-2">
-                    {roomtype.map((roomtype) => (
+                    {roomtype.map((room) => (
                         <p
-                            key={roomtype.id}
+                            key={room.id}
+                            onClick={() => handleRoomTypeClick(room.name)} // Xử lý click loại phòng
                             className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
-                            <MdNavigateNext size={14} /> Cho thuê {roomtype.name}
+                            <MdNavigateNext size={14} />
+                            {room.name}
                         </p>
                     ))}
                 </div>

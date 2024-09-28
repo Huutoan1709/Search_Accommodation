@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-
+import API, { endpoints } from '../API';
+import { notifyError } from '../components/ToastManager';
 function Modal({ field, setIsModal, handleApply }) {
-    const [selected, setSelected] = useState('Tất cả diện tích'); // Default value for area
-    const [minPrice, setMinPrice] = useState(''); // Default min price
-    const [maxPrice, setMaxPrice] = useState(''); // Default max price
-    const [minArea, setMinArea] = useState(''); // Default min area
-    const [maxArea, setMaxArea] = useState(''); // Default max area
-    const [isValid, setIsValid] = useState(true); // Validation state
+    const [selected, setSelected] = useState('');
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
+    const [minArea, setMinArea] = useState('');
+    const [maxArea, setMaxArea] = useState('');
+    const [isValid, setIsValid] = useState(true);
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedDistrict, setSelectedDistrict] = useState('');
     const [selectedWard, setSelectedWard] = useState('');
@@ -16,6 +17,7 @@ function Modal({ field, setIsModal, handleApply }) {
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
     const [wards, setWards] = useState([]);
+    const [roomTypeOptions, setRoomTypeOptions] = useState([]);
 
     const options = {
         area: [
@@ -57,12 +59,29 @@ function Modal({ field, setIsModal, handleApply }) {
                     const response = await fetch('https://provinces.open-api.vn/api/p');
                     const data = await response.json();
                     setCities(data);
-                    console.log(data);
                 } catch (error) {
                     console.error('Failed to fetch cities:', error);
                 }
             };
             fetchCities();
+        }
+    }, [field]);
+
+    useEffect(() => {
+        if (field === 'room_type') {
+            const fetchRoomTypes = async () => {
+                try {
+                    let res = await API.get(endpoints['roomtype']);
+                    if (Array.isArray(res.data)) {
+                        setRoomTypeOptions(res.data);
+                    } else {
+                        setRoomTypeOptions([]);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch room types:', error);
+                }
+            };
+            fetchRoomTypes();
         }
     }, [field]);
 
@@ -112,18 +131,21 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        let valid = true;
+
         if (field === 'price') {
-            if (!minPrice && !maxPrice) {
-                setIsValid(false);
-                return;
+            if (minPrice < 0 || maxPrice < 0 || (minPrice && maxPrice && Number(minPrice) > Number(maxPrice))) {
+                valid = false;
+                notifyError('Đảm bảo thông tin hợp lệ.');
+            } else {
+                handleApply(field, selected, minPrice, maxPrice);
             }
-            handleApply(field, selected, minPrice, maxPrice);
         } else if (field === 'area') {
-            if (!minArea && !maxArea) {
-                setIsValid(false);
-                return;
+            if (minArea < 0 || maxArea < 0 || (minArea && maxArea && Number(minArea) > Number(maxArea))) {
+                valid = false;
+            } else {
+                handleApply(field, selected, minArea, maxArea);
             }
-            handleApply(field, selected, minArea, maxArea);
         } else if (field === 'region') {
             const selectedRange = {
                 city: selectedCityName,
@@ -131,19 +153,52 @@ function Modal({ field, setIsModal, handleApply }) {
                 ward: selectedWardName,
             };
             handleApply(field, selectedRange);
+        } else if (field === 'room_type') {
+            handleApply(field, selected);
         }
-        setIsModal(false);
+
+        if (!valid) {
+            setIsValid(false);
+        } else {
+            setIsValid(true);
+            setIsModal(false); // Đóng modal chỉ khi thông tin hợp lệ
+        }
     };
 
     return (
         <div className="modal fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-20">
-            <form onSubmit={handleSubmit} className="modal-content bg-white p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-semibold mb-4 border-b border-gray-300 border-dashed">
-                    {field === 'region' ? 'CHỌN KHU VỰC' : field === 'price' ? 'CHỌN MỨC GIÁ' : 'CHỌN DIỆN TÍCH'}
+            <form onSubmit={handleSubmit} className="modal-content bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-lg">
+                <h2 className="text-2xl font-semibold mb-4 border-b border-gray-300 border-dashed text-center">
+                    {field === 'region'
+                        ? 'CHỌN KHU VỰC'
+                        : field === 'price'
+                        ? 'CHỌN MỨC GIÁ'
+                        : field === 'area'
+                        ? 'CHỌN DIỆN TÍCH'
+                        : 'CHỌN LOẠI PHÒNG'}
                 </h2>
+                {field === 'room_type' && (
+                    <select
+                        value={selected}
+                        onChange={(e) => setSelected(e.target.value)}
+                        className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                        <option value="">Chọn loại phòng</option>
+                        {roomTypeOptions &&
+                            Array.isArray(roomTypeOptions) &&
+                            roomTypeOptions.map((room) => (
+                                <option key={room.id} value={room.name}>
+                                    {room.name}
+                                </option>
+                            ))}
+                    </select>
+                )}
                 {field === 'region' && (
                     <>
-                        <select onChange={handleCityChange} className="border p-2 mb-2 rounded">
+                        <select
+                            onChange={handleCityChange}
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
                             <option value="">Chọn tỉnh</option>
                             {cities.map((city) => (
                                 <option key={city.code} value={city.code}>
@@ -151,7 +206,10 @@ function Modal({ field, setIsModal, handleApply }) {
                                 </option>
                             ))}
                         </select>
-                        <select onChange={handleDistrictChange} className="border p-2 mb-2 rounded">
+                        <select
+                            onChange={handleDistrictChange}
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
                             <option value="">Chọn quận</option>
                             {districts.map((district) => (
                                 <option key={district.code} value={district.code}>
@@ -159,7 +217,10 @@ function Modal({ field, setIsModal, handleApply }) {
                                 </option>
                             ))}
                         </select>
-                        <select onChange={handleWardChange} className="border p-2 mb-2 rounded">
+                        <select
+                            onChange={handleWardChange}
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
+                        >
                             <option value="">Chọn phường</option>
                             {wards.map((ward) => (
                                 <option key={ward.code} value={ward.code}>
@@ -173,17 +234,17 @@ function Modal({ field, setIsModal, handleApply }) {
                     <>
                         <input
                             type="number"
-                            placeholder="Giá tối thiểu"
+                            placeholder="Giá từ"
                             value={minPrice}
                             onChange={(e) => setMinPrice(e.target.value)}
-                            className="border p-2 mb-2 rounded w-full"
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <input
                             type="number"
-                            placeholder="Giá tối đa"
+                            placeholder="Đến"
                             value={maxPrice}
                             onChange={(e) => setMaxPrice(e.target.value)}
-                            className="border p-2 mb-2 rounded w-full"
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                     </>
                 )}
@@ -191,30 +252,33 @@ function Modal({ field, setIsModal, handleApply }) {
                     <>
                         <input
                             type="number"
-                            placeholder="Diện tích tối thiểu"
+                            placeholder="Diện tích từ"
                             value={minArea}
                             onChange={(e) => setMinArea(e.target.value)}
-                            className="border p-2 mb-2 rounded w-full"
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                         <input
                             type="number"
-                            placeholder="Diện tích tối đa"
+                            placeholder="Đến"
                             value={maxArea}
                             onChange={(e) => setMaxArea(e.target.value)}
-                            className="border p-2 mb-2 rounded w-full"
+                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
                         />
                     </>
                 )}
-                <div className="flex items-center justify-between mt-3">
-                    {!isValid && <p className="text-red-500 mt-2">Vui lòng điền ít nhất một trường.</p>}
+                {!isValid && <p className="text-red-500 text-xl mb-4">Vui lòng nhập thông tin hợp lệ.</p>}
+                <div className="flex justify-between mt-4">
                     <button
                         type="button"
                         onClick={() => setIsModal(false)}
-                        className="bg-green-500 text-white py-2 px-4 rounded-md hover:bg-green-600"
+                        className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
                     >
-                        Đóng
+                        Huỷ
                     </button>
-                    <button type="submit" className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600">
+                    <button
+                        type="submit"
+                        className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                    >
                         Áp dụng
                     </button>
                 </div>
