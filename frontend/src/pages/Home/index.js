@@ -23,8 +23,7 @@ function Home() {
     };
 
     const handleCityClick = (city) => {
-        // Define search parameters based on the city clicked
-        const params = { city }; // You can add more parameters as needed
+        const params = { city };
         handleSearch(params);
     };
 
@@ -59,24 +58,25 @@ function Home() {
                     </p>
                 </div>
                 <Search setSearchParams={setSearchParams} />
-                <div className="my-14 flex gap-4 p-2">
+                <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
+                <div className="my-10 flex gap-4 p-2">
                     <div
                         className="relative w-1/3 group cursor-pointer"
                         onClick={() => handleCityClick('Thành phố Hồ Chí Minh')}
                     >
                         <img src={hochiminh} alt="Hồ Chí Minh" className="rounded-lg object-cover w-full h-[310px]" />
-                        <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
+                        <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
                             <h3 className="text-2xl font-bold">Hồ Chí Minh</h3>
-                            <p className="text-lg">1.260 tin đăng</p>
+                            <p className="text-lg"></p>
                         </div>
                     </div>
 
                     <div className="w-2/3 grid grid-cols-2 gap-4 cursor-pointer">
                         <div className="relative group" onClick={() => handleCityClick('Thành phố Hà Nội')}>
                             <img src={hanoi} alt="Hà Nội" className="rounded-lg object-cover w-full h-[150px]" />
-                            <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
+                            <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
                                 <h3 className="text-2xl font-bold">Hà Nội</h3>
-                                <p className="text-lg">1.260 tin đăng</p>
+                                <p className="text-lg"></p>
                             </div>
                         </div>
                         <div
@@ -88,9 +88,9 @@ function Home() {
                                 alt="Bình Dương"
                                 className="rounded-lg object-cover w-full h-[150px]"
                             />
-                            <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
+                            <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
                                 <h3 className="text-2xl font-bold">Bình Dương</h3>
-                                <p className="text-lg">1.260 tin đăng</p>
+                                <p className="text-lg"></p>
                             </div>
                         </div>
                         <div
@@ -98,9 +98,9 @@ function Home() {
                             onClick={() => handleCityClick('Thành phố Đà Nẵng')}
                         >
                             <img src={danang} alt="Đà Nẵng" className="rounded-lg object-cover w-full h-[150px]" />
-                            <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
+                            <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
                                 <h3 className="text-2xl font-bold ">Đà Nẵng</h3>
-                                <p className="text-lg">1.260 tin đăng</p>
+                                <p className="text-lg"></p>
                             </div>
                         </div>
                         <div
@@ -112,9 +112,9 @@ function Home() {
                                 alt="Bình Phước"
                                 className="rounded-lg object-cover w-full h-[150px]"
                             />
-                            <div className="absolute inset-0 from-transparent to-transparent bg-gradient-to-t group-hover:from-black group-hover:to-transparent text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300">
+                            <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
                                 <h3 className="text-2xl font-bold">Bình Phước</h3>
-                                <p className="text-lg">1.260 tin đăng</p>
+                                <p className="text-lg"></p>
                             </div>
                         </div>
                     </div>
@@ -125,7 +125,7 @@ function Home() {
                         <ListPost searchParams={searchParams} />
                     </div>
                     <div className="w-[30%] flex flex-col gap-4 justify-start items-center ">
-                        <Sidebar />
+                        <Sidebar setSearchParams={setSearchParams} />
                     </div>
                 </div>
             </div>

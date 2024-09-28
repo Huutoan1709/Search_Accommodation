@@ -256,6 +256,30 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             setLoading(false);
         }
     };
+    const fetchAddressFromCoordinates = async (latitude, longitude) => {
+        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
+
+        try {
+            const response = await axios.get(geocodingUrl);
+            const { features } = response.data;
+            if (features.length > 0) {
+                const address = features[0].place_name;
+                console.log('Địa chỉ:', address);
+                // Bạn có thể cập nhật một state mới hoặc thông báo địa chỉ này
+            } else {
+                console.warn('Không tìm thấy địa chỉ cho tọa độ này.');
+            }
+        } catch (error) {
+            console.error('Lỗi khi lấy địa chỉ từ tọa độ:', error);
+        }
+    };
+
+    // Theo dõi thay đổi tọa độ
+    useEffect(() => {
+        if (formData.latitude && formData.longitude) {
+            fetchAddressFromCoordinates(formData.latitude, formData.longitude);
+        }
+    }, [formData.latitude, formData.longitude]);
     return (
         <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-[1100px] w-full mt-[200px]">
@@ -406,9 +430,9 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                         </select>
                     </div>
                     <div>
-                        <label className="block text-gray-700">Tiện nghi</label>
+                        <label className="block text-gray-600 font-semibold">Nội thất</label>
                         <div className="grid grid-cols-2 gap-4">
-                            {amenitiesList.slice(0, 8).map((amenity) => (
+                            {amenitiesList.slice(0, 10).map((amenity) => (
                                 <label key={amenity.id} className="block">
                                     <input
                                         type="checkbox"

@@ -71,19 +71,19 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                 {images.slice(0, 4).map((image, index) => (
                     <img key={index} src={image.url} alt="image" className="w-[135px] h-[125px] object-cover" />
                 ))}
-                <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1">{`${images.length} ảnh`}</span>
+                <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1 mr-1">{`${images.length} ảnh`}</span>
                 <span
-                    className="absolute bottom-1 right-1 cursor-pointer"
+                    className="absolute bottom-1 right-1 cursor-pointer mr-[2px]"
                     onMouseEnter={() => setHoverHearth(true)}
                     onMouseLeave={() => setHoverHearth(false)}
                     onClick={handleFavoriteClick}
                 >
                     {favorite ? (
-                        <PiHeartStraightFill size={25} color="red" />
+                        <PiHeartStraightFill size={27} color="red" />
                     ) : HoverHearth ? (
-                        <PiHeartStraightFill size={25} color="red" />
+                        <PiHeartStraightFill size={27} color="red" />
                     ) : (
-                        <PiHeartStraightLight size={25} />
+                        <PiHeartStraightLight size={27} className="text-white font-semibold" />
                     )}
                 </span>
             </div>
@@ -111,7 +111,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
                     {`${room?.district}, ${room?.city}`}
                 </span>
-                <p className="text-gray-500, min-h-[90px] text-[14px]">
+                <p className="text-gray-500, min-h-[100px] text-[14px]">
                     {content.length > 170 ? `${content.slice(0, 170)}...` : content}
                 </p>
                 <div className="flex items-center justify-between">

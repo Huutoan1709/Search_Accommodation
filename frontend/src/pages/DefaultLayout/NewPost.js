@@ -28,7 +28,7 @@ const NewPost = () => {
     }, []);
 
     if (!posts.length) {
-        return <div>Không có bài đăng nào gần đây</div>;
+        return <div>Chưa có bài đăng nào gần đây</div>;
     }
 
     return posts.map((post) => {
@@ -50,8 +50,8 @@ const NewPost = () => {
                         {post?.title.length > 40 ? `${post?.title.slice(0, 40)}...` : post?.title}
                     </h4>
                     <div className="flex items-center justify-between">
-                        <span className="text-green-500 font-medium text-[14x]">{post.room.price} triệu/tháng</span>
-                        <span className="text-[12px]">
+                        <span className="text-green-500 font-medium text-[12x]">{post?.room?.price} triệu</span>
+                        <span className="text-[10px]">
                             {formatDistanceToNow(parseISO(post?.created_at), {
                                 addSuffix: true,
                                 locale: vi,

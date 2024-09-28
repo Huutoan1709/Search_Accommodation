@@ -38,20 +38,18 @@ function Modal({ field, setIsModal, handleApply }) {
         ],
     };
 
-    // Reset giá trị khi thay đổi field
     useEffect(() => {
         if (field === 'area') {
-            setSelected('Tất cả diện tích'); // Default for area
-            setMinArea(''); // Reset min area
-            setMaxArea(''); // Reset max area
+            setSelected('Tất cả diện tích');
+            setMinArea('');
+            setMaxArea('');
         } else if (field === 'price') {
-            setSelected('Tất cả mức giá'); // Default for price
-            setMinPrice(''); // Reset min price
-            setMaxPrice(''); // Reset max price
+            setSelected('Tất cả mức giá');
+            setMinPrice('');
+            setMaxPrice('');
         }
     }, [field]);
 
-    // Fetch cities khi field là 'region'
     useEffect(() => {
         if (field === 'region') {
             const fetchCities = async () => {
@@ -70,19 +68,19 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleCityChange = async (e) => {
         const selectedCityCode = e.target.value;
-        const selectedCityName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected city
+        const selectedCityName = e.target.options[e.target.selectedIndex]?.text;
         setSelectedCity(selectedCityCode);
-        setSelectedCityName(selectedCityName); // Store the city name
+        setSelectedCityName(selectedCityName);
 
         try {
             const response = await fetch(`https://provinces.open-api.vn/api/p/${selectedCityCode}?depth=2`);
             const data = await response.json();
             setDistricts(data.districts);
             setWards([]);
-            setSelectedDistrict(''); // Reset selected district
-            setSelectedWard(''); // Reset selected ward
-            setSelectedDistrictName(''); // Reset district name
-            setSelectedWardName(''); // Reset ward name
+            setSelectedDistrict('');
+            setSelectedWard('');
+            setSelectedDistrictName('');
+            setSelectedWardName('');
         } catch (error) {
             console.error('Failed to fetch districts:', error);
         }
@@ -90,16 +88,16 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleDistrictChange = async (e) => {
         const selectedDistrictCode = e.target.value;
-        const selectedDistrictName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected district
+        const selectedDistrictName = e.target.options[e.target.selectedIndex]?.text;
         setSelectedDistrict(selectedDistrictCode);
-        setSelectedDistrictName(selectedDistrictName); // Store the district name
+        setSelectedDistrictName(selectedDistrictName);
 
         try {
             const response = await fetch(`https://provinces.open-api.vn/api/d/${selectedDistrictCode}?depth=2`);
             const data = await response.json();
             setWards(data.wards);
-            setSelectedWard(''); // Reset selected ward
-            setSelectedWardName(''); // Reset ward name
+            setSelectedWard('');
+            setSelectedWardName('');
         } catch (error) {
             console.error('Failed to fetch wards:', error);
         }
@@ -107,9 +105,9 @@ function Modal({ field, setIsModal, handleApply }) {
 
     const handleWardChange = (e) => {
         const selectedWardCode = e.target.value;
-        const selectedWardName = e.target.options[e.target.selectedIndex]?.text; // Get the name of the selected ward
+        const selectedWardName = e.target.options[e.target.selectedIndex]?.text;
         setSelectedWard(selectedWardCode);
-        setSelectedWardName(selectedWardName); // Store the ward name
+        setSelectedWardName(selectedWardName);
     };
 
     const handleSubmit = (e) => {

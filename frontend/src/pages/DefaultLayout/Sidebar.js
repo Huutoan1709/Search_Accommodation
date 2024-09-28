@@ -3,7 +3,7 @@ import { MdNavigateNext } from 'react-icons/md';
 import API, { endpoints } from '../../API';
 import NewPost from '././NewPost';
 
-const Sidebar = () => {
+const Sidebar = ({ setSearchParams, searchParams }) => {
     const [roomtype, setRoomType] = useState([]);
     const [error, setError] = useState('');
 
@@ -26,20 +26,38 @@ const Sidebar = () => {
     if (!roomtype) {
         return <div>Loading...</div>;
     }
-
+    const handlePriceClick = (minPrice, maxPrice) => {
+        setSearchParams({
+            ...searchParams,
+            min_price: minPrice,
+            max_price: maxPrice,
+        });
+    };
+    const handleAreaClick = (minArea, maxArea) => {
+        setSearchParams({
+            ...searchParams,
+            min_area: minArea,
+            max_area: maxArea,
+        });
+    };
     const priceRanges = [
-        'Dưới 1 triệu',
-        'Từ 1 - 2 triệu',
-        'Từ 2 - 3 triệu',
-        'Từ 3 - 5 triệu',
-        'Từ 5 - 7 triệu',
-        'Từ 7 - 10 triệu',
-        'Từ 10 - 15 triệu',
-        'Trên 15 triệu',
+        { label: 'Dưới 1 triệu', min: 0, max: 1 },
+        { label: 'Từ 1 - 2 triệu', min: 1, max: 2 },
+        { label: 'Từ 2 - 3 triệu', min: 2, max: 3 },
+        { label: 'Từ 3 - 5 triệu', min: 3, max: 5 },
+        { label: 'Từ 5 - 7 triệu', min: 5, max: 7 },
+        { label: 'Từ 7 - 10 triệu', min: 7, max: 10 },
+        { label: 'Từ 10 - 15 triệu', min: 10, max: 15 },
+        { label: 'Trên 15 triệu', min: 15, max: 1000 },
     ];
-
-    const areaRanges = ['Dưới 20 m²', 'Từ 20 - 30 m²', 'Từ 30 - 50 m²', 'Từ 50 - 70 m²', 'Từ 70 - 90 m²', 'Trên 90 m²'];
-
+    const areaRanges = [
+        { label: 'Dưới 20 m²', min: 0, max: 20 },
+        { label: 'Từ 20 - 30 m²', min: 20, max: 30 },
+        { label: 'Từ 30 - 50 m²', min: 30, max: 50 },
+        { label: 'Từ 50 - 70 m²', min: 50, max: 70 },
+        { label: 'Từ 70 - 90 m²', min: 70, max: 90 },
+        { label: 'Trên 90 m²', min: 90, max: '1000' },
+    ];
     return (
         <>
             <div className="w-full bg-[#fff] rounded-xl border border-gray-300 p-5 shadow-xl">
@@ -62,9 +80,10 @@ const Sidebar = () => {
                     {priceRanges.map((range, index) => (
                         <p
                             key={index}
+                            onClick={() => handlePriceClick(range.min, range.max)}
                             className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
-                            <MdNavigateNext size={14} /> {range}
+                            <MdNavigateNext size={14} /> {range.label}
                         </p>
                     ))}
                 </div>
@@ -76,9 +95,10 @@ const Sidebar = () => {
                     {areaRanges.map((range, index) => (
                         <p
                             key={index}
+                            onClick={() => handleAreaClick(range.min, range.max)}
                             className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
-                            <MdNavigateNext size={14} /> {range}
+                            <MdNavigateNext size={14} /> {range.label}
                         </p>
                     ))}
                 </div>

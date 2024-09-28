@@ -39,7 +39,7 @@ const PostItem = ({ post }) => {
     return (
         <div key={post.id} className="w-full flex border-t border-orange-700 p-3 gap-1 bg-white">
             <div
-                className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer"
+                className="w-[42%] flex flex-wrap gap-[1px] justify-center items-center rounded-xl relative cursor-pointer"
                 onClick={handlePostClick}
             >
                 {post.images.slice(0, 4).map((image, index) => (
@@ -50,19 +50,19 @@ const PostItem = ({ post }) => {
                         className="w-[135px] h-[125px] object-cover"
                     />
                 ))}
-                <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1">{`${post.images.length} ảnh`}</span>
+                <span className="bg-overlay-30 rounded-md text-white px-2 absolute right-1 top-1 mr-1">{`${post.images.length} ảnh`}</span>
                 <span
-                    className="absolute bottom-1 right-1 cursor-pointer"
+                    className="absolute bottom-1 right-1 cursor-pointer mr-[2px]"
                     onMouseEnter={() => setHoverHearth(true)}
                     onMouseLeave={() => setHoverHearth(false)}
                     onClick={handleFavoriteClick}
                 >
                     {favorite ? (
-                        <PiHeartStraightFill size={25} color="red" />
+                        <PiHeartStraightFill size={27} color="red" />
                     ) : HoverHearth ? (
-                        <PiHeartStraightFill size={25} color="red" />
+                        <PiHeartStraightFill size={27} color="red" />
                     ) : (
-                        <PiHeartStraightLight size={25} />
+                        <PiHeartStraightLight size={27} />
                     )}
                 </span>
             </div>
@@ -72,7 +72,7 @@ const PostItem = ({ post }) => {
                         {post.title}
                     </h3>
                 </div>
-                <div className=" flex items-center gap-5">
+                <div className=" flex items-center gap-4">
                     <span className="flex font-semibold text-[16px]">
                         <MdOutlineAttachMoney size={20} className="text-gray-500" />
                         <p className="text-green-500">{post.room?.price} triệu/tháng</p>
