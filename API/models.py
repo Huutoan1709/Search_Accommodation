@@ -37,13 +37,12 @@ class User(AbstractUser):
     )
     phone = models.CharField(max_length=15, unique=True)
     email = models.EmailField(max_length=100, unique=True, null=True)
-    gender = models.CharField(max_length=6, choices=GENDER,default ='MALE')
-    role = models.CharField(max_length=30, null=False, choices=ROLES,default ='CUSTOMER')
-    avatar = CloudinaryField(default='avatar_default',blank=True)
+    gender = models.CharField(max_length=6, choices=GENDER, default='MALE')
+    role = models.CharField(max_length=30, null=False, choices=ROLES, default='CUSTOMER')
+    avatar = CloudinaryField(default='avatar_default', blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', through='Follow')
-    # booking = models.ManyToManyField('Rooms', through='Bookings', related_name='booked_users')
-    review = models.ManyToManyField('Post', through='Reviews', related_name='reviewed_users')
+    reviews_landlord = models.ManyToManyField('Reviews', related_name='reviewed_users', blank=True)
 
     def __str__(self):
         return str(self.get_full_name())
@@ -62,7 +61,6 @@ class RoomType(BaseModel):
     name = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
 
-
     def __str__(self):
         return str(self.name)
 
@@ -76,16 +74,18 @@ class Post(BaseModel):
     title = models.CharField(max_length=400)
     content = models.TextField()
     is_approved = models.BooleanField(default=False)
-    is_block = models.BooleanField(default= False)
+    is_block = models.BooleanField(default=False)
     user = models.ForeignKey('User', related_name='User_Post', on_delete=models.CASCADE)
     room = models.ForeignKey('Rooms', related_name='Room_Post', on_delete=models.CASCADE)
 
     def __str__(self):
         return f'{self.title} + {self.room}'
+
+
 class Amenities(BaseModel):
     name = models.CharField(max_length=50)
-    description = models.TextField(blank = True)
-    quanlity = models.IntegerField(default = 1)
+    description = models.TextField(blank=True)
+    quanlity = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -97,15 +97,16 @@ class Rooms(BaseModel):
     district = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     area = models.FloatField()
-    other_address = models.CharField(max_length=255, default ='',blank=True)
-    latitude = models.FloatField(blank=True,null=True)
+    other_address = models.CharField(max_length=255, default='', blank=True)
+    latitude = models.FloatField(blank=True, null=True)
     longitude = models.FloatField(blank=True, null=True)
     landlord = models.ForeignKey('User', related_name='landlord', on_delete=models.CASCADE)
     room_type = models.ForeignKey('RoomType', related_name='Room_Type', on_delete=models.CASCADE)
-    amenities= models.ManyToManyField('Amenities', blank=True, related_name='Room_Amenities')
+    amenities = models.ManyToManyField('Amenities', blank=True, related_name='Room_Amenities')
 
     def has_post(self):
         return self.Room_Post.exists()
+
     def __str__(self):
         return f'Trọ {self.ward} - {self.district} - {self.city}'
 
@@ -139,9 +140,23 @@ class FavoritePost(BaseModel):
 
 class Reviews(BaseModel):
     customer = models.ForeignKey('User', related_name='Customer_Reviews', on_delete=models.CASCADE)
-    post = models.ForeignKey('Post', related_name='Post_Reviews', on_delete=models.CASCADE)
-    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
-    comment = models.TextField()
+    landlord = models.ForeignKey('User', related_name='Landlord_Reviews', on_delete=models.CASCADE, null=True)  # Thay đổi ở đây
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])  # Số sao chung
+    comment = models.TextField()  # Nội dung đánh giá
+    created_at = models.DateTimeField(auto_now_add=True)
+    selected_criteria = models.ManyToManyField('ReviewCriterion', blank=True, related_name='Selected_Reviews')  # Chọn tiêu chí
+
+    def __str__(self):
+        return f"Đánh giá từ {self.customer} cho {self.landlord}"
+
+
+class ReviewCriterion(BaseModel):
+    name = models.CharField(max_length=255)
+    description = models.TextField(null=True, blank=True)  # Mô tả chi tiết về tiêu chí
+
+    def __str__(self):
+        return self.name
+
 
 class SupportRequests(BaseModel):
     subject = models.CharField(max_length=255)
@@ -152,7 +167,9 @@ class SupportRequests(BaseModel):
     def __str__(self):
         return f"Yêu cầu {self.subject} Từ {str(self.user.get_full_name())}"
 
+
 User = get_user_model()
+
 
 class PasswordResetOTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -290,7 +290,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         ward = self.request.query_params.get('ward', None)
         district = self.request.query_params.get('district', None)
         city = self.request.query_params.get('city', None)
-
+        room_type = self.request.query_params.get('room_type', None)
         # Lọc theo price
         if min_price and max_price:
             queryset = queryset.filter(room__price__range=(min_price, max_price))
@@ -314,12 +314,14 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             queryset = queryset.filter(room__district__iexact=district.strip())
         if city:
             queryset = queryset.filter(room__city__iexact=city.strip())
-
+        if room_type:
+            queryset = queryset.filter(room__room_type__name__iexact=room_type.strip())
         # Chỉ lọc những bài đăng đã duyệt khi action là 'list'
         if self.action == 'list':
             queryset = queryset.filter(is_approved=True)
 
         return queryset
+
     def get_serializer_class(self):
         serializers = {
             'list': PostSerializer,
