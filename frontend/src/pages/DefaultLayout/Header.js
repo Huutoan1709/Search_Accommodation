@@ -8,7 +8,10 @@ import { FaHeart } from 'react-icons/fa';
 import { PiNotePencilBold } from 'react-icons/pi';
 import './DefaultLayout.scss';
 import { FaFileSignature } from 'react-icons/fa';
+import { ImProfile } from 'react-icons/im';
+import { BiSupport } from 'react-icons/bi';
 import { CgProfile } from 'react-icons/cg';
+import { GoCodeReview } from 'react-icons/go';
 
 const Header = () => {
     const { user, logout, fetchUser } = useContext(MyContext);
@@ -50,6 +53,12 @@ const Header = () => {
     const handleToRequest = () => {
         navigate('/supportrequest');
     };
+    const handleReviewClick = () => {
+        navigate('/reviews');
+    };
+    const handleUserPageClick = () => {
+        navigate('/profiles/current/'); // Đường dẫn tới trang cá nhân
+    };
     return (
         <header className="header">
             <div className="header-logo">
@@ -75,7 +84,7 @@ const Header = () => {
                 {user ? (
                     <div className="user-dropdown">
                         <div className="user-info">
-                            <img src={user.avatar || 'default-avatar.png'} alt="Avatar" className="avatar" />
+                            <img src={user.avatar || 'default-avatar.png'} alt="Avatar" className="avatar " />
                             <span className="user-name">
                                 {user.first_name} {user.last_name}
                             </span>
@@ -83,14 +92,28 @@ const Header = () => {
                         </div>
 
                         <div className="user-menu rounded-md">
-                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
-                                <PiNotePencilBold size={20} className="text-blue-500" />
-                                <span onClick={handlecreateClick}>Đăng tin cho thuê</span>
-                            </div>
-                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
-                                <FaFileSignature size={20} className="text-green-500" />
-                                <span onClick={handleManagePostClick}>Quản lý tin đăng</span>
-                            </div>
+                            {user.role === 'LANDLORD' && (
+                                <>
+                                    <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                        <PiNotePencilBold size={20} className="text-fuchsia-500" />
+                                        <span onClick={handlecreateClick}>Đăng tin cho thuê</span>
+                                    </div>
+                                    <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                        <FaFileSignature size={20} className="text-green-500" />
+                                        <span onClick={handleManagePostClick}>Quản lý tin đăng</span>
+                                    </div>
+                                    <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                        <ImProfile size={20} className="text-emerald-600 " />
+                                        <span onClick={handleUserPageClick}>Trang cá nhân</span>
+                                    </div>
+                                </>
+                            )}
+                            {user.role === 'CUSTOMER' && (
+                                <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                    <GoCodeReview size={20} className="text-green-500" />
+                                    <span onClick={handleReviewClick}>Đánh giá từ tôi</span>
+                                </div>
+                            )}
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <FaHeart size={20} className="text-red-500" />
                                 <span onClick={handleFavoritePostClick}>Tin yêu thích</span>
@@ -98,6 +121,10 @@ const Header = () => {
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                 <CgProfile size={20} className="text-yellow-500 " />
                                 <span onClick={hadleUpdateProfileClick}>Thông tin cá nhân</span>
+                            </div>
+                            <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                <BiSupport size={20} className="text-sky-600" />
+                                <span onClick={handleToRequest}>Hỗ trợ</span>
                             </div>
 
                             <div className="flex items-center cursor-pointer">
@@ -116,9 +143,11 @@ const Header = () => {
                         </button>
                     </>
                 )}
-                <button className="post-buttons" onClick={handlecreateClick}>
-                    Đăng tin
-                </button>
+                {user?.role === 'LANDLORD' && (
+                    <button className="post-buttons" onClick={handlecreateClick}>
+                        Đăng tin
+                    </button>
+                )}
             </div>
         </header>
     );

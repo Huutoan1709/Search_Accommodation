@@ -3,6 +3,10 @@ import { authApi } from '../../../API';
 import { notifyWarning, notifySuccess } from '../../../components/ToastManager';
 import { useNavigate } from 'react-router-dom';
 import MyContext from '../../../context/MyContext';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import Header from '../../DefaultLayout/Header';
+import Footer from '../../DefaultLayout/footer';
 
 const ChangePassword = () => {
     const [formData, setFormData] = useState({
@@ -10,9 +14,11 @@ const ChangePassword = () => {
         newPassword: '',
         confirmPassword: '',
     });
-    const { logout } = useContext(MyContext);
+    const [showOldPassword, setShowOldPassword] = useState(false);
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
-
     const handleChange = (e) => {
         setFormData({
             ...formData,
@@ -57,55 +63,88 @@ const ChangePassword = () => {
         }
     };
 
+    const togglePasswordVisibility = (field) => {
+        if (field === 'old') setShowOldPassword(!showOldPassword);
+        if (field === 'new') setShowNewPassword(!showNewPassword);
+        if (field === 'confirm') setShowConfirmPassword(!showConfirmPassword);
+    };
+
     return (
-        <div className="flex flex-col max-w-4xl mx-auto p-8">
-            <h1 className="text-3xl font-medium">Đổi Mật Khẩu</h1>
-            <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-xl font-semibold mb-2">Mật khẩu cũ</label>
-                    <input
-                        type="password"
-                        name="oldPassword"
-                        value={formData.oldPassword}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Nhập mật khẩu cũ"
-                        required
-                    />
+        <div>
+            <Header />
+            <div className="flex justify-center items-center bg-gray-100">
+                <div className="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg mt-10">
+                    <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">Đổi Mật Khẩu</h2>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div>
+                            <label className="block text-2xl font-medium text-gray-700 mb-2">Mật khẩu cũ:</label>
+                            <div className="relative">
+                                <input
+                                    type={showOldPassword ? 'text' : 'password'}
+                                    name="oldPassword"
+                                    value={formData.oldPassword}
+                                    onChange={handleChange}
+                                    required
+                                    className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <span
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                                    onClick={() => togglePasswordVisibility('old')}
+                                >
+                                    <FontAwesomeIcon icon={showOldPassword ? faEyeSlash : faEye} />
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-2xl font-medium text-gray-700 mb-2">Mật khẩu mới:</label>
+                            <div className="relative">
+                                <input
+                                    type={showNewPassword ? 'text' : 'password'}
+                                    name="newPassword"
+                                    value={formData.newPassword}
+                                    onChange={handleChange}
+                                    required
+                                    className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <span
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                                    onClick={() => togglePasswordVisibility('new')}
+                                >
+                                    <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
+                                </span>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-2xl font-medium text-gray-700 mb-2">
+                                Nhập lại mật khẩu mới:
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type={showConfirmPassword ? 'text' : 'password'}
+                                    name="confirmPassword"
+                                    value={formData.confirmPassword}
+                                    onChange={handleChange}
+                                    required
+                                    className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                                <span
+                                    className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                                    onClick={() => togglePasswordVisibility('confirm')}
+                                >
+                                    <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+                                </span>
+                            </div>
+                        </div>
+                        <button
+                            type="submit"
+                            className="w-full py-3 text-2xl font-semibold text-white bg-red-500 rounded-md shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                        >
+                            Cập nhật
+                        </button>
+                    </form>
                 </div>
-                <div className="mb-4">
-                    <label className="block text-gray-700 text-xl font-semibold mb-2">Mật khẩu mới</label>
-                    <input
-                        type="password"
-                        name="newPassword"
-                        value={formData.newPassword}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Nhập mật khẩu mới"
-                        required
-                    />
-                </div>
-                <div className="mb-6">
-                    <label className="block text-gray-700 text-xl font-semibold mb-2">Nhập lại mật khẩu mới</label>
-                    <input
-                        type="password"
-                        name="confirmPassword"
-                        value={formData.confirmPassword}
-                        onChange={handleChange}
-                        className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                        placeholder="Xác nhận mật khẩu mới"
-                        required
-                    />
-                </div>
-                <div className="flex items-center justify-between">
-                    <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                    >
-                        Cập nhật
-                    </button>
-                </div>
-            </form>
+            </div>
+            <Footer />
         </div>
     );
 };

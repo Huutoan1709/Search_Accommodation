@@ -4,7 +4,7 @@ import uploadimage from '../../../assets/upload-image.png';
 import { notifyError, notifySuccess, notifyWarning } from '../../../components/ToastManager';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import { FaLock, FaCalendarAlt, FaMapMarkerAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaLock, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import MapBox from '../../../components/MapBox';
 
 const CreatePost = () => {
@@ -126,6 +126,18 @@ const CreatePost = () => {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
+    };
+    const generateTitle = () => {
+        if (
+            roomDetails.room_type &&
+            roomDetails.other_address &&
+            roomDetails.ward &&
+            roomDetails.district &&
+            roomDetails.city
+        ) {
+            const title = `Cho thuê ${roomDetails.room_type.name} tại ${roomDetails.other_address}, ${roomDetails.ward}, ${roomDetails.district}, ${roomDetails.city} chất lượng`;
+            setPostTitle(title);
+        }
     };
     return (
         <div className="container mx-auto p-6">
@@ -309,13 +321,22 @@ const CreatePost = () => {
                                     <label className="block text-red-400 font-semibold text-2xl">
                                         Tiêu đề bài đăng
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={postTitle}
-                                        onChange={(e) => setPostTitle(e.target.value)}
-                                        className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-red-400"
-                                        placeholder="Phòng trọ giá rẻ tại quận 1..."
-                                    />
+                                    <div className="flex items-center">
+                                        <input
+                                            type="text"
+                                            value={postTitle}
+                                            onChange={(e) => setPostTitle(e.target.value)}
+                                            className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-red-400"
+                                            placeholder="Phòng trọ giá rẻ tại quận 1..."
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={generateTitle}
+                                            className="flex items-center justify-center font-base rounded-lg ml-4 bg-green-500 text-white px-4 py-2 hover:bg-green-600"
+                                        >
+                                            Tiêu đề tự động
+                                        </button>
+                                    </div>
 
                                     <label className="block text-red-500 font-semibold text-2xl">
                                         Nội dung bài đăng

@@ -76,7 +76,7 @@ const UpdateInfo = () => {
     };
 
     const handleChangePassword = () => {
-        navigate('/changepassword/'); // Navigate to /changepassword
+        navigate('/changepassword');
     };
 
     if (loading) {

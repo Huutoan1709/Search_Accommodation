@@ -7,7 +7,7 @@ import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
 import EditRoom from '../EditRoom';
-import { notifySuccess } from '../../../components/ToastManager';
+import { notifyError, notifySuccess } from '../../../components/ToastManager';
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
@@ -75,11 +75,18 @@ const ManageRoom = () => {
         const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa phòng này không?');
         if (confirmDelete) {
             try {
-                await authApi().delete(endpoints.deleteroom(roomId)); // Call API to delete room
+                await authApi().delete(endpoints.deleteroom(roomId));
                 setRooms(rooms.filter((room) => room.id !== roomId));
                 notifySuccess('Xóa phòng thành công');
             } catch (error) {
                 console.error('Failed to delete room:', error);
+
+                // Kiểm tra xem có thông báo lỗi từ server không
+                if (error.response && error.response.data) {
+                    notifyError(error.response.data.error); // Hiển thị thông báo lỗi từ server
+                } else {
+                    notifyError('Xóa phòng thất bại'); // Thông báo lỗi mặc định
+                }
             }
         }
     };

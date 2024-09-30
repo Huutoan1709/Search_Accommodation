@@ -12,6 +12,7 @@ import { vi } from 'date-fns/locale';
 import { CiStopwatch } from 'react-icons/ci';
 import Footer from '../../DefaultLayout/footer';
 import NewPost from '../../DefaultLayout/NewPost';
+import { notifySuccess } from '../../../components/ToastManager';
 const PostItem = ({ post }) => {
     const timeAgo = formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: vi });
     const [HoverHearth, setHoverHearth] = useState(false);
@@ -27,7 +28,9 @@ const PostItem = ({ post }) => {
         try {
             const res = await authApi().post(endpoints.createFavorite, { post_id: post.id });
             if (res.data.message === 'Post removed from favorites') {
+                notifySuccess('Đã xóa tin khỏi danh sách yêu thích');
                 setFavorite(false);
+                window.location.reload();
             } else if (res.data.message === 'Post added to favorites') {
                 setFavorite(true);
             }
@@ -114,7 +117,6 @@ const PostItem = ({ post }) => {
 const FavoritePost = () => {
     const [favoritePosts, setFavoritePosts] = useState([]);
 
-    // Fetching favorite posts from the API with authentication
     useEffect(() => {
         const fetchData = async () => {
             try {

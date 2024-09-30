@@ -12,12 +12,14 @@ import { vi } from 'date-fns/locale';
 import { CiStopwatch } from 'react-icons/ci';
 import { notifySuccess, notifyWarning } from '../../components/ToastManager';
 import MyContext from '../../context/MyContext';
+import { AiFillSafetyCertificate } from 'react-icons/ai';
 
 const Item = ({ images, title, content, room, created_at, user, id }) => {
     const { user: loggedInUser } = useContext(MyContext);
     const timeAgo = formatDistanceToNow(new Date(created_at), { addSuffix: true, locale: vi });
     const [HoverHearth, setHoverHearth] = useState(false);
     const [favorite, setFavorite] = useState(false);
+    const [showTooltip, setShowTooltip] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -90,7 +92,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
             <div className="w-[60%] pl-2 text-[15px] gap-1 flex flex-col">
                 <div className="items-center">
                     <h3 className="text-red-600 font-semibold cursor-pointer" onClick={handlePostClick}>
-                        {title}
+                        {title.length > 80 ? `${title.slice(0, 80)}...` : title}
                     </h3>
                 </div>
                 <div className=" flex items-center gap-4">
@@ -111,14 +113,34 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
                     {`${room?.district}, ${room?.city}`}
                 </span>
-                <p className="text-gray-500, min-h-[100px] text-[14px]">
-                    {content.length > 170 ? `${content.slice(0, 170)}...` : content}
-                </p>
+                <div className="text-gray-500 min-h-[100px] text-[14px]">
+                    {content.length > 150 ? (
+                        <div dangerouslySetInnerHTML={{ __html: `${content.slice(0, 150)}...` }}></div>
+                    ) : (
+                        <div dangerouslySetInnerHTML={{ __html: content }}></div>
+                    )}
+                </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
                         <img src={Logomotel} alt="avatar" className="w-[30px] h-[30px] rounded-full object-cover" />
-                        <p>
+                        <p className="flex items-center justify-center gap-1">
                             {user?.first_name} {user?.last_name}
+                            {user?.reputation && (
+                                <div
+                                    className="relative items-center"
+                                    onMouseEnter={() => setShowTooltip(true)}
+                                    onMouseLeave={() => setShowTooltip(false)}
+                                >
+                                    <span className="text-green-500">
+                                        <AiFillSafetyCertificate size={18} />
+                                    </span>
+                                    {showTooltip && (
+                                        <div className="w-20 absolute bg-gray-800 text-white text-xs rounded-md p-1 left-1/2 transform -translate-x-1/2 -translate-y-full mb-3">
+                                            Chủ trọ uy tín
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </p>
                     </div>
 

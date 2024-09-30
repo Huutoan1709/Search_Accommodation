@@ -18,14 +18,17 @@ import { GiWashingMachine } from 'react-icons/gi';
 import zalo from '../../../assets/zalo.png';
 import NewPost from '../../DefaultLayout/NewPost';
 import MapBox from '../../../components/MapBox';
-import { IoNavigate } from 'react-icons/io5';
+import { useNavigate } from 'react-router-dom';
 import Footer from '../../DefaultLayout/footer';
+import BackToTop from '../../../components/BackToTop';
+import { AiFillSafetyCertificate } from 'react-icons/ai';
 
 function DetailPost() {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
     const [amenitiesList, setAmenitiesList] = useState([]);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -144,36 +147,45 @@ function DetailPost() {
                                     <span>{post?.id}</span>
                                 </span>
                             </div>
+
                             <div className="mt-8">
-                                <h3 className="font-semibold text-[20px] my-5">Thông tin mô tả:</h3>
-                                <div className="gap-3 flex flex-col">{post?.content}</div>
+                                <h3 className="font-semibold text-[24px] my-5 text-gray-800">Thông tin mô tả:</h3>
+                                <div
+                                    className="gap-3 flex flex-col bg-gray-50 p-4 rounded-lg border border-gray-200"
+                                    dangerouslySetInnerHTML={{ __html: post?.content }}
+                                ></div>
                             </div>
 
                             <div className="mt-8">
-                                <h3 className="font-semibold text-[20px] my-5">Đặc điểm tin đăng:</h3>
+                                <h3 className="font-semibold text-[24px] my-5 text-gray-800">Đặc điểm tin đăng:</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     {features.map((feature, index) => (
-                                        <div key={index} className="flex items-center justify-between border-b py-2">
+                                        <div
+                                            key={index}
+                                            className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
+                                        >
                                             <div className="flex items-center gap-2">
                                                 {feature.icon}
-                                                <span className="font-semibold">{feature.label}</span>
+                                                <span className="font-semibold text-gray-700">{feature.label}</span>
                                             </div>
-                                            <span>{feature.value}</span>
+                                            <span className="text-gray-600">{feature.value}</span>
                                         </div>
                                     ))}
                                 </div>
                                 {amenities.length > 0 && (
                                     <>
-                                        <h3 className="font-semibold text-[20px] my-5">Nội thất:</h3>
+                                        <h3 className="font-semibold text-[24px] my-5 text-gray-800">Nội thất:</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             {amenities.map((amenity, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-center justify-between border-b py-2"
+                                                    className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
                                                 >
                                                     <div className="flex items-center gap-2">
                                                         {amenity.icon}
-                                                        <span className="font-semibold">{amenity.label}</span>
+                                                        <span className="font-semibold text-gray-700">
+                                                            {amenity.label}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -182,24 +194,27 @@ function DetailPost() {
                                 )}
                                 {prices.length > 0 && (
                                     <>
-                                        <h3 className="font-semibold text-[20px] my-5">Giá dịch vụ:</h3>
+                                        <h3 className="font-semibold text-[24px] my-5 text-gray-800">Giá dịch vụ:</h3>
                                         <div className="grid grid-cols-2 gap-4">
                                             {prices.map((price, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-center justify-between border-b py-2"
+                                                    className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
                                                 >
                                                     <div className="flex items-center gap-2">
                                                         {price.icon}
-                                                        <span className="font-semibold">{price.label}</span>
+                                                        <span className="font-semibold text-gray-700">
+                                                            {price.label}
+                                                        </span>
                                                     </div>
-                                                    <span>{price.value}</span>
+                                                    <span className="text-gray-600">{price.value}</span>
                                                 </div>
                                             ))}
                                         </div>
                                     </>
                                 )}
                             </div>
+
                             <div className="w-full mt-8">
                                 <h3 className="font-semibold text-[20px] my-5">Bản đồ</h3>
                                 <div className="border border-gray-300 rounded-lg shadow-md overflow-hidden">
@@ -242,10 +257,14 @@ function DetailPost() {
                             <img
                                 src={post?.user?.avatar || '/default-avatar.png'}
                                 alt="Landlord Avatar"
-                                className="w-[80px] h-[80px] rounded-full"
+                                className="w-[80px] h-[80px] rounded-full cursor-pointer"
+                                onClick={() => navigate(`/profiles/${post?.user?.id}`)}
                             />
-                            <h3 className="mt-2 font-semibold text-[20px]">
+                            <h3 className="mt-2 font-semibold text-[20px] flex items-center gap-1">
                                 {post?.user?.first_name} {post?.user?.last_name}
+                                {post?.user?.reputation && (
+                                    <AiFillSafetyCertificate size={20} className="text-green-500" />
+                                )}
                             </h3>
 
                             <a
@@ -278,6 +297,7 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
+            <BackToTop />
             <Footer />
         </div>
     );

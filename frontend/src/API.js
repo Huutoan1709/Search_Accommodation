@@ -14,6 +14,7 @@ export const endpoints = {
     deleteroom: (roomId) => `/room/${roomId}/`,
     roomdetail: (roomId) => `/room/${roomId}/`,
     login: '/o/token/',
+    detailuser: (userId) => `/user/${userId}/`,
     register: '/user/',
     currentuser: '/user/current_user/',
     mypost: '/user/my-post/',
@@ -28,6 +29,11 @@ export const endpoints = {
     updateamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
     changepassword: '/user/change-password/',
     supportrequest: '/support-request/',
+    postuser: (userId) => `/user/${userId}/posts/`,
+    reviewlandlord: (userId) => `/user/${userId}/review/`,
+    review: '/review/',
+    follow: (userId) => `/user/${userId}/follow/`,
+    following: (userId) => `/user/${userId}/following/`,
 };
 
 export const authApi = () => {

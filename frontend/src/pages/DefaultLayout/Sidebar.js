@@ -73,7 +73,7 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
                         <p
                             key={room.id}
                             onClick={() => handleRoomTypeClick(room.name)} // Xử lý click loại phòng
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-500 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} />
                             {room.name}
@@ -89,7 +89,7 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
                         <p
                             key={index}
                             onClick={() => handlePriceClick(range.min, range.max)}
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} /> {range.label}
                         </p>
@@ -104,7 +104,7 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
                         <p
                             key={index}
                             onClick={() => handleAreaClick(range.min, range.max)}
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-orange-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} /> {range.label}
                         </p>
