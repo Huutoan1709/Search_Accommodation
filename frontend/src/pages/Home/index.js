@@ -14,20 +14,28 @@ import danang from '../../assets/danang.jpg';
 import Search from '../DefaultLayout/Search';
 import BackToTop from '../../components/BackToTop';
 
-function Home() {
-    const [showScroll, setShowScroll] = useState(false);
-    const [searchParams, setSearchParams] = useState('');
+const Home = ({ room_type = 'Phòng trọ' }) => {
+    const [searchParams, setSearchParams] = useState({ room_type });
+    console.log('Current Room Type: ', room_type);
+    useEffect(() => {
+        if (!searchParams.room_type) {
+            setSearchParams((prevParams) => ({
+                ...prevParams,
+                room_type: room_type,
+            }));
+        }
+    }, [room_type]);
 
     const handleSearch = (params) => {
-        setSearchParams(params);
+        const updatedParams = { ...params, room_type };
+        setSearchParams(updatedParams);
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCityClick = (city) => {
-        const params = { city };
+        const params = { city, room_type: searchParams.room_type };
         handleSearch(params);
     };
-
     return (
         <>
             <Header />
@@ -41,7 +49,7 @@ function Home() {
                         100.000+ bài đăng và 1.000.000 lượt xem mỗi tháng
                     </p>
                 </div>
-                <Search setSearchParams={setSearchParams} />
+                <Search setSearchParams={setSearchParams} room_type={room_type} />
                 <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
                 <div className="my-10 flex gap-4 p-2">
                     <div
@@ -106,10 +114,10 @@ function Home() {
 
                 <div className="flex w-full gap-4">
                     <div className="w-[70%] ">
-                        <ListPost searchParams={searchParams} />
+                        <ListPost searchParams={searchParams} room_type={searchParams.room_type} />
                     </div>
                     <div className="w-[30%] flex flex-col gap-4 justify-start items-center ">
-                        <Sidebar setSearchParams={setSearchParams} />
+                        <Sidebar setSearchParams={setSearchParams} room_type={room_type} searchParams={searchParams} />
                     </div>
                 </div>
             </div>
@@ -117,6 +125,6 @@ function Home() {
             <Footer />
         </>
     );
-}
+};
 
 export default Home;

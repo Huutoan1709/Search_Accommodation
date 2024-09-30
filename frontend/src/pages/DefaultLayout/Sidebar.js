@@ -2,11 +2,12 @@ import React, { memo, useState, useEffect } from 'react';
 import { MdNavigateNext } from 'react-icons/md';
 import API, { endpoints } from '../../API';
 import NewPost from '././NewPost';
+import { useNavigate } from 'react-router-dom';
 
-const Sidebar = ({ setSearchParams, searchParams }) => {
+const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
     const [roomtype, setRoomType] = useState([]);
     const [error, setError] = useState('');
-
+    const navigate = useNavigate();
     useEffect(() => {
         const fetchRoomTypes = async () => {
             try {
@@ -31,20 +32,31 @@ const Sidebar = ({ setSearchParams, searchParams }) => {
             ...searchParams,
             min_price: minPrice,
             max_price: maxPrice,
+            room_type: room_type,
         });
     };
+
     const handleAreaClick = (minArea, maxArea) => {
         setSearchParams({
             ...searchParams,
             min_area: minArea,
             max_area: maxArea,
+            room_type: room_type,
         });
     };
     const handleRoomTypeClick = (roomType) => {
-        setSearchParams({
-            ...searchParams,
-            room_type: roomType,
-        });
+        if (roomType === 'Nhà nguyên căn') {
+            navigate('/nha-nguyen-can');
+        }
+        if (roomType === 'Phòng Trọ') {
+            navigate('/');
+        }
+        if (roomType === 'Căn hộ dịch vụ') {
+            navigate('/can-ho-dich-vu');
+        }
+        if (roomType === 'Chung Cư') {
+            navigate('/chung-cu');
+        }
     };
     const priceRanges = [
         { label: 'Dưới 1 triệu', min: 0, max: 1 },

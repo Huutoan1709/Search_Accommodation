@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom'; // Import useLocation
 import Logomotel from '../../assets/Logomotel.png';
 import MyContext from '../../context/MyContext';
 import { FaCaretDown } from 'react-icons/fa';
@@ -16,6 +16,8 @@ import { GoCodeReview } from 'react-icons/go';
 const Header = () => {
     const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
+    const location = useLocation(); // Get current location
+
     useEffect(() => {
         if (user) {
             fetchUser();
@@ -28,11 +30,9 @@ const Header = () => {
     const handleLoginClick = () => {
         navigate('/login');
     };
-
     const handleRegisterClick = () => {
         navigate('/register');
     };
-
     const handleLogoutClick = () => {
         if (logout) logout();
         navigate('/');
@@ -57,8 +57,23 @@ const Header = () => {
         navigate('/reviews');
     };
     const handleUserPageClick = () => {
-        navigate('/profiles/current/'); // Đường dẫn tới trang cá nhân
+        navigate('/profiles/current/');
     };
+    const handleNhaNguyenCanClick = () => {
+        navigate('/nha-nguyen-can');
+    };
+    const handleChungCuClick = () => {
+        navigate('/chung-cu');
+    };
+    const handleCHDVClick = () => {
+        navigate('/can-ho-dich-vu');
+    };
+
+    // Check if the current path matches the route to highlight
+    const isActive = (path) => {
+        return location.pathname === path ? 'active' : '';
+    };
+
     return (
         <header className="header">
             <div className="header-logo">
@@ -66,14 +81,19 @@ const Header = () => {
                 <span></span>
             </div>
             <nav className="header-nav">
-                <span className="active cursor-pointer" onClick={handleHomeClick}>
+                <span className={`cursor-pointer ${isActive('/')}`} onClick={handleHomeClick}>
                     Trang Chủ
                 </span>
-                <span className="cursor-pointer">Phòng trọ nhà trọ</span>
-                <span className="cursor-pointer">Nhà Nguyên căn</span>
-                <span className="cursor-pointer">Căn hộ Mini</span>
-                <span className="cursor-pointer">Căn hộ dịch vụ</span>
-                <span className="cursor-pointer" onClick={handleToRequest}>
+                <span className={`cursor-pointer ${isActive('/nha-nguyen-can')}`} onClick={handleNhaNguyenCanClick}>
+                    Nhà nguyên căn
+                </span>
+                <span className={`cursor-pointer ${isActive('/chung-cu')}`} onClick={handleChungCuClick}>
+                    Chung Cư
+                </span>
+                <span className={`cursor-pointer ${isActive('/can-ho-dich-vu')}`} onClick={handleCHDVClick}>
+                    Căn hộ dịch vụ
+                </span>
+                <span className={`cursor-pointer ${isActive('/supportrequest')}`} onClick={handleToRequest}>
                     Hỗ Trợ
                 </span>
             </nav>

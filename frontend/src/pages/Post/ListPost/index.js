@@ -11,7 +11,7 @@ const ListPost = ({ searchParams }) => {
     const [count, setCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const postsPerPage = 10; // =page_size (pagination django)
+    const postsPerPage = 2; // =page_size (pagination django)
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
     const lastUrl = useRef(''); //

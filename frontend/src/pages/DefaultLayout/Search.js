@@ -1,29 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SearchItem from '../../components/SearchItem';
 import { IoPricetagsOutline } from 'react-icons/io5';
 import { MdLocationOn, MdNavigateNext } from 'react-icons/md';
 import { RiCrop2Line } from 'react-icons/ri';
 import { PiBuildingApartmentBold } from 'react-icons/pi';
-import { LiaSearchSolid } from 'react-icons/lia';
 import Modal from '../../components/Modal';
 import { LuRefreshCcw } from 'react-icons/lu';
 
-function Search({ setSearchParams }) {
+function Search({ setSearchParams, room_type }) {
     const [isModal, setIsModal] = useState(false);
-    const [field, setField] = useState('');
     const [selectedValues, setSelectedValues] = useState({
         city: '',
         district: '',
         ward: '',
         price: 'Chọn giá',
         area: 'Chọn diện tích',
-        room_type: 'Chọn loại phòng',
         min_price: undefined,
         max_price: undefined,
         min_area: undefined,
         max_area: undefined,
     });
     const [selectedField, setSelectedField] = useState('');
+
+    // Effect to initialize room_type
+    useEffect(() => {
+        setSelectedValues((prev) => ({
+            ...prev,
+            room_type: room_type, // Use room_type from props or default
+        }));
+    }, [room_type]);
 
     const openModal = (field) => {
         setSelectedField(field);
@@ -33,6 +38,7 @@ function Search({ setSearchParams }) {
     const handleApply = (field, selectedRange, minValue, maxValue) => {
         let updatedValues = { ...selectedValues };
 
+        // Update logic based on field type
         if (field === 'price') {
             const minPrice = minValue ? parseFloat(minValue) : undefined;
             const maxPrice = maxValue ? parseFloat(maxValue) : undefined;
@@ -43,8 +49,6 @@ function Search({ setSearchParams }) {
                 updatedValues.price = `Từ ${minPrice} triệu`;
             } else if (maxPrice !== undefined) {
                 updatedValues.price = `${maxPrice} triệu trở xuống`;
-            } else {
-                updatedValues.price = selectedRange;
             }
 
             updatedValues.min_price = minPrice;
@@ -59,8 +63,6 @@ function Search({ setSearchParams }) {
                 updatedValues.area = `Từ ${minArea}m²`;
             } else if (maxArea !== undefined) {
                 updatedValues.area = `${maxArea}m² trở xuống`;
-            } else {
-                updatedValues.area = selectedRange;
             }
 
             updatedValues.min_area = minArea;
@@ -72,9 +74,9 @@ function Search({ setSearchParams }) {
             updatedValues.district = district || '';
             updatedValues.ward = ward || '';
         }
-        if (field === 'room_type') {
-            updatedValues.room_type = selectedRange || 'Chọn loại phòng';
-        }
+
+        // Đảm bảo room_type không undefined
+        updatedValues.room_type = selectedValues.room_type || room_type; // Thêm kiểm tra giá trị 'Phòng trọ' mặc định
 
         setSelectedValues(updatedValues);
 
@@ -86,9 +88,8 @@ function Search({ setSearchParams }) {
             city: updatedValues.city || '',
             district: updatedValues.district || '',
             ward: updatedValues.ward || '',
-            room_type: updatedValues.room_type !== 'Chọn loại phòng' ? updatedValues.room_type : '', // Only include if not default
+            room_type: updatedValues.room_type || '', // Đảm bảo room_type luôn có giá trị hợp lệ
         };
-
         const queryString = Object.entries(params)
             .filter(([_, value]) => value !== '')
             .map(([key, value]) => `${key}=${value}`)
@@ -109,22 +110,24 @@ function Search({ setSearchParams }) {
             max_price: undefined,
             min_area: undefined,
             max_area: undefined,
-            room_type: 'Chọn loại phòng',
+            room_type: room_type,
         });
-        setSearchParams('');
+        setSearchParams({ room_type: room_type }); // Reset with room_type
     };
+
     const truncateText = (text) => {
         return text.length > 20 ? text.slice(0, 20) + '...' : text;
     };
+
     return (
         <>
             <div className="w-[1024px] h-[60px] p-[10px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
-                <span onClick={() => openModal('room_type')} className="flex-1 cursor-pointer gap-1">
+                <span className="flex-1 cursor-pointer gap-1">
                     <SearchItem
                         iconBf={<PiBuildingApartmentBold size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
                         text={selectedValues.room_type}
-                        className={selectedValues.room_type !== 'Chọn loại phòng' ? 'font-semibol ' : ''}
+                        className="font-semibold"
                     />
                 </span>
                 <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1">
@@ -158,7 +161,7 @@ function Search({ setSearchParams }) {
                         iconBf={<RiCrop2Line size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
                         text={selectedValues.area}
-                        className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibol' : ''}
+                        className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
                     />
                 </span>
                 <span

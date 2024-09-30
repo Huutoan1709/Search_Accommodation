@@ -11,10 +11,12 @@ import CreatePost from '../pages/Post/CreatePost';
 import FavoritePost from '../pages/Post/FavoritePost';
 import ResetPassword from '../pages/User/ResetPassword';
 import MapBox from '../components/MapBox';
-import RoomSearch from '../components/RoomSearch';
 import changepassword from '../pages/User/changepassword';
 import SupportRequest from '../pages/SupportRequest';
 import Personal from '../pages/User/Personal';
+import NhaNguyenCan from '../pages/Home/Nhanguyencan';
+import ChungCu from '../pages/Home/ChungCu';
+import CanHoDichVu from '../pages/Home/CanHoDichVu';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -23,8 +25,10 @@ const publicroutes = [
     { path: '/search', component: search },
     { path: '/reset-password', component: ResetPassword },
     { path: '/map', component: MapBox },
-    { path: '/roomsearch', component: RoomSearch },
     { path: '/profiles/:userId', component: Personal },
+    { path: '/nha-nguyen-can', component: NhaNguyenCan },
+    { path: '/chung-cu', component: ChungCu },
+    { path: '/can-ho-dich-vu', component: CanHoDichVu },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },
