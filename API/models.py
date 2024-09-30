@@ -104,8 +104,6 @@ class Rooms(BaseModel):
     room_type = models.ForeignKey('RoomType', related_name='Room_Type', on_delete=models.CASCADE)
     amenities = models.ManyToManyField('Amenities', blank=True, related_name='Room_Amenities')
 
-    def has_post(self):
-        return self.Room_Post.exists()
 
     def __str__(self):
         return f'Trọ {self.ward} - {self.district} - {self.city}'
@@ -142,7 +140,7 @@ class Reviews(BaseModel):
     customer = models.ForeignKey('User', related_name='Customer_Reviews', on_delete=models.CASCADE)
     landlord = models.ForeignKey('User', related_name='Landlord_Reviews', on_delete=models.CASCADE, null=True)  # Thay đổi ở đây
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])  # Số sao chung
-    comment = models.TextField()  # Nội dung đánh giá
+    comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     selected_criteria = models.ManyToManyField('ReviewCriterion', blank=True, related_name='Selected_Reviews')  # Chọn tiêu chí
 
@@ -180,7 +178,7 @@ class PasswordResetOTP(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
-            self.expires_at = timezone.now() + timezone.timedelta(minutes=15)  # Ví dụ: thiết lập giá trị mặc định
+            self.expires_at = timezone.now() + timezone.timedelta(minutes=15)
         super().save(*args, **kwargs)
 
     def generate_otp(self):

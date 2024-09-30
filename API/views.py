@@ -2,7 +2,7 @@ from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
     SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
-    CreatePostSerializer, PostImageSerializer, ReviewSerializer
+    CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
@@ -69,7 +69,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         user.password = make_password(new_password)
         user.save()
-        return response.Response({'success': 'Password updated successfully'}, status=status.HTTP_200_OK)
+        return response.Response({'success': 'Đổi mật khẩu thành công'}, status=status.HTTP_200_OK)
 
     @action(methods=['get', 'patch', 'delete'], url_path='current_user', detail=False)
     def current_user(self, request):
@@ -102,6 +102,18 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(serializer.data, status.HTTP_200_OK)
 
+    @action(methods=['get'], url_path='posts', detail=True)
+    def get_post(self, request, pk):
+        user = self.get_object()  # Lấy đối tượng người dùng
+
+        posts = Post.objects.filter(user=user, is_active=True)
+
+        if request.user != user:
+            posts = posts.filter(is_approved=True)
+
+        return response.Response(serializers.DetailPostSerializer(posts, many=True).data,
+                                 status=status.HTTP_200_OK)
+
     @action(methods=['get'], url_path='my-rooms', detail=False)
     def my_rooms(self, request):
         user = request.user
@@ -126,6 +138,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
             f.save()
 
         return response.Response(status=status.HTTP_200_OK)
+
 
     @action(methods=['post'], url_path='favorite-post', detail=False)
     def favorite_post(self, request):
@@ -157,11 +170,17 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     # Mysupport
-    @action(methods=['get'], detail=False, url_path='my-review')
-    def my_review(self, request):
-        user = request.user
-        review = Reviews.objects.filter(customer=user).all()
-        serializer = DetailPostSerializer(review, many=True)
+    @action(methods=['get'], detail=True, url_path='review')
+    def get_reviews(self, request, pk=None):
+        try:
+            user = User.objects.get(pk=pk)  # Lấy user theo id từ đường dẫn
+        except User.DoesNotExist:
+            return response.Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+        reviews = Reviews.objects.filter(landlord=user).order_by('-id')
+
+        serializer = ReviewSerializer(reviews, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -191,6 +210,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
 
     def get_queryset(self):
         queryset = Rooms.objects.filter(is_active=True)
+
         min_price = self.request.query_params.get('min_price', None)
         max_price = self.request.query_params.get('max_price', None)
         min_area = self.request.query_params.get('min_area', None)
@@ -220,7 +240,6 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return queryset
 
     def create(self, request, *args, **kwargs):
-        # Sao chép dữ liệu từ request.data vào một từ điển Python thông thường
         data = request.data.copy()
         data['landlord'] = request.user.id
         serializer = WriteRoomSerializer(data=data, context={'request': request})
@@ -237,7 +256,7 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
             return response.Response({'error': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
 
         if room.landlord != request.user:
-            return response.Response({'error': 'You do not have permission to edit this room.'},
+            return response.Response({'error': 'Bạn không có quyền thực hiện hành động này.'},
                                      status=status.HTTP_403_FORBIDDEN)
 
         serializer = self.get_serializer(room, data=request.data, partial=True)
@@ -266,10 +285,17 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
-        motel = self.get_object()
-        motel.is_active = False
-        motel.save()
-        return response.Response(status=status.HTTP_204_NO_CONTENT)
+        room = self.get_object()
+
+        # Kiểm tra xem có bài đăng liên quan đến phòng này không
+        if Post.objects.filter(room=room).exists():
+            return response.Response(
+                {"error": "Phòng này đang được đăng cho thuê, hãy xóa bài đăng trước khi xóa phòng!"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Nếu không có bài đăng liên quan, cho phép xóa phòng
+        return super().destroy(request, *args, **kwargs)
 
 
 class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView, generics.DestroyAPIView,
@@ -281,6 +307,8 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
     def get_queryset(self):
         queryset = Post.objects.filter(is_active=True)
+        if self.action in ['destroy', 'partial_update']:
+            queryset = Post.objects.all()
 
         # Lấy các giá trị từ query params
         min_price = self.request.query_params.get('min_price', None)
@@ -321,6 +349,15 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             queryset = queryset.filter(is_approved=True)
 
         return queryset
+
+    def get_permissions(self):
+        if self.action in ['partial_update', 'wait_approved', 'get_block_post', 'destroy']:
+            return [perms.PostLandlordAuthenticated()] or [perm.IsWebmaster()]
+
+        if self.action in ['create', 'images']:
+            return [perms.IsRoomLandlord()]
+
+        return [permissions.AllowAny()]
 
     def get_serializer_class(self):
         serializers = {
@@ -368,7 +405,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         # Kiểm tra quyền chỉnh sửa
         if request.user != post.user:
-            if request.user.role not in ['WEBMASTER', 'ADMIN']:
+            if request.user.role not in ['WEBMASTER', 'ADMIN', 'LANDLORD']:
                 return response.Response(
                     {'error': 'Chỉ người đăng bài hoặc admin/webmaster mới có thể chỉnh sửa bài viết này.'},
                     status=status.HTTP_403_FORBIDDEN)
@@ -383,13 +420,13 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         return super().update(request, *args, **kwargs)
 
     @action(methods=['get'], detail=False, url_path='wait-approved')
-    def wait_approved(self, request):
+    def get_wait_approved(self, request):
         approved = Post.objects.filter(is_approved=False).all()
         serializer = DetailPostSerializer(approved, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=False, url_path='block')
-    def wait_approved(self, request):
+    def get_block_post(self, request):
         block = Post.objects.filter(isblock=True).all()
         serializer = DetailPostSerializer(block, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
@@ -411,35 +448,43 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    @action(methods=['get'], detail=True, url_path='reviews')
-    def get_review(self, request, pk=None):
+    def destroy(self, request, *args, **kwargs):
         post = self.get_object()
-        reviews = post.Post_Reviews.all()
-        serializer = ReviewSerializer(reviews, many=True)
-        return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+        # Kiểm tra quyền xóa bài viết
+        if request.user != post.user:
+            if request.user.role not in ['WEBMASTER', 'ADMIN', 'LANDLORD']:
+                return response.Response({'error': 'Bạn không có quyền thực hiện hành động này!'},
+                                         status=status.HTTP_403_FORBIDDEN)
+
+        # Xóa bài viết vĩnh viễn
+        post.delete()
+        return response.Response({'message': 'Bài viết đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
     queryset = Price.objects.all()
-    # permission_classes = [perms.HasMotelOwnerAuthenticated]
+    permission_classes = [permissions.IsAuthenticated()]
 
 
 class AmenitiesViewSet(viewsets.ViewSet, generics.ListCreateAPIView, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = AmenitiesSerializer
     queryset = Amenities.objects.all()
+    permissions_classes = [permissions.IsAuthenticated()]
 
 
 class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
+    permissions_classes = [permissions.IsAuthenticated()]
 
 
 class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SupportRequestsSerializer
     queryset = SupportRequests.objects.all()
     pagination_class = paginators.BasePaginator
-    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu người dùng phải xác thực
+    permission_classes = [permissions.IsAuthenticated]
 
     def create(self, request, *args, **kwargs):
         # Thêm thông tin người dùng hiện tại vào dữ liệu yêu cầu
@@ -450,10 +495,49 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu phải đăng nhập
 
-class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
-    serializer_class = ReviewSerializer
-    queryset = Reviews.objects.all()
+    def get_serializer_class(self):
+        if self.action.__eq__('create'):
+            return CreateReviewSerializer
+        return ReviewSerializer
+
+    def get_queryset(self):
+        return Reviews.objects.filter(is_active=True).order_by('-id')
+
+    def create(self, request, *args, **kwargs):
+        data = request.data.copy()
+        customer = request.user  # Người dùng hiện tại (đã đăng nhập)
+
+        data['customer'] = customer.id
+
+        landlord_id = data.get('landlord')
+        try:
+            landlord = User.objects.get(id=landlord_id)
+        except User.DoesNotExist:
+            return response.Response({"error": "Chủ trọ không tồn tại."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Kiểm tra vai trò của người dùng
+        if customer.role != 'CUSTOMER':
+            return response.Response({"error": "Chỉ người dùng có vai trò 'CUSTOMER' mới có thể thực hiện đánh giá."},
+                                     status=status.HTTP_403_FORBIDDEN)
+        if landlord.role != 'LANDLORD':
+            return response.Response({"error": "Chỉ người dùng có vai trò 'LANDLORD' mới có thể nhận đánh giá."},
+                                     status=status.HTTP_403_FORBIDDEN)
+        if customer == landlord:
+            return response.Response({"error": "Bạn không thể tự đánh giá chính mình."},
+                                     status=status.HTTP_400_BAD_REQUEST)
+        if Reviews.objects.filter(customer=customer, landlord=landlord).exists():
+            return response.Response({"error": "Bạn đã đánh giá người cho thuê này rồi."},
+                                     status=status.HTTP_400_BAD_REQUEST)
+
+        serializer_class = self.get_serializer_class()  # Gọi phương thức để lấy lớp serializer
+        serializer = serializer_class(data=data)  # Sử dụng serializer_class
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 from django.core.mail import send_mail

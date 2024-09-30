@@ -28,6 +28,7 @@ class IsOwner(permissions.IsAuthenticated):
 
 
 class OwnerAuthenticated(permissions.IsAuthenticated):
+    #Người dùng chức thực là người dùng hiện tại
     def has_object_permission(self, request, view, obj):
         return super().has_permission(request, view) and obj.user == request.user
 
@@ -36,3 +37,8 @@ class RoomLandlordAuthenticated(IsRoomLandlord):
     # Đối tượng user là chủ trọ của đối tượng room
     def has_object_permission(self, request, view, obj):
         return super().has_permission(request, view) and obj.landlord == request.user
+
+class PostLandlordAuthenticated(IsRoomLandlord):
+    # Đối tượng user là chủ bài đăng của đối tượng post
+    def has_object_permission(self, request, view, obj):
+        return super().has_permission(request, view) and obj.user == request.user

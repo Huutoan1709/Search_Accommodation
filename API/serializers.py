@@ -5,9 +5,10 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
 from django.utils.timesince import timesince
-
+from django.db.models import Avg
 class UserSerializer(ModelSerializer):
     followed = SerializerMethodField()
+    reputation = SerializerMethodField()
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -27,9 +28,18 @@ class UserSerializer(ModelSerializer):
                                          is_active=True).first() is not None
         return False
 
+    def get_reputation(self, obj):
+        landlord_reviews = Reviews.objects.filter(landlord=obj, is_active=True)
+
+
+        total_rating = landlord_reviews.aggregate(average_rating=Avg('rating'))['average_rating']
+
+        if total_rating and total_rating >= 4.0:
+            return True
+        return False
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation']
 
 
 class UserInfoSerializer(UserSerializer):
@@ -80,17 +90,21 @@ class AmenitiesSerializer(ModelSerializer):
 class RoomsSerializer(ModelSerializer):
     created_at_humanized = serializers.SerializerMethodField()
     room_type = RoomTypeSerializer()
+    has_post = serializers.SerializerMethodField()
+
     def get_created_at_humanized(self, obj):
         return timesince(obj.created_at) + ' trước'
+
+    def get_has_post(self, obj):
+        return Post.objects.filter(room=obj).exists()
+
     class Meta:
         model = Rooms
-        fields = ['id', 'price', 'ward',
-                  'district', 'city', 'other_address', 'area', 'landlord','created_at_humanized','room_type','has_post']
+        fields = ['id', 'price', 'ward', 'district', 'city', 'other_address', 'area', 'landlord',
+                  'created_at_humanized', 'room_type', 'has_post', 'is_active']
         extra_kwargs = {
-            'landlord':
-                {'read_only': True},
+            'landlord': {'read_only': True},
         }
-
 
 class DetailRoomSerializer(RoomsSerializer):
     prices = SerializerMethodField()
@@ -103,7 +117,7 @@ class DetailRoomSerializer(RoomsSerializer):
         return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at','room_type']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at','room_type', 'has_post']
 
 
 class WriteRoomSerializer(RoomsSerializer):
@@ -197,8 +211,30 @@ class SupportRequestsSerializer(ModelSerializer):
 
 #####APi review ,support,FavoritePost
 
-class ReviewSerializer(ModelSerializer):
+class ReviewSerializer(serializers.ModelSerializer):
+    customer = UserInfoSerializer()
     class Meta:
         model = Reviews
-        fields = ['id', 'customer', 'post', 'rating', 'comment']
+        fields = ['id', 'customer', 'landlord', 'rating', 'comment', 'selected_criteria', 'created_at']
+
+class CreateReviewSerializer(ReviewSerializer):
+    customer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    class Meta(ReviewSerializer.Meta):
+        model = ReviewSerializer.Meta.model
+
+
+    def validate(self, data):
+        customer = data.get('customer')
+        landlord = data.get('landlord')
+
+        if customer == landlord:
+            raise serializers.ValidationError("Bạn không thể tự đánh giá chính mình.")
+
+        if customer.role != 'CUSTOMER':
+            raise serializers.ValidationError("Chỉ người dùng có vai trò 'CUSTOMER' mới có thể thực hiện đánh giá.")
+
+        if landlord.role != 'LANDLORD':
+            raise serializers.ValidationError("Chỉ người dùng có vai trò 'LANDLORD' mới có thể nhận đánh giá.")
+
+        return data
 
