@@ -5,7 +5,6 @@ import CreatePost from '../../Post/CreatePost';
 import Updateinfo from '../../User/Updateinfo'; // Component cho việc cập nhật thông tin cá nhân
 import ManageRoom from '../../Room/ManageRoom';
 import ManagePost from '../../Post/ManagePost'; // Component quản lý tin đăng
-import ChangePassword from '../changepassword';
 
 import { useRoutes } from 'react-router-dom';
 

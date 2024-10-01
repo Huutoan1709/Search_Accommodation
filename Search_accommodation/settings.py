@@ -41,10 +41,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 
 ]
+import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'API/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -52,11 +53,16 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+
             ],
         },
     },
 ]
-
+STATIC_URL = '/static/'
+# Cấu hình static files
+STATICFILES_DIRS = [
+    BASE_DIR / 'API/static',  # Sử dụng Path
+]
 WSGI_APPLICATION = 'Search_accommodation.wsgi.application'
 
 # Database

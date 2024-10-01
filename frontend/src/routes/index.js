@@ -17,6 +17,10 @@ import Personal from '../pages/User/Personal';
 import NhaNguyenCan from '../pages/Home/Nhanguyencan';
 import ChungCu from '../pages/Home/ChungCu';
 import CanHoDichVu from '../pages/Home/CanHoDichVu';
+import HomeAdmin from '../pages/Admin/HomeAdmin';
+import AdminUser from '../pages/Admin/AdminUser';
+import AdminPost from '../pages/Admin/AdminPost';
+import AdminOverview from '../pages/Admin/AdminOverview';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -36,8 +40,15 @@ const profileRoutes = [
     { path: 'manageroom', component: ManageRoom },
     { path: 'updateinfo', component: Updateinfo },
 ];
+const AdminRoutes = [
+    { path: '/admin', component: AdminOverview },
+    { path: 'user', component: AdminUser },
+    { path: 'post', component: AdminPost },
+];
+
 const privateRoutes = [
     { path: '/profile/*', component: Profile, children: profileRoutes },
+    { path: '/admin/*', component: HomeAdmin, children: AdminRoutes },
     { path: '/favorite', component: FavoritePost },
     { path: '/supportrequest', component: SupportRequest },
     { path: '/changepassword', component: changepassword },
