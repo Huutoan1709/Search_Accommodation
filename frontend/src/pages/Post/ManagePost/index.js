@@ -3,20 +3,19 @@ import { authApi, endpoints } from '../../../API';
 import UpdatePost from '../UpdatePost';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
-import { BiSolidHide } from 'react-icons/bi';
+import { BiSolidHide, BiShow } from 'react-icons/bi'; // Thêm icon mắt
 import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 
 const ManagePost = () => {
     const [posts, setPosts] = useState([]);
-    const [isEdit, setIsEdit] = useState(false);
-    const [filterStatus, setFilterStatus] = useState(''); // Lưu trữ trạng thái lọc
+    const [filterStatus, setFilterStatus] = useState('');
+    const [searchTerm, setSearchTerm] = useState(''); // Thêm state cho tìm kiếm
 
     useEffect(() => {
-        // Fetch the posts when the component mounts
         const fetchPosts = async () => {
             try {
                 const response = await authApi().get(endpoints.mypost);
-                setPosts(response.data); // Assuming the API returns a list of posts
+                setPosts(response.data);
             } catch (error) {
                 console.error('Failed to fetch posts:', error);
             }
@@ -24,11 +23,27 @@ const ManagePost = () => {
         fetchPosts();
     }, []);
 
-    const getStatus = (isActive, isApproved) => {
+    const getStatus = (isActive, isApproved, isBlock) => {
+        if (isBlock) return 'Đã khóa';
         if (isActive && !isApproved) return 'Chờ duyệt';
         if (!isActive) return 'Đã ẩn';
         if (isActive && isApproved) return 'Đang hoạt động';
         return '';
+    };
+
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'Đang hoạt động':
+                return 'bg-green-300 text-green-800 font-semibold';
+            case 'Chờ duyệt':
+                return 'bg-yellow-200 text-yellow-800 font-semibold';
+            case 'Đã ẩn':
+                return 'bg-gray-300 text-gray-800 font-semibold';
+            case 'Đã khóa':
+                return 'bg-red-300 text-red-800 font-semibold';
+            default:
+                return '';
+        }
     };
 
     const formatDate = (dateString) => {
@@ -45,20 +60,25 @@ const ManagePost = () => {
         return formatDate(start);
     };
 
+    // Hàm để lọc các bài đăng theo trạng thái và tìm kiếm
     const filteredPosts = posts.filter((post) => {
-        const status = getStatus(post?.is_active, post?.is_approved);
+        const status = getStatus(post?.is_active, post?.is_approved, post?.is_block);
+        const matchesStatus = filterStatus === '' || status === filterStatus;
+        const matchesSearch =
+            post.id.toString().includes(searchTerm) || // Tìm kiếm theo mã tin
+            post.title.toLowerCase().includes(searchTerm.toLowerCase()) || // Tìm kiếm theo tiêu đề
+            post.room.price.toString().includes(searchTerm); // Tìm kiếm theo giá
 
-        if (filterStatus === '') return true;
-
-        return status === filterStatus;
+        return matchesStatus && matchesSearch;
     });
+
     const handleDelete = async (postId) => {
         const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bài đăng này không?');
         if (confirmDelete) {
             try {
-                await authApi().delete(endpoints.deletepost(postId)); // Gọi API để xóa bài đăng
+                await authApi().delete(endpoints.deletepost(postId));
                 notifySuccess('Xóa bài đăng thành công');
-                setPosts(posts.filter((post) => post.id !== postId)); // Cập nhật lại danh sách bài đăng
+                setPosts(posts.filter((post) => post.id !== postId));
             } catch (error) {
                 console.error('Failed to delete post:', error);
             }
@@ -66,14 +86,28 @@ const ManagePost = () => {
     };
 
     const handleHide = async (postId) => {
-        const confirmDelete = window.confirm('Bạn có chắc chắn muốn ẩn bài đăng này không?');
-        if (confirmDelete) {
+        const confirmHide = window.confirm('Bạn có chắc chắn muốn ẩn bài đăng này không?');
+        if (confirmHide) {
             try {
-                await authApi().patch(endpoints.updatepost(postId), { is_active: false }); // Gọi API để cập nhật trạng thái
+                await authApi().patch(endpoints.updatepost(postId), { is_active: false });
                 notifySuccess('Đã ẩn bài đăng');
-                setPosts(posts.map((post) => (post.id === postId ? { ...post, is_active: false } : post))); // Cập nhật trạng thái bài đăng trong danh sách
+                setPosts(posts.map((post) => (post.id === postId ? { ...post, is_active: false } : post)));
             } catch (error) {
                 console.error('Failed to hide post:', error);
+            }
+        }
+    };
+
+    // Hàm để hiện bài đăng
+    const handleShow = async (postId) => {
+        const confirmShow = window.confirm('Bạn có chắc chắn muốn hiện bài đăng này không?');
+        if (confirmShow) {
+            try {
+                await authApi().patch(endpoints.updatepost(postId), { is_active: true });
+                notifySuccess('Đã hiện bài đăng');
+                setPosts(posts.map((post) => (post.id === postId ? { ...post, is_active: true } : post)));
+            } catch (error) {
+                console.error('Failed to show post:', error);
             }
         }
     };
@@ -82,16 +116,26 @@ const ManagePost = () => {
         <div className="px-4 py-6 relative">
             <div className="py-4 border-b border-gray-200 flex items-center justify-between">
                 <h1 className="text-3xl font-medium">Quản lý tin đăng</h1>
-                <select
-                    className="outline-none border border-gray-300 p-2 rounded-md"
-                    value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                >
-                    <option value="">Tất cả trạng thái</option>
-                    <option value="Đang hoạt động">Đang hoạt động</option>
-                    <option value="Chờ duyệt">Chờ duyệt</option>
-                    <option value="Đã ẩn">Đã ẩn</option>
-                </select>
+                <div className="flex items-center gap-3">
+                    <input
+                        type="text"
+                        placeholder="Tìm kiếm theo mã tin , tiêu..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="ml-4 border border-gray-300 p-2 rounded-md h-full min-w-[200px]"
+                    />
+                    <select
+                        className="outline-none border border-gray-300 p-2 rounded-md"
+                        value={filterStatus}
+                        onChange={(e) => setFilterStatus(e.target.value)}
+                    >
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="Đang hoạt động">Đang hoạt động</option>
+                        <option value="Chờ duyệt">Chờ duyệt</option>
+                        <option value="Đã ẩn">Đã ẩn</option>
+                        <option value="Đã khóa">Đã khóa</option>
+                    </select>
+                </div>
             </div>
             <table className="w-full table-auto border-collapse border border-gray-200">
                 <thead>
@@ -124,23 +168,41 @@ const ManagePost = () => {
                                 <td className="p-2 border">{post?.room?.price} triệu/tháng</td>
                                 <td className="p-2 border">{formatDate(post?.created_at)}</td>
                                 <td className="p-2 border">{calculateEndDate(post?.created_at)}</td>
-                                <td className="p-2 border">{getStatus(post?.is_active, post?.is_approved)}</td>
+                                <td
+                                    className={`p-2 border ${getStatusClass(
+                                        getStatus(post?.is_active, post?.is_approved, post?.is_block),
+                                    )}`}
+                                >
+                                    {getStatus(post?.is_active, post?.is_approved, post?.is_block)}
+                                </td>
                                 <td className="p-2 border">
-                                    <button className="bg-green-500 text-white px-4 py-2 rounded mr-2">
+                                    <button className="bg-green-500 text-white px-4 py-2 rounded mr-2" title="Sửa">
                                         <RiEditFill size={15} />
                                     </button>
                                     <button
                                         className="bg-red-500 text-white px-4 py-2 rounded mr-2"
                                         onClick={() => handleDelete(post.id)}
+                                        title="Xóa"
                                     >
                                         <MdDelete size={15} />
                                     </button>
-                                    <button
-                                        className="bg-yellow-500 text-white px-4 py-2 rounded"
-                                        onClick={() => handleHide(post.id)}
-                                    >
-                                        <BiSolidHide size={15} />
-                                    </button>
+                                    {post.is_active ? (
+                                        <button
+                                            className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                            onClick={() => handleHide(post.id)}
+                                            title="Ẩn"
+                                        >
+                                            <BiSolidHide size={15} />
+                                        </button>
+                                    ) : (
+                                        <button
+                                            className="bg-gray-400 text-black px-4 py-2 rounded"
+                                            onClick={() => handleShow(post.id)}
+                                            title="Hiện"
+                                        >
+                                            <BiShow size={15} />
+                                        </button>
+                                    )}
                                 </td>
                             </tr>
                         ))

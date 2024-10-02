@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import '../../../output.css';
 import Item from '../../DefaultLayout/Item';
 import API, { endpoints } from '../../../API';
+import Pagination from '../../../components/Pagination';
 
 const ListPost = ({ searchParams }) => {
     const [data, setData] = useState([]);
@@ -11,10 +12,11 @@ const ListPost = ({ searchParams }) => {
     const [count, setCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const postsPerPage = 2; // =page_size (pagination django)
+    const postsPerPage = 10; // =page_size (pagination django)
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
-    const lastUrl = useRef(''); //
+    const lastUrl = useRef('');
+
     const fetchData = async (url) => {
         setLoading(true);
         try {
@@ -25,7 +27,6 @@ const ListPost = ({ searchParams }) => {
             setCount(result.data.count);
             setTotalPages(Math.ceil(result.data.count / postsPerPage));
 
-            // Lấy trang từ URL
             const pageFromUrl = new URL(url, window.location.origin).searchParams.get('page') || 1;
             setCurrentPage(parseInt(pageFromUrl, 10));
             window.scrollTo(0, 0);
@@ -39,17 +40,14 @@ const ListPost = ({ searchParams }) => {
     };
 
     useEffect(() => {
-        // Tạo URL tìm kiếm dựa trên tham số tìm kiếm hiện tại
         const params = new URLSearchParams(searchParams).toString();
         const fetchUrl = params ? `${endpoints['post']}?${params}` : endpoints['post'];
 
-        // Tránh gọi fetchData nếu URL giống với lần gọi trước
         if (fetchUrl !== lastUrl.current) {
             lastUrl.current = fetchUrl;
             fetchData(fetchUrl);
         }
 
-        // Tạo tiêu đề động dựa trên các tiêu chí tìm kiếm
         if (!searchParams || Object.keys(searchParams).length === 0) {
             setTitle(`Danh sách bài đăng toàn quốc hiện có ${count} bài đăng.`);
         } else {
@@ -68,65 +66,13 @@ const ListPost = ({ searchParams }) => {
             setTitle(titleText);
         }
     }, [searchParams, count]);
-    const handlePageChange = (url) => {
-        if (url) {
-            const currentParams = new URLSearchParams(searchParams);
-            const urlObj = new URL(url, window.location.origin);
-            const urlParams = new URLSearchParams(urlObj.search);
 
-            // Chỉ giữ lại tham số 'page' từ URL của trang tiếp theo
-            const page = urlParams.get('page');
-            if (page) {
-                currentParams.set('page', page); // Thay đổi page trong params hiện tại
-            }
+    const handlePageChange = (page) => {
+        const currentParams = new URLSearchParams(searchParams);
+        currentParams.set('page', page);
 
-            const fetchUrl = `${endpoints['post']}?${currentParams.toString()}`;
-            fetchData(fetchUrl);
-        }
-    };
-
-    const renderPageNumbers = () => {
-        const pageNumbers = [];
-        const startPage = Math.max(currentPage - 2, 1);
-        const endPage = Math.min(currentPage + 2, totalPages);
-
-        if (currentPage > 3) {
-            pageNumbers.push(renderButton(1));
-            if (currentPage > 4) {
-                pageNumbers.push(<span key="start-ellipsis">...</span>);
-            }
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            pageNumbers.push(renderButton(i));
-        }
-
-        if (currentPage < totalPages - 2) {
-            if (currentPage < totalPages - 3) {
-                pageNumbers.push(<span key="end-ellipsis">...</span>);
-            }
-            pageNumbers.push(renderButton(totalPages));
-        }
-
-        return pageNumbers;
-    };
-
-    const renderButton = (pageNumber) => {
-        const currentParams = new URLSearchParams(searchParams); // Lấy các tham số tìm kiếm hiện tại
-        currentParams.set('page', pageNumber); // Thay đổi giá trị của page trong searchParams
-        const fetchUrl = `${endpoints['post']}?${currentParams.toString()}`; // Tạo URL với các tham số tìm kiếm và page
-
-        return (
-            <button
-                key={pageNumber}
-                onClick={() => fetchData(fetchUrl)} // Gọi fetchData với URL mới chứa cả các tham số tìm kiếm và số trang
-                className={`px-3 py-1 mx-1 border rounded ${
-                    pageNumber === currentPage ? 'bg-red-500 text-white' : 'bg-gray-200 hover:bg-gray-400'
-                }`}
-            >
-                {pageNumber}
-            </button>
-        );
+        const fetchUrl = `${endpoints['post']}?${currentParams.toString()}`;
+        fetchData(fetchUrl);
     };
 
     if (loading) {
@@ -162,26 +108,15 @@ const ListPost = ({ searchParams }) => {
                     <p>CHƯA CÓ BÀI ĐĂNG.....</p>
                 )}
             </div>
+
             {/* Pagination Component */}
-            <div className="pagination flex justify-center my-4 border-t-2 border-red-300">
-                <button
-                    disabled={!previousPage}
-                    onClick={() => handlePageChange(previousPage)}
-                    className="px-3 py-1 mx-1 border rounded bg-gray-200 hover:bg-gray-400"
-                >
-                    « Trang trước
-                </button>
-
-                {renderPageNumbers()}
-
-                <button
-                    disabled={!nextPage}
-                    onClick={() => handlePageChange(nextPage)}
-                    className="px-3 py-1 mx-1 border rounded bg-gray-200 hover:bg-gray-400"
-                >
-                    Trang sau »
-                </button>
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                previousPage={previousPage}
+                nextPage={nextPage}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };

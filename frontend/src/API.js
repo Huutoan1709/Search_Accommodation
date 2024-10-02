@@ -16,6 +16,7 @@ export const endpoints = {
     login: '/o/token/',
     detailuser: (userId) => `/user/${userId}/`,
     register: '/user/',
+    listuser: '/user/',
     currentuser: '/user/current_user/',
     mypost: '/user/my-post/',
     myfavorite: '/user/my-favorites/',

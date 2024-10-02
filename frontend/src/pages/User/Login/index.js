@@ -6,7 +6,6 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../DefaultLayout/Header';
 import MyContext from '../../../context/MyContext'; // Import context
 import { notifySuccess } from '../../../components/ToastManager';
-import loginbackground from '../../../assets/loginbackground.jpg';
 import Footer from '../../DefaultLayout/footer';
 
 function Login() {
@@ -41,8 +40,23 @@ function Login() {
                 const userData = response.data; // Get the user data from response
                 localStorage.setItem('access-token', userData.access_token);
                 notifySuccess('Đăng nhập thành công');
-                login(userData); // Call login from context to save user data
-                navigate('/');
+                login(userData); // Chỉ lưu token
+
+                // Lấy thông tin người dùng (bao gồm vai trò)
+                const userInfoResponse = await API.get(endpoints['currentuser'], {
+                    headers: {
+                        Authorization: `Bearer ${userData.access_token}`,
+                    },
+                });
+
+                const userInfo = userInfoResponse.data;
+                login(userInfo); // Cập nhật thông tin người dùng bao gồm vai trò
+
+                if (userInfo.role === 'ADMIN' || userInfo.role === 'WEBMASTER') {
+                    navigate('/admin/overview'); // Redirect to admin overview
+                } else {
+                    navigate('/'); // Redirect to home page for other roles
+                }
             }
         } catch (err) {
             setError('Tên đăng nhập hoặc mật khẩu không đúng.');

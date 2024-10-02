@@ -306,9 +306,15 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Post.objects.filter(is_active=True)
+        queryset = Post.objects.filter(is_active = True, is_approved=True,is_block = False)
+
+        # Kiểm tra nếu có param 'all=true' thì bỏ qua các filter mặc định
+        if self.request.query_params.get('all', None) == 'true':
+            queryset = Post.objects.all()
         if self.action in ['destroy', 'partial_update']:
             queryset = Post.objects.all()
+        if(self.action) in ['images']:
+            queryset = Post.objects.filter(is_active= True)
 
         # Lấy các giá trị từ query params
         min_price = self.request.query_params.get('min_price', None)
@@ -351,14 +357,15 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         return queryset
 
     def get_permissions(self):
-        if self.action in ['partial_update', 'wait_approved', 'get_block_post', 'destroy']:
-            return [perms.PostLandlordAuthenticated()] or [perm.IsWebmaster()]
+        if self.action == 'list':
+            # Bất kỳ người dùng nào đều có thể xem danh sách bài đăng
+            return [permissions.AllowAny()]
 
-        if self.action in ['create', 'images']:
-            return [perms.IsRoomLandlord()]
+        if self.action in ['create', 'partial_update', 'update','destroy']:
+            # Sử dụng lớp quyền tùy chỉnh để kiểm tra quyền
+            return [perms.IsAdminWebmasterOrLandlord()]
 
         return [permissions.AllowAny()]
-
     def get_serializer_class(self):
         serializers = {
             'list': PostSerializer,
@@ -404,11 +411,10 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         post = self.get_object()
 
         # Kiểm tra quyền chỉnh sửa
-        if request.user != post.user:
-            if request.user.role not in ['WEBMASTER', 'ADMIN', 'LANDLORD']:
-                return response.Response(
-                    {'error': 'Chỉ người đăng bài hoặc admin/webmaster mới có thể chỉnh sửa bài viết này.'},
-                    status=status.HTTP_403_FORBIDDEN)
+        if request.user.role not in ['ADMIN', 'WEBMASTER', 'LANDLORD']:
+            return response.Response(
+                {'error': 'Chỉ ADMIN, WEBMASTER hoặc chủ bài đăng mới có thể chỉnh sửa bài viết này.'},
+                status=status.HTTP_403_FORBIDDEN)
 
         # Nếu người dùng không phải là admin hoặc webmaster, không cho phép chỉnh sửa các trường is_approved và is_block
         if 'is_approved' in request.data or 'is_block' in request.data:
@@ -419,9 +425,21 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         # Cập nhật bài viết
         return super().update(request, *args, **kwargs)
 
+    def destroy(self, request, *args, **kwargs):
+        post = self.get_object()
+
+        # Kiểm tra quyền xóa bài viết
+        if request.user.role not in ['ADMIN', 'WEBMASTER', 'LANDLORD']:
+            return response.Response({'error': 'Bạn không có quyền thực hiện hành động này!'},
+                                     status=status.HTTP_403_FORBIDDEN)
+
+        # Xóa bài viết vĩnh viễn
+        post.delete()
+        return response.Response({'message': 'Bài viết đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
+
     @action(methods=['get'], detail=False, url_path='wait-approved')
     def get_wait_approved(self, request):
-        approved = Post.objects.filter(is_approved=False).all()
+        approved = Post.objects.filter(is_approved=False, is_block = False).all()
         serializer = DetailPostSerializer(approved, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -448,18 +466,6 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
-    def destroy(self, request, *args, **kwargs):
-        post = self.get_object()
-
-        # Kiểm tra quyền xóa bài viết
-        if request.user != post.user:
-            if request.user.role not in ['WEBMASTER', 'ADMIN', 'LANDLORD']:
-                return response.Response({'error': 'Bạn không có quyền thực hiện hành động này!'},
-                                         status=status.HTTP_403_FORBIDDEN)
-
-        # Xóa bài viết vĩnh viễn
-        post.delete()
-        return response.Response({'message': 'Bài viết đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
 
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):

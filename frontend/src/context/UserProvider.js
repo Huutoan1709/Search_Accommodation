@@ -36,18 +36,15 @@ const UserProvider = ({ children }) => {
         }
     }, [fetchUser]);
 
-    // Login function
     const login = (userData, token) => {
         localStorage.setItem('user', JSON.stringify(userData));
-        localStorage.setItem('accessToken', token); // Save token with correct key
+        localStorage.setItem('accessToken', token);
         dispatch({ type: 'login', payload: userData });
     };
 
-    // Logout function
     const logout = () => {
-        // Clear user and token from localStorage
         localStorage.removeItem('user');
-        localStorage.removeItem('access-token'); // Correct token key
+        localStorage.removeItem('access-token');
         localStorage.removeItem('favorites');
         dispatch({ type: 'logout' });
     };

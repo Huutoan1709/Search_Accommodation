@@ -38,7 +38,16 @@ class RoomLandlordAuthenticated(IsRoomLandlord):
     def has_object_permission(self, request, view, obj):
         return super().has_permission(request, view) and obj.landlord == request.user
 
-class PostLandlordAuthenticated(IsRoomLandlord):
+class PostLandlordAuthenticated(permissions.BasePermission):
     # Đối tượng user là chủ bài đăng của đối tượng post
+    def has_permission(self, request, view):
+        return (request.user.is_authenticated and
+                (request.user.role in ['ADMIN', 'WEBMASTER', 'LANDLORD']))
+
     def has_object_permission(self, request, view, obj):
-        return super().has_permission(request, view) and obj.user == request.user
+        # Kiểm tra xem người dùng có phải là ADMIN, WEBMASTER hoặc chủ bài đăng không
+        return (request.user.role in ['ADMIN', 'WEBMASTER'] or obj.user == request.user)
+class IsAdminWebmasterOrLandlord(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (request.user.is_authenticated and
+                (request.user.role in ['ADMIN', 'WEBMASTER', 'LANDLORD']))

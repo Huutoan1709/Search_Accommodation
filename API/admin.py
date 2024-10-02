@@ -13,22 +13,24 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ('username', 'email', 'phone')
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'is_approved', 'created_at')
+    list_display = ('title', 'user', 'is_approved','is_block', 'created_at')
     list_filter = ('is_approved', 'created_at')
     search_fields = ('title', 'user__username')
 
 class RoomsAdmin(admin.ModelAdmin):
-    list_display = ('ward', 'district', 'city', 'price')
-    search_fields = ('ward', 'district', 'city','price')
+    list_display = ('is_active', 'price', 'area','district' ,'city')
+    search_fields = ('district', 'city','price')
 
-
+class RoomTypeAdmin(admin.ModelAdmin):
+    list_display =('id','name')
+    search_fields = ('name','id')
 
 admin.site.register(Rooms, RoomsAdmin)
 admin.site.register(User, UserAdmin)
 admin.site.register(Post, PostAdmin)
 admin.site.register(Reviews)
 admin.site.register(SupportRequests)
-admin.site.register(RoomType)
+admin.site.register(RoomType,RoomTypeAdmin)
 admin.site.register(FavoritePost)
 admin.site.register(PostImage)
 admin.site.register(Price)

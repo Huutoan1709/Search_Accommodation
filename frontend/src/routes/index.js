@@ -21,6 +21,7 @@ import HomeAdmin from '../pages/Admin/HomeAdmin';
 import AdminUser from '../pages/Admin/AdminUser';
 import AdminPost from '../pages/Admin/AdminPost';
 import AdminOverview from '../pages/Admin/AdminOverview';
+import ApprovedPost from '../pages/Admin/ApprovedPost';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -44,6 +45,7 @@ const AdminRoutes = [
     { path: '/admin', component: AdminOverview },
     { path: 'user', component: AdminUser },
     { path: 'post', component: AdminPost },
+    { path: 'approved-post', component: ApprovedPost },
 ];
 
 const privateRoutes = [

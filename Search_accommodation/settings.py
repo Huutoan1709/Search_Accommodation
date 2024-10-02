@@ -58,11 +58,6 @@ TEMPLATES = [
         },
     },
 ]
-STATIC_URL = '/static/'
-# Cấu hình static files
-STATICFILES_DIRS = [
-    BASE_DIR / 'API/static',  # Sử dụng Path
-]
 WSGI_APPLICATION = 'Search_accommodation.wsgi.application'
 
 # Database

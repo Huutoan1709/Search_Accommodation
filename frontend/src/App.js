@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { publicroutes, privateRoutes } from './routes';
-import PrivateRoute from './components/PrivateRoute'; // Import PrivateRoute
+import PrivateRoute from './components/PrivateRoute';
 import { ToastManager } from './components/ToastManager';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
