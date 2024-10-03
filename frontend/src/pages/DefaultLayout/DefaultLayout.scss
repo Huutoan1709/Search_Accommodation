@@ -3,7 +3,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
+    padding: 10px 20px;
     background-color: #fff;
     border-bottom: 1px solid #e0e0e0;
     position: fixed;
@@ -13,7 +13,7 @@
     box-sizing: border-box;
 }
 .header + div {
-    margin-top: 80px;
+    margin-top: 69px;
 }
 .header-logo {
     display: flex;
@@ -30,11 +30,11 @@
     gap: 20px;
 }
 
-.header-nav a {
+.header-nav span {
     text-decoration: none;
     color: black;
     padding: 5px 10px;
-    transition: color 0.3s ease;
+    transition: color 0.5s ease;
 }
 
 .header-nav span.active,

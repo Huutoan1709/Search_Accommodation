@@ -240,6 +240,7 @@ const CreatePost = () => {
                                                 />
                                             </div>
                                         </div>
+
                                         <div>
                                             <label className="block text-gray-600">Số nhà</label>
                                             <div className="relative">
@@ -247,6 +248,19 @@ const CreatePost = () => {
                                                     type="text"
                                                     className="border border-gray-300 p-3 rounded-lg w-full"
                                                     value={`${roomDetails?.other_address}`}
+                                                    readOnly
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Thêm trường nội thất có sẵn */}
+                                        <div>
+                                            <label className="block text-gray-600">Nội thất có sẵn</label>
+                                            <div className="relative">
+                                                <input
+                                                    type="text"
+                                                    className="border border-gray-300 p-3 rounded-lg w-full"
+                                                    value={roomDetails?.amenities.map((id) => amenities[id]).join(', ')}
                                                     readOnly
                                                 />
                                             </div>
@@ -348,31 +362,45 @@ const CreatePost = () => {
                                             const data = editor.getData();
                                             setPostContent(data);
                                         }}
-                                        className="border border-gray-300 rounded-lg w-full"
                                     />
+                                    {postContent.length < 10 && (
+                                        <p className="text-red-500">Nội dung bài đăng cần ít nhất 10 ký tự.</p>
+                                    )}
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    className="font-semibold mt-8 bg-red-500 text-white px-6 py-3 rounded-lg w-full hover:bg-red-600 transition duration-300"
-                                    disabled={loading}
-                                >
-                                    {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
-                                </button>
+                                <div className="flex items-center justify-between mt-6">
+                                    <button
+                                        type="submit"
+                                        className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ${
+                                            loading ? 'opacity-50 cursor-not-allowed' : ''
+                                        }`}
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </form>
                 </div>
-                {/* Right column for the map */}
                 {selectedRoom && roomDetails.latitude && roomDetails.longitude && (
                     <div className="lg:col-span-1">
                         <h2 className="text-2xl font-bold mb-4">Bản đồ</h2>
                         <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
+
+                        <div className="bg-yellow-100 p-4 rounded-lg mt-4">
+                            <h3 className="font-bold">Lưu ý:</h3>
+                            <ul className="list-disc list-inside pl-4">
+                                <li>Khi đăng tin phải điền đầy đủ thông tin các trường nội dung, tiêu đề.</li>
+                                <li>Hình ảnh bắt buộc phải có ít nhất 4 ảnh.</li>
+                                <li>Nội dung phải viết bằng tiếng Việt có dấu</li>
+                                <li>Không đăng tin trùng lặp</li>
+                            </ul>
+                        </div>
                     </div>
                 )}
             </div>
         </div>
     );
 };
-
 export default CreatePost;

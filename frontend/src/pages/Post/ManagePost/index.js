@@ -3,14 +3,20 @@ import { authApi, endpoints } from '../../../API';
 import UpdatePost from '../UpdatePost';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
-import { BiSolidHide, BiShow } from 'react-icons/bi'; // Thêm icon mắt
+import { BiSolidHide, BiShow } from 'react-icons/bi';
 import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
+import PaginationUser from '../../../components/PaginationUser';
+import PostDetailModal from './PostDetailModal';
 
 const ManagePost = () => {
     const [posts, setPosts] = useState([]);
     const [filterStatus, setFilterStatus] = useState('');
-    const [searchTerm, setSearchTerm] = useState(''); // Thêm state cho tìm kiếm
-
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 10;
+    const [isUpdateOpen, setIsUpdateOpen] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [showDetailModal, setShowDetailModal] = useState(false);
     useEffect(() => {
         const fetchPosts = async () => {
             try {
@@ -60,7 +66,6 @@ const ManagePost = () => {
         return formatDate(start);
     };
 
-    // Hàm để lọc các bài đăng theo trạng thái và tìm kiếm
     const filteredPosts = posts.filter((post) => {
         const status = getStatus(post?.is_active, post?.is_approved, post?.is_block);
         const matchesStatus = filterStatus === '' || status === filterStatus;
@@ -71,6 +76,12 @@ const ManagePost = () => {
 
         return matchesStatus && matchesSearch;
     });
+    // Phân trang
+    const totalPosts = filteredPosts.length;
+    const totalPages = Math.ceil(totalPosts / postsPerPage);
+    const indexOfLastPost = currentPage * postsPerPage;
+    const indexOfFirstPost = indexOfLastPost - postsPerPage;
+    const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
 
     const handleDelete = async (postId) => {
         const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa bài đăng này không?');
@@ -112,22 +123,50 @@ const ManagePost = () => {
         }
     };
 
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+    };
+    const handleFilterChange = (newFilter) => {
+        setFilterStatus(newFilter);
+        setCurrentPage(1);
+    };
+
+    const handleSearchChange = (newSearchTerm) => {
+        setSearchTerm(newSearchTerm);
+        setCurrentPage(1);
+    };
+    const handleEdit = (post) => {
+        setSelectedPost(post);
+        setIsUpdateOpen(true);
+    };
+
+    const handleUpdate = (updatedPost) => {
+        setPosts(posts.map((post) => (post.id === selectedPost.id ? { ...post, ...updatedPost } : post)));
+        setIsUpdateOpen(false);
+        setSelectedPost(null);
+    };
+
+    const handlePostClick = (post) => {
+        setSelectedPost(post);
+        setShowDetailModal(true);
+    };
     return (
         <div className="px-4 py-6 relative">
             <div className="py-4 border-b border-gray-200 flex items-center justify-between">
                 <h1 className="text-3xl font-medium">Quản lý tin đăng</h1>
-                <div className="flex items-center gap-3">
+
+                <div className="py-4 border-b border-gray-200 flex items-center justify-between">
                     <input
                         type="text"
-                        placeholder="Tìm kiếm theo mã tin , tiêu..."
+                        placeholder="Tìm kiếm theo mã tin, tiêu đề hoặc giá"
                         value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="ml-4 border border-gray-300 p-2 rounded-md h-full min-w-[200px]"
+                        onChange={(e) => handleSearchChange(e.target.value)}
+                        className="ml-4 border border-gray-300 p-2 rounded-md h-full min-w-[200px] focus:ring focus:ring-blue-300"
                     />
                     <select
-                        className="outline-none border border-gray-300 p-2 rounded-md"
+                        className="outline-none border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300"
                         value={filterStatus}
-                        onChange={(e) => setFilterStatus(e.target.value)}
+                        onChange={(e) => handleFilterChange(e.target.value)}
                     >
                         <option value="">Tất cả trạng thái</option>
                         <option value="Đang hoạt động">Đang hoạt động</option>
@@ -137,50 +176,54 @@ const ManagePost = () => {
                     </select>
                 </div>
             </div>
-            <table className="w-full table-auto border-collapse border border-gray-200">
+            <table className="w-full table-auto border-collapse border border-gray-200 mt-4">
                 <thead>
                     <tr className="bg-blue-500 text-white">
-                        <th className="p-2 border">Mã Tin</th>
-                        <th className="p-2 border">Ảnh đại diện</th>
-                        <th className="p-2 border">Tiêu đề</th>
-                        <th className="p-2 border">Giá</th>
-                        <th className="p-2 border">Ngày bắt đầu</th>
-                        <th className="p-2 border">Ngày hết hạn</th>
-                        <th className="p-2 border">Trạng thái</th>
-                        <th className="p-2 border">Tùy chọn</th>
+                        <th className="p-3 border">Mã Tin</th>
+                        <th className="p-3 border">Ảnh đại diện</th>
+                        <th className="p-3 border">Tiêu đề</th>
+                        <th className="p-3 border">Giá(triệu)</th>
+                        <th className="p-3 border">Ngày bắt đầu</th>
+                        <th className="p-3 border">Ngày hết hạn</th>
+                        <th className="p-3 border">Trạng thái</th>
+                        <th className="p-3 border">Tùy chọn</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredPosts.length > 0 ? (
-                        filteredPosts.map((post) => (
-                            <tr key={post.id} className="text-center">
-                                <td className="p-2 border">#{post.id}</td>
-                                <td className="p-2 border">
+                    {currentPosts.length > 0 ? (
+                        currentPosts.map((post) => (
+                            <tr key={post.id} className="text-center odd:bg-gray-100 even:bg-white">
+                                <td className="p-3 border">#{post.id}</td>
+                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
                                     <img
                                         src={post?.images[0]?.url}
                                         alt={post?.title}
                                         className="w-16 h-16 object-cover rounded-md mx-auto"
                                     />
                                 </td>
-                                <td className="p-2 border">
+                                <td className="p-3 border  cursor-pointer" onClick={() => handlePostClick(post)}>
                                     {post?.title?.length > 20 ? `${post?.title.slice(0, 20)}...` : post?.title}
                                 </td>
-                                <td className="p-2 border">{post?.room?.price} triệu/tháng</td>
-                                <td className="p-2 border">{formatDate(post?.created_at)}</td>
-                                <td className="p-2 border">{calculateEndDate(post?.created_at)}</td>
+                                <td className="p-3 border">{post?.room?.price}</td>
+                                <td className="p-3 border">{formatDate(post?.created_at)}</td>
+                                <td className="p-3 border">{calculateEndDate(post?.created_at)}</td>
                                 <td
-                                    className={`p-2 border ${getStatusClass(
+                                    className={`p-3 border ${getStatusClass(
                                         getStatus(post?.is_active, post?.is_approved, post?.is_block),
                                     )}`}
                                 >
                                     {getStatus(post?.is_active, post?.is_approved, post?.is_block)}
                                 </td>
-                                <td className="p-2 border">
-                                    <button className="bg-green-500 text-white px-4 py-2 rounded mr-2" title="Sửa">
+                                <td className="p-3 border">
+                                    <button
+                                        className="bg-green-500 text-white px-3 py-2 rounded mr-2 hover:bg-green-600"
+                                        title="Sửa"
+                                        onClick={() => handleEdit(post)}
+                                    >
                                         <RiEditFill size={15} />
                                     </button>
                                     <button
-                                        className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                                        className="bg-red-500 text-white px-3 py-2 rounded mr-2 hover:bg-red-600"
                                         onClick={() => handleDelete(post.id)}
                                         title="Xóa"
                                     >
@@ -188,7 +231,7 @@ const ManagePost = () => {
                                     </button>
                                     {post.is_active ? (
                                         <button
-                                            className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                            className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
                                             onClick={() => handleHide(post.id)}
                                             title="Ẩn"
                                         >
@@ -196,7 +239,7 @@ const ManagePost = () => {
                                         </button>
                                     ) : (
                                         <button
-                                            className="bg-gray-400 text-black px-4 py-2 rounded"
+                                            className="bg-gray-400 text-black px-3 py-2 rounded hover:bg-gray-500"
                                             onClick={() => handleShow(post.id)}
                                             title="Hiện"
                                         >
@@ -215,7 +258,12 @@ const ManagePost = () => {
                     )}
                 </tbody>
             </table>
-            <UpdatePost />
+
+            <PaginationUser currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+            {isUpdateOpen && (
+                <UpdatePost post={selectedPost} onUpdate={handleUpdate} onClose={() => setIsUpdateOpen(false)} />
+            )}
+            {showDetailModal && <PostDetailModal post={selectedPost} onClose={() => setShowDetailModal(false)} />}
         </div>
     );
 };

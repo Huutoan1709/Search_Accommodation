@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../DefaultLayout/Header';
-import MyContext from '../../../context/MyContext'; // Import context
+import MyContext from '../../../context/MyContext';
 import { notifySuccess } from '../../../components/ToastManager';
 import Footer from '../../DefaultLayout/footer';
 
@@ -14,7 +14,7 @@ function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
-    const { login } = useContext(MyContext); // Get login function from context
+    const { login } = useContext(MyContext);
 
     const handleLogin = async (event) => {
         event.preventDefault();
@@ -37,12 +37,11 @@ function Login() {
             });
 
             if (response.status === 200) {
-                const userData = response.data; // Get the user data from response
+                const userData = response.data;
                 localStorage.setItem('access-token', userData.access_token);
                 notifySuccess('Đăng nhập thành công');
-                login(userData); // Chỉ lưu token
+                login(userData);
 
-                // Lấy thông tin người dùng (bao gồm vai trò)
                 const userInfoResponse = await API.get(endpoints['currentuser'], {
                     headers: {
                         Authorization: `Bearer ${userData.access_token}`,
@@ -50,12 +49,12 @@ function Login() {
                 });
 
                 const userInfo = userInfoResponse.data;
-                login(userInfo); // Cập nhật thông tin người dùng bao gồm vai trò
+                login(userInfo);
 
                 if (userInfo.role === 'ADMIN' || userInfo.role === 'WEBMASTER') {
-                    navigate('/admin/overview'); // Redirect to admin overview
+                    navigate('/admin/overview');
                 } else {
-                    navigate('/'); // Redirect to home page for other roles
+                    navigate('/');
                 }
             }
         } catch (err) {

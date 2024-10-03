@@ -44,6 +44,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     queryset = User.objects.filter(is_active=True)
     pagination_class = paginators.BasePaginator
 
+
     def get_permissions(self):
         if self.action in ['get_follower', 'get_following', 'follow', 'current_user', 'my_rooms', 'my_post',
                            'favorite_post', 'my_review', 'my_favorites']:
@@ -311,7 +312,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         # Kiểm tra nếu có param 'all=true' thì bỏ qua các filter mặc định
         if self.request.query_params.get('all', None) == 'true':
             queryset = Post.objects.all()
-        if self.action in ['destroy', 'partial_update']:
+        if self.action in ['destroy', 'partial_update', 'update','delete_image']:
             queryset = Post.objects.all()
         if(self.action) in ['images']:
             queryset = Post.objects.filter(is_active= True)
@@ -466,7 +467,28 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
         return response.Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
+    @action(methods=['delete'], detail=True, url_path='images/(?P<image_id>[^/.]+)')
+    def delete_image(self, request, pk=None, image_id=None):
+        try:
+            # Lấy bài đăng hiện tại
+            post = self.get_object()
 
+            # Kiểm tra quyền xóa (chỉ chủ bài đăng hoặc admin/webmaster mới có thể xóa ảnh)
+            if request.user.role not in ['ADMIN', 'WEBMASTER', 'LANDLORD'] or post.user != request.user:
+                return response.Response(
+                    {'error': 'Chỉ ADMIN, WEBMASTER hoặc chủ bài đăng mới có thể xóa ảnh.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Tìm ảnh theo ID
+            post_image = PostImage.objects.get(id=image_id, post=post)
+
+            # Xóa ảnh
+            post_image.delete()
+
+            return response.Response({'message': 'Ảnh đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
+        except PostImage.DoesNotExist:
+            return response.Response({'error': 'Ảnh không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer

@@ -8,6 +8,7 @@ import { RiEditFill } from 'react-icons/ri';
 import { IoIosAddCircle } from 'react-icons/io';
 import EditRoom from '../EditRoom';
 import { notifyError, notifySuccess } from '../../../components/ToastManager';
+import PaginationUser from '../../../components/PaginationUser';
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
@@ -17,6 +18,8 @@ const ManageRoom = () => {
     const [currentRoomId, setCurrentRoomId] = useState(null);
     const [showEdit, setShowEdit] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const roomsPerPage = 10;
 
     useEffect(() => {
         const fetchRooms = async () => {
@@ -48,11 +51,13 @@ const ManageRoom = () => {
     const handlePriceFilterChange = (event) => {
         const value = event.target.value;
         setPriceFilter(value);
+        setCurrentPage(1); // Reset trang về 1 khi thay đổi bộ lọc
     };
 
     const handleStatusFilterChange = (event) => {
         const value = event.target.value;
         setStatusFilter(value);
+        setCurrentPage(1); // Reset trang về 1 khi thay đổi bộ lọc
     };
 
     const handleShowCreateRoom = () => {
@@ -117,7 +122,10 @@ const ManageRoom = () => {
 
         return sortedRooms;
     };
-
+    const totalRooms = filteredRooms().length;
+    const indexOfLastRoom = currentPage * roomsPerPage;
+    const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
+    const currentRooms = filteredRooms().slice(indexOfFirstRoom, indexOfLastRoom);
     return (
         <div className="px-4 py-6 relative">
             <div className="py-4 border-b border-gray-200 flex items-center justify-between z-30">
@@ -159,22 +167,38 @@ const ManageRoom = () => {
                         <th className="p-2 border">Diện tích (m²)</th>
                         <th className="p-2 border">Địa chỉ</th>
                         <th className="p-2 border">Ngày đăng</th>
-                        {/* <th className="p-2 border">Giá bổ sung</th> Cột cho prices[] */}
+                        <th className="p-2 border">Tình trạng</th>
                         <th className="p-2 border">Tùy chọn</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredRooms().length > 0 ? (
-                        filteredRooms().map((room) => (
-                            <tr key={room.id} className="text-center">
-                                <td className="p-2 border">#{room?.id}</td>
-                                <td className="p-2 border">{room?.room_type?.name}</td>
-                                <td className="p-2 border">{room?.price}</td>
-                                <td className="p-2 border">{room?.area}</td>
-                                <td className="p-2 border">{`${room?.other_address},${room?.ward}, ${room?.district}, ${room?.city}`}</td>
-                                <td className="p-2 border">{formatDate(room?.created_at)}</td>
-                                {/* <td className="p-2 border">{renderPrices(room?.prices)}</td> */}
-                                <td className="p-2 border">
+                    {currentRooms.length > 0 ? (
+                        currentRooms.map((room) => (
+                            <tr key={room.id} className="text-center odd:bg-gray-100 even:bg-white">
+                                <td className="p-3 border">#{room?.id}</td>
+                                <td className="p-3 border">{room?.room_type?.name}</td>
+                                <td className="p-3 border">{room?.price}</td>
+                                <td className="p-3 border">{room?.area}</td>
+                                <td className="p-3 border">
+                                    {`${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`.length >
+                                    50
+                                        ? `${`${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`.slice(
+                                              0,
+                                              50,
+                                          )}...`
+                                        : `${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`}
+                                </td>
+                                <td className="p-3 border">{formatDate(room?.created_at)}</td>
+                                <td className="p-3 border">
+                                    <span
+                                        className={
+                                            room?.has_post ? 'text-green-500 font-bold' : 'text-red-500 font-bold'
+                                        }
+                                    >
+                                        {room?.has_post ? 'Đã đăng' : 'Chưa đăng'}
+                                    </span>
+                                </td>
+                                <td className="p-3 border">
                                     <button
                                         className="bg-green-500 text-white px-4 py-2 rounded mr-2"
                                         onClick={() => handleShowEditRoom(room.id)}
@@ -199,6 +223,11 @@ const ManageRoom = () => {
                     )}
                 </tbody>
             </table>
+            <PaginationUser
+                currentPage={currentPage}
+                totalPages={Math.ceil(totalRooms / roomsPerPage)}
+                onPageChange={setCurrentPage}
+            />
             {showCreateRoom && (
                 <>
                     <div className="fixed inset-0 bg-gray-500 opacity-50 z-40"></div>

@@ -35,6 +35,7 @@ export const endpoints = {
     review: '/review/',
     follow: (userId) => `/user/${userId}/follow/`,
     following: (userId) => `/user/${userId}/following/`,
+    deleteImage: (postId, imageId) => `/post/${postId}/images/${imageId}/`,
 };
 
 export const authApi = () => {

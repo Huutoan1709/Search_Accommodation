@@ -235,7 +235,7 @@ function Register() {
                     </form>
                     <p className="text-center mt-4">
                         Bạn đã có tài khoản?{' '}
-                        <a href="/login" className="text-red-500 font-semibold">
+                        <a href="/login" className="text-red-600">
                             Đăng nhập
                         </a>
                     </p>
