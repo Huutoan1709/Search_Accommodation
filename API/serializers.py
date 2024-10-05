@@ -9,6 +9,7 @@ from django.db.models import Avg
 class UserSerializer(ModelSerializer):
     followed = SerializerMethodField()
     reputation = SerializerMethodField()
+    average_rating = SerializerMethodField()
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
@@ -37,9 +38,14 @@ class UserSerializer(ModelSerializer):
         if total_rating and total_rating >= 4.0:
             return True
         return False
+
+    def get_average_rating(self, obj):
+        landlord_reviews = Reviews.objects.filter(landlord=obj, is_active=True)
+        average_rating = landlord_reviews.aggregate(average_rating=Avg('rating'))['average_rating']
+        return average_rating if average_rating is not None else 0
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating']
 
 
 class UserInfoSerializer(UserSerializer):
@@ -72,7 +78,7 @@ class UserInfoSerializer(UserSerializer):
 class RoomTypeSerializer(ModelSerializer):
     class Meta:
         model = RoomType
-        fields = ['id', 'name', 'description']
+        fields = ['id', 'name', 'description','created_at','is_active']
 
 
 class PriceSerializer(ModelSerializer):
@@ -213,11 +219,12 @@ class SupportRequestsSerializer(ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     customer = UserInfoSerializer()
+    landlord = UserInfoSerializer()
     class Meta:
         model = Reviews
         fields = ['id', 'customer', 'landlord', 'rating', 'comment', 'selected_criteria', 'created_at']
 
-class CreateReviewSerializer(ReviewSerializer):
+class CreateReviewSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
     class Meta(ReviewSerializer.Meta):
         model = ReviewSerializer.Meta.model

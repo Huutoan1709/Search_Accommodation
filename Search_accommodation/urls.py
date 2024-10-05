@@ -3,7 +3,7 @@ from django.urls import path, include, re_path
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
-
+from API.admin import admin_site
 schema_view = get_schema_view(
     openapi.Info(
         title="Search_accommodation API",
@@ -17,7 +17,7 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/', admin_site.urls),
     path('', include('API.urls')),
     re_path(r'^ckeditor/',
             include('ckeditor_uploader.urls')),

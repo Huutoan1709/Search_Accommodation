@@ -45,7 +45,7 @@ import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'API/templates'],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -58,6 +58,11 @@ TEMPLATES = [
         },
     },
 ]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "API/static",
+]
+STATIC_ROOT = BASE_DIR / "staticfiles"
 WSGI_APPLICATION = 'Search_accommodation.wsgi.application'
 
 # Database

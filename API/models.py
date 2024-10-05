@@ -9,7 +9,7 @@ from django.contrib.auth import get_user_model
 import random
 import string
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from django.db.models import UniqueConstraint
 EXPIRATION_BOOKING = 2
 
 
@@ -41,6 +41,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=30, null=False, choices=ROLES, default='CUSTOMER')
     avatar = CloudinaryField(default='avatar_default', blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
+    is_block = models.BooleanField(default=False)
     following = models.ManyToManyField('self', symmetrical=False, related_name='followers', through='Follow')
     reviews_landlord = models.ManyToManyField('Reviews', related_name='reviewed_users', blank=True)
 
@@ -138,19 +139,25 @@ class FavoritePost(BaseModel):
 
 class Reviews(BaseModel):
     customer = models.ForeignKey('User', related_name='Customer_Reviews', on_delete=models.CASCADE)
-    landlord = models.ForeignKey('User', related_name='Landlord_Reviews', on_delete=models.CASCADE, null=True)  # Thay đổi ở đây
+    landlord = models.ForeignKey('User', related_name='Landlord_Reviews', on_delete=models.CASCADE, null=True)
     rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])  # Số sao chung
     comment = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    selected_criteria = models.ManyToManyField('ReviewCriterion', blank=True, related_name='Selected_Reviews')  # Chọn tiêu chí
+    selected_criteria = models.ManyToManyField('ReviewCriterion', blank=True, related_name='Selected_Reviews')
 
     def __str__(self):
         return f"Đánh giá từ {self.customer} cho {self.landlord}"
 
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['customer', 'landlord'], name='unique_customer_landlord_review')
+        ]
+
+
 
 class ReviewCriterion(BaseModel):
     name = models.CharField(max_length=255)
-    description = models.TextField(null=True, blank=True)  # Mô tả chi tiết về tiêu chí
+    description = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.name

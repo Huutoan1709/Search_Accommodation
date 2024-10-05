@@ -11,6 +11,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
 from django.core.mail import send_mail
 from django.contrib.auth.hashers import check_password, make_password
+from django.core.mail import send_mail
+from django.utils import timezone
+from .models import PasswordResetOTP
+from django.conf import settings
+from django.template.loader import render_to_string
+from django.shortcuts import render
+
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -42,7 +49,7 @@ class DestroySoftAPIView(generics.DestroyAPIView):
 class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
     serializer_class = UserInfoSerializer
     queryset = User.objects.filter(is_active=True)
-    pagination_class = paginators.BasePaginator
+    pagination_class = paginators.UserPagination
 
 
     def get_permissions(self):
@@ -170,11 +177,22 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
         serializer = PostSerializer(posts, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
-    # Mysupport
+    @action(methods=['get'], detail=False, url_path='my-reviews')
+    def get_my_reviews(self, request):
+        user = request.user  # Lấy user hiện tại
+
+        reviews = Reviews.objects.filter(customer=user).order_by('-created_at')
+
+        # Nếu không có đánh giá nào
+        if not reviews.exists():
+            return response.Response({"message": "You have no reviews"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ReviewSerializer(reviews, many=True)
+        return response.Response(serializer.data, status=status.HTTP_200_OK)
     @action(methods=['get'], detail=True, url_path='review')
     def get_reviews(self, request, pk=None):
         try:
-            user = User.objects.get(pk=pk)  # Lấy user theo id từ đường dẫn
+            user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             return response.Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
@@ -309,7 +327,6 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     def get_queryset(self):
         queryset = Post.objects.filter(is_active = True, is_approved=True,is_block = False)
 
-        # Kiểm tra nếu có param 'all=true' thì bỏ qua các filter mặc định
         if self.request.query_params.get('all', None) == 'true':
             queryset = Post.objects.all()
         if self.action in ['destroy', 'partial_update', 'update','delete_image']:
@@ -505,6 +522,7 @@ class AmenitiesViewSet(viewsets.ViewSet, generics.ListCreateAPIView, DestroySoft
 class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
+    pagination_class = paginators.BasePaginator
     permissions_classes = [permissions.IsAuthenticated()]
 
 
@@ -523,8 +541,8 @@ class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, gener
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
-    permission_classes = [permissions.IsAuthenticated]  # Yêu cầu phải đăng nhập
+class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action.__eq__('create'):
@@ -564,13 +582,27 @@ class ReviewViewSet(viewsets.ViewSet, generics.ListCreateAPIView):
         serializer = serializer_class(data=data)  # Sử dụng serializer_class
         if serializer.is_valid():
             serializer.save()
+            # Dữ liệu cho email
+            context = {
+                'landlord': landlord,
+                'customer': customer,
+                'review': serializer.instance,
+            }
+
+            # Render email bằng template HTML
+            subject = 'Bạn đã nhận được một đánh giá mới!'
+            from_email = settings.EMAIL_HOST_USER
+            recipient_list = [landlord.email]
+
+            try:
+                html_message = render_to_string('emails/new_review_email.html', context, request=request)
+            except Exception as e:
+                return response.Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            # Gọi hàm send_mail với html_message
+            send_mail(subject, '', from_email, recipient_list, html_message=html_message, fail_silently=False)
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-from django.core.mail import send_mail
-from django.utils import timezone
-from .models import User, PasswordResetOTP
 
 
 class ResetPasswordViewSet(viewsets.ViewSet):
@@ -582,14 +614,14 @@ class ResetPasswordViewSet(viewsets.ViewSet):
         try:
             user = User.objects.get(email=email)
 
-            if otp:  # Nếu người dùng đã nhập OTP, thực hiện xác thực và reset mật khẩu
+            if otp:
                 otp_instance = PasswordResetOTP.objects.filter(user=user, otp=otp, is_used=False).last()
 
                 if not otp_instance:
-                    return Response({'error': 'OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
+                    return response.Response({'error': 'OTP không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
 
                 if otp_instance.expires_at < timezone.now():
-                    return Response({'error': 'OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
+                    return response.Response({'error': 'OTP đã hết hạn.'}, status=status.HTTP_400_BAD_REQUEST)
 
                 # Đặt lại mật khẩu
                 user.set_password(new_password)
@@ -599,7 +631,7 @@ class ResetPasswordViewSet(viewsets.ViewSet):
                 otp_instance.is_used = True
                 otp_instance.save()
 
-                return Response({'message': 'Mật khẩu đã được đặt lại thành công.'}, status=status.HTTP_200_OK)
+                return response.Response({'message': 'Mật khẩu đã được đặt lại thành công.'}, status=status.HTTP_200_OK)
 
             else:  # Nếu chưa có OTP, gửi OTP qua email
                 otp_instance = PasswordResetOTP.objects.create(user=user)
