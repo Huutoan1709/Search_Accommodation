@@ -170,7 +170,7 @@ class SupportRequests(BaseModel):
     user = models.ForeignKey('User', related_name='User_Support', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"Yêu cầu {self.subject} Từ {str(self.user.get_full_name())}"
+        return f"Yêu cầu {self.subject}"
 
 
 User = get_user_model()

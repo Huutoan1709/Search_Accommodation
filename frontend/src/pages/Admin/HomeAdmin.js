@@ -4,18 +4,22 @@ import AdminSidebar from './AdminSidebar';
 import AdminOverview from './AdminOverview';
 import AdminPost from './AdminPost';
 import AdminUser from './AdminUser';
-import AdminHeader from './AdminHeader';
 import ApprovedPost from './ApprovedPost';
+import AdminRoomType from './AdminRoomType';
+import AdminSupportRequest from './AdminSupportRequest';
 
 const HomeAdmin = () => {
     let element = useRoutes([
         { path: '/overview', element: <AdminOverview /> },
         { path: '/post', element: <AdminPost /> },
         { path: '/approved-post', element: <ApprovedPost /> },
+        { path: '/roomtype', element: <AdminRoomType /> },
+        { path: '/listuser', element: <AdminUser /> },
+        { path: '/supportrequest', element: <AdminSupportRequest /> },
     ]);
 
     return (
-        <div className="w-full flex flex-col h-screen">
+        <div className="w-full flex flex-col max-h-screen">
             <div className="flex w-full flex-auto">
                 <AdminSidebar />
                 <div className="flex-auto bg-[#F3F4F6] shadow-md overflow-auto">

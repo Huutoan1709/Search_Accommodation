@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
 import CreateRoom from '../CreateRoom';
-import Addprices from './Addprices';
 import { GrFormAdd } from 'react-icons/gr';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
-import { IoIosAddCircle } from 'react-icons/io';
+import * as XLSX from 'xlsx';
 import EditRoom from '../EditRoom';
+import { AiOutlineFileExcel } from 'react-icons/ai';
 import { notifyError, notifySuccess } from '../../../components/ToastManager';
 import PaginationUser from '../../../components/PaginationUser';
 const ManageRoom = () => {
@@ -122,10 +122,19 @@ const ManageRoom = () => {
 
         return sortedRooms;
     };
+    //Phân trang
     const totalRooms = filteredRooms().length;
     const indexOfLastRoom = currentPage * roomsPerPage;
     const indexOfFirstRoom = indexOfLastRoom - roomsPerPage;
     const currentRooms = filteredRooms().slice(indexOfFirstRoom, indexOfLastRoom);
+
+    // xuất file excel
+    const exportToExcel = () => {
+        const worksheet = XLSX.utils.json_to_sheet(rooms);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Rooms');
+        XLSX.writeFile(workbook, 'rooms_data.xlsx');
+    };
     return (
         <div className="px-4 py-6 relative">
             <div className="py-4 border-b border-gray-200 flex items-center justify-between z-30">
@@ -149,8 +158,15 @@ const ManageRoom = () => {
                         <option value="asc">Mới nhất</option>
                         <option value="desc">Cũ nhất</option>
                     </select>
+
                     <button
-                        className="flex items-center bg-red-500 text-white px-4 py-2 rounded"
+                        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-md"
+                        onClick={exportToExcel}
+                    >
+                        <AiOutlineFileExcel size={20} /> Xuất Excel
+                    </button>
+                    <button
+                        className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md"
                         onClick={handleShowCreateRoom}
                     >
                         <GrFormAdd size={20} /> Thêm phòng

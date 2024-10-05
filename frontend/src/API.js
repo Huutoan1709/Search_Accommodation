@@ -22,6 +22,7 @@ export const endpoints = {
     myfavorite: '/user/my-favorites/',
     myrooms: '/user/my-rooms/',
     roomtype: '/roomtype/',
+    deleteroomtype: (roomtypeId) => `/roomtype/${roomtypeId}/`,
     amenities: '/amenities/',
     addroomprices: (roomdId) => `/room/${roomdId}/prices/`,
     detailamenities: (amenitiesId) => `/amenities/${amenitiesId}/`,
@@ -36,6 +37,12 @@ export const endpoints = {
     follow: (userId) => `/user/${userId}/follow/`,
     following: (userId) => `/user/${userId}/following/`,
     deleteImage: (postId, imageId) => `/post/${postId}/images/${imageId}/`,
+    myreviews: '/user/my-reviews/',
+    deletereview: (reviewId) => `/review/${reviewId}/`,
+    deleteSupportRequest: (requestId) => `/support-request/${requestId}/`,
+    deleteUser: (userId) => `/user/${userId}/`,
+    detailuseradmin: (userId) => `/user/${userId}/`,
+    updateUser: (userId) => `/user/${userId}/`,
 };
 
 export const authApi = () => {

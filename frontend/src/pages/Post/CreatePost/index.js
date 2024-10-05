@@ -141,12 +141,12 @@ const CreatePost = () => {
     };
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-4xl font-semibold mb-8 text-gray-800">Tạo Bài Đăng Mới</h1>
+            <h1 className="text-4xl font-medium mb-8 text-gray-800">Tạo Bài Đăng Mới</h1>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-8">
                     <form onSubmit={handlePostCreation} className="space-y-8">
                         <div className="space-y-2">
-                            <label className="block text-red-400 font-semibold">Danh sách phòng chưa đăng</label>
+                            <label className="block text-red-400 font-semibold">Chọn phòng có sẵn</label>
                             <select
                                 className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
                                 onChange={(e) => handleRoomSelect(e.target.value)}
@@ -395,6 +395,10 @@ const CreatePost = () => {
                                 <li>Hình ảnh bắt buộc phải có ít nhất 4 ảnh.</li>
                                 <li>Nội dung phải viết bằng tiếng Việt có dấu</li>
                                 <li>Không đăng tin trùng lặp</li>
+                                <li>
+                                    Tin đăng có hình ảnh rõ ràng sẽ được xem và gọi gấp nhiều lần so với tin rao không
+                                    có ảnh. Hãy đăng ảnh để được giao dịch nhanh chóng!
+                                </li>
                             </ul>
                         </div>
                     </div>

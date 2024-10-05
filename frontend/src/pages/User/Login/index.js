@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Header from '../../DefaultLayout/Header';
 import MyContext from '../../../context/MyContext';
-import { notifySuccess } from '../../../components/ToastManager';
+import { notifySuccess, notifyWarning } from '../../../components/ToastManager';
 import Footer from '../../DefaultLayout/footer';
 
 function Login() {
@@ -51,13 +51,14 @@ function Login() {
                 const userInfo = userInfoResponse.data;
                 login(userInfo);
 
-                if (userInfo.role === 'ADMIN' || userInfo.role === 'WEBMASTER') {
+                if (userInfo.is_staff || userInfo.role === 'WEBMASTER') {
                     navigate('/admin/overview');
                 } else {
                     navigate('/');
                 }
             }
         } catch (err) {
+            notifyWarning('Vui lòng kiểm tra thông tin');
             setError('Tên đăng nhập hoặc mật khẩu không đúng.');
         }
     };

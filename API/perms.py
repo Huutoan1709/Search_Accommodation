@@ -24,7 +24,11 @@ class IsRoomLandlord(permissions.IsAuthenticated):
 
 class IsOwner(permissions.IsAuthenticated):
     def has_object_permission(self, request, view, obj):
-        return super().has_permission(request, view) and obj == request.user
+        # Check if the user is authenticated, is the owner, or is a webmaster or superuser
+        return (
+            super().has_permission(request, view) and
+            (obj == request.user or request.user.is_superuser or request.user.role in ['WEBMASTER'])
+        )
 
 
 class OwnerAuthenticated(permissions.IsAuthenticated):

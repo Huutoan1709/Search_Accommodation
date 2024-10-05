@@ -22,11 +22,10 @@ function Search({ setSearchParams, room_type }) {
     });
     const [selectedField, setSelectedField] = useState('');
 
-    // Effect to initialize room_type
     useEffect(() => {
         setSelectedValues((prev) => ({
             ...prev,
-            room_type: room_type, // Use room_type from props or default
+            room_type: room_type,
         }));
     }, [room_type]);
 
@@ -38,7 +37,6 @@ function Search({ setSearchParams, room_type }) {
     const handleApply = (field, selectedRange, minValue, maxValue) => {
         let updatedValues = { ...selectedValues };
 
-        // Update logic based on field type
         if (field === 'price') {
             const minPrice = minValue ? parseFloat(minValue) : undefined;
             const maxPrice = maxValue ? parseFloat(maxValue) : undefined;
@@ -75,8 +73,7 @@ function Search({ setSearchParams, room_type }) {
             updatedValues.ward = ward || '';
         }
 
-        // Đảm bảo room_type không undefined
-        updatedValues.room_type = selectedValues.room_type || room_type; // Thêm kiểm tra giá trị 'Phòng trọ' mặc định
+        updatedValues.room_type = selectedValues.room_type || room_type;
 
         setSelectedValues(updatedValues);
 
@@ -88,7 +85,7 @@ function Search({ setSearchParams, room_type }) {
             city: updatedValues.city || '',
             district: updatedValues.district || '',
             ward: updatedValues.ward || '',
-            room_type: updatedValues.room_type || '', // Đảm bảo room_type luôn có giá trị hợp lệ
+            room_type: updatedValues.room_type || '',
         };
         const queryString = Object.entries(params)
             .filter(([_, value]) => value !== '')
@@ -112,7 +109,7 @@ function Search({ setSearchParams, room_type }) {
             max_area: undefined,
             room_type: room_type,
         });
-        setSearchParams({ room_type: room_type }); // Reset with room_type
+        setSearchParams({ room_type: room_type });
     };
 
     const truncateText = (text) => {
@@ -167,7 +164,7 @@ function Search({ setSearchParams, room_type }) {
                 <span
                     type="button"
                     onClick={handleReset}
-                    className="cursor-pointer text-center bg-red-500 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
+                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
                 >
                     <LuRefreshCcw />
                     Đặt lại

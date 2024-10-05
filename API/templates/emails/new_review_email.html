@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .email-container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #333;
+        }
+        .review {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            background-color: #f9f9f9;
+        }
+        .rating {
+            font-weight: bold;
+            color: #ffcc00; /* Màu vàng cho số sao */
+        }
+        .comment {
+            margin-top: 10px;
+            color: #555;
+        }
+        .customer-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .customer-avatar {
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+        }
+        .star-rating {
+            display: flex;
+        }
+        .star {
+            color: #ffcc00; /* Màu vàng cho sao */
+            font-size: 20px;
+            margin-right: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h2>Xin chào {{ landlord.first_name }},</h2>
+        <p>Bạn vừa nhận được một đánh giá mới từ khách hàng <strong>{{ customer.first_name }}. Tiếp tục phát huy nhé</strong>:</p>
+
+        <div class="customer-info">
+            <img src="{{ customer.avatar.url }}" alt="{{ customer.first_name }}'s Avatar" class="customer-avatar">
+            <div>
+                <h3 style="margin: 0;">{{ customer.first_name }}</h3>
+                <div class="star-rating">
+                    {% for i in "12345" %}
+                        <span class="star">{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}</span>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="review">
+            <p class="rating">Đánh giá: {{ review.rating }} sao</p>
+            <p class="comment">Nội dung: {{ review.comment }}</p>
+        </div>
+    </div>
+</body>
+</html>

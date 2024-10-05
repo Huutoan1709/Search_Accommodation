@@ -65,7 +65,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
     };
 
     return (
-        <div className="w-full flex border-t border-orange-700 p-3 gap-1 bg-white ">
+        <div className="w-full flex border-t border-orange-600 p-3 gap-1 bg-white ">
             <div
                 className="w-[42%] flex flex-wrap gap-[1px] items-center rounded-xl relative cursor-pointer"
                 onClick={handlePostClick}
@@ -89,31 +89,31 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     )}
                 </span>
             </div>
-            <div className="w-[60%] pl-2 text-[15px] gap-1 flex flex-col">
+            <div className="w-[60%] pl-2 text-2xl gap-1 flex flex-col">
                 <div className="items-center">
-                    <h3 className="text-red-600 font-semibold cursor-pointer" onClick={handlePostClick}>
-                        {title.length > 80 ? `${title.slice(0, 80)}...` : title}
+                    <h3 className=" font-semibold cursor-pointer" onClick={handlePostClick}>
+                        {title.length > 70 ? `${title.slice(0, 70)}...` : title}
                     </h3>
                 </div>
                 <div className=" flex items-center gap-4">
-                    <span className="flex font-semibold text-[16px]">
-                        <MdOutlineAttachMoney size={20} className="text-gray-500" />
+                    <span className="flex font-semibold text-2xl">
+                        <MdOutlineAttachMoney size={20} className="text-gray-400" />
                         <p className="text-green-500">{room?.price} triệu/tháng</p>
                     </span>
                     <span className=" flex">
-                        <BiArea size={20} className="text-gray-500" />
+                        <BiArea size={20} className="text-gray-400" />
                         {room?.area}m2
                     </span>
                 </div>
                 <span className=" flex items-center">
-                    <CiStopwatch size={20} className="text-gray-500" />
+                    <CiStopwatch size={18} className="text-gray-500" />
                     {timeAgo}
                 </span>
                 <span className=" flex items-center">
-                    <PiMapPinAreaFill className="text-gray-500 mr-2" size={20} />
+                    <PiMapPinAreaFill className="text-gray-400 mr-2" size={18} />
                     {`${room?.district}, ${room?.city}`}
                 </span>
-                <div className="text-gray-500 min-h-[100px] text-[14px]">
+                <div className="text-gray-400 min-h-[100px] text-[13px]">
                     {content.length > 150 ? (
                         <div dangerouslySetInnerHTML={{ __html: `${content.slice(0, 150)}...` }}></div>
                     ) : (
@@ -122,7 +122,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                 </div>
                 <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                        <img src={Logomotel} alt="avatar" className="w-[30px] h-[30px] rounded-full object-cover" />
+                        <img src={user?.avatar} alt="avatar" className="w-[30px] h-[30px] rounded-full object-cover" />
                         <p className="flex items-center justify-center gap-1">
                             {user?.first_name} {user?.last_name}
                             {user?.reputation && (
@@ -136,7 +136,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                                     </span>
                                     {showTooltip && (
                                         <div className="w-20 absolute bg-gray-800 text-white text-xs rounded-md p-1 left-1/2 transform -translate-x-1/2 -translate-y-full mb-3">
-                                            Chủ trọ uy tín
+                                            Uy tín
                                         </div>
                                     )}
                                 </div>
@@ -145,7 +145,7 @@ const Item = ({ images, title, content, room, created_at, user, id }) => {
                     </div>
 
                     <div className="flex items-center">
-                        <button type="button" className="border border-red-300 rounded-md">
+                        <button type="button" className="border border-gray-400 rounded-md">
                             <div className="flex items-center p-1">{`Gọi ${user?.phone}`}</div>
                         </button>
                     </div>

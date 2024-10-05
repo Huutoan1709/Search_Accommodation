@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import { authApi, endpoints } from '../../../API';
 import { notifyError, notifySuccess } from '../../../components/ToastManager';
-import { FaCamera } from 'react-icons/fa'; // Import camera icon
+import { FaCamera } from 'react-icons/fa';
 
 const UpdateInfo = () => {
-    const navigate = useNavigate(); // Initialize navigate
+    const navigate = useNavigate();
     const [user, setUser] = useState({
         first_name: '',
         last_name: '',
@@ -18,7 +18,7 @@ const UpdateInfo = () => {
         following_count: 0,
     });
     const [loading, setLoading] = useState(true);
-    const [previewImage, setPreviewImage] = useState(null); // State for previewing the new image
+    const [previewImage, setPreviewImage] = useState(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -42,7 +42,7 @@ const UpdateInfo = () => {
         const file = e.target.files[0];
         if (file) {
             setUser({ ...user, avatar: file });
-            setPreviewImage(URL.createObjectURL(file)); // Set preview image
+            setPreviewImage(URL.createObjectURL(file));
         }
     };
 
@@ -57,7 +57,6 @@ const UpdateInfo = () => {
         formData.append('gender', user.gender);
         formData.append('address', user.address);
 
-        // Only append the avatar if a new file is selected
         if (user.avatar instanceof File) {
             formData.append('avatar', user.avatar);
         }
@@ -84,21 +83,19 @@ const UpdateInfo = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8">
+        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8 mt-10 border border-gray-300">
             <h2 className="text-2xl font-bold mb-6 text-center">Quản lý tài khoản</h2>
             <form onSubmit={handleSubmit} className="space-y-8">
-                {/* Avatar Section */}
                 <div className="flex justify-center relative">
                     <div className="w-40 h-40 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden relative">
-                        {previewImage ? ( // If a new image is selected, show it
+                        {previewImage ? (
                             <img src={previewImage} alt="Avatar Preview" className="h-full w-full object-cover" />
-                        ) : user.avatar && !(user.avatar instanceof File) ? ( // If no new image but avatar exists, show the existing one
+                        ) : user.avatar && !(user.avatar instanceof File) ? (
                             <img src={user.avatar} alt="Avatar" className="h-full w-full object-cover" />
                         ) : (
                             <span className="text-gray-400">No Image</span>
                         )}
 
-                        {/* Icon for choosing file */}
                         <label className="absolute bottom-0 right-12 mr-2 bg-gray-700 p-2 rounded-full cursor-pointer hover:bg-gray-800">
                             <FaCamera className="text-white text-xl" />
                             <input
@@ -114,7 +111,7 @@ const UpdateInfo = () => {
 
                 <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Họ</label>
+                        <label className="block text-2xl font-medium text-gray-700">Họ</label>
                         <input
                             type="text"
                             name="first_name"
@@ -125,7 +122,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Tên</label>
+                        <label className="block text-2xl font-medium text-gray-700">Tên</label>
                         <input
                             type="text"
                             name="last_name"
@@ -136,7 +133,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Số điện thoại</label>
+                        <label className="block text-2xl font-medium text-gray-700">Số điện thoại</label>
                         <input
                             type="text"
                             name="phone"
@@ -147,7 +144,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Email</label>
+                        <label className="block text-2xl font-medium text-gray-700">Email</label>
                         <input
                             type="email"
                             name="email"
@@ -159,7 +156,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Giới tính</label>
+                        <label className="block text-2xl font-medium text-gray-700">Giới tính</label>
                         <select
                             name="gender"
                             value={user.gender || ''}
@@ -176,7 +173,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Địa chỉ</label>
+                        <label className="block text-2xl font-medium text-gray-700">Địa chỉ</label>
                         <input
                             type="text"
                             name="address"
@@ -190,7 +187,7 @@ const UpdateInfo = () => {
                 {/* Followers Section */}
                 <div className="grid grid-cols-2 gap-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Người theo dõi</label>
+                        <label className="block text-2xl font-medium text-gray-700">Người theo dõi</label>
                         <input
                             type="text"
                             value={user.follower_count}
@@ -200,7 +197,7 @@ const UpdateInfo = () => {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Đang theo dõi</label>
+                        <label className="block text-2xl font-medium text-gray-700">Đang theo dõi</label>
                         <input
                             type="text"
                             value={user.following_count}

@@ -40,6 +40,7 @@
     "swiper": "^11.1.14",
     "web-vitals": "^2.1.0",
     "webpack-dev-server": "^5.1.0",
+    "xlsx": "^0.18.5",
     "yup": "^1.4.0"
   },
   "scripts": {

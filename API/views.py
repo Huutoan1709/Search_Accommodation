@@ -46,9 +46,9 @@ class DestroySoftAPIView(generics.DestroyAPIView):
         return response.Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveAPIView):
+class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserInfoSerializer
-    queryset = User.objects.filter(is_active=True)
+    queryset = User.objects.all()
     pagination_class = paginators.UserPagination
 
 
@@ -522,7 +522,7 @@ class AmenitiesViewSet(viewsets.ViewSet, generics.ListCreateAPIView, DestroySoft
 class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
     serializer_class = RoomTypeSerializer
     queryset = RoomType.objects.all()
-    pagination_class = paginators.BasePaginator
+    # pagination_class = paginators.BasePaginator
     permissions_classes = [permissions.IsAuthenticated()]
 
 

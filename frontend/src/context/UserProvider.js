@@ -2,16 +2,16 @@ import React, { useReducer, useEffect, useCallback } from 'react';
 import MyUserReducer from '../reducers/MyUserReducer';
 import MyContext from './MyContext';
 import API, { endpoints, authApi } from '../API';
+import { notifySuccess } from '../components/ToastManager';
 
 const UserProvider = ({ children }) => {
     const [user, dispatch] = useReducer(MyUserReducer, null);
 
-    // Fetch user info from API
     const fetchUser = useCallback(async () => {
         try {
             const result = await authApi().get(endpoints.currentuser);
             dispatch({ type: 'login', payload: result.data });
-            // Save user info to localStorage after fetching from API
+
             localStorage.setItem('user', JSON.stringify(result.data));
         } catch (error) {
             console.error('Failed to fetch user', error);
@@ -20,18 +20,14 @@ const UserProvider = ({ children }) => {
     }, []);
 
     useEffect(() => {
-        // Check if there's user info in localStorage
         const storedUser = localStorage.getItem('user');
-        const token = localStorage.getItem('access-token'); // Ensure correct token key
+        const token = localStorage.getItem('access-token');
 
         if (storedUser) {
-            // If user is already in localStorage, log them in
             dispatch({ type: 'login', payload: JSON.parse(storedUser) });
         } else if (token) {
-            // If no user but there's a token, fetch user info from the API
             fetchUser();
         } else {
-            // Handle logout if no token or user
             logout();
         }
     }, [fetchUser]);

@@ -195,15 +195,14 @@ const Personal = () => {
                                     </span>
                                 </div>
                                 <div className="mt-2 relative">
-                                    {/* Nút Theo dõi */}
                                     <button
                                         className="bg-blue-500 text-white px-4 py-2 rounded-lg mt-2 hover:bg-blue-600 transition"
-                                        onMouseEnter={() => setShowTooltip(true)} // Hiển thị tooltip khi hover
-                                        onMouseLeave={() => setShowTooltip(false)} // Ẩn tooltip khi rời khỏi
+                                        onMouseEnter={() => setShowTooltip(true)}
+                                        onMouseLeave={() => setShowTooltip(false)}
                                     >
                                         Theo dõi
                                     </button>
-                                    {showTooltip && ( // Điều kiện hiển thị tooltip
+                                    {showTooltip && (
                                         <div className="absolute left-0 bg-black text-white text-sm px-2 py-1 rounded mt-1">
                                             Theo dõi để nhận được thông báo sớm nhất về bài đăng
                                         </div>

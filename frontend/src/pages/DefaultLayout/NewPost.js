@@ -3,6 +3,7 @@ import API, { endpoints } from '../../API';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
+import { CiStopwatch } from 'react-icons/ci';
 
 const NewPost = () => {
     const [posts, setPosts] = useState([]);
@@ -51,12 +52,15 @@ const NewPost = () => {
                     </h4>
                     <div className="flex items-center justify-between">
                         <span className="text-green-500 font-medium text-[12x]">{post?.room?.price} triệu</span>
-                        <span className="text-[10px]">
-                            {formatDistanceToNow(parseISO(post?.created_at), {
-                                addSuffix: true,
-                                locale: vi,
-                            })}
-                        </span>
+                        <div className="flex gap-1 items-center">
+                            <CiStopwatch size={15} className="text-gray-500" />
+                            <span className="text-[10px]">
+                                {formatDistanceToNow(parseISO(post?.created_at), {
+                                    addSuffix: true,
+                                    locale: vi,
+                                })}
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

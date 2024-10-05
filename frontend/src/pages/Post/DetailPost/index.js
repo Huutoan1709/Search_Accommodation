@@ -22,7 +22,8 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../../DefaultLayout/footer';
 import BackToTop from '../../../components/BackToTop';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
-
+import { IoIosCall } from 'react-icons/io';
+import { SlUserFollow } from 'react-icons/sl';
 function DetailPost() {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
@@ -111,18 +112,18 @@ function DetailPost() {
         <div>
             <Header />
             <div className="w-[1024px] flex m-auto">
-                <div className="w-full flex gap-4">
+                <div className="w-full flex gap-4 mt-6">
                     <div className="w-[70%]">
                         <SliderCustom images={post?.images} />
                         <div className="rounded-md shadow-md bg-white p-4">
-                            <h2 className="text-[25px] font-semibold text-red-600">{post?.title}</h2>
+                            <h2 className="text-3xl font-semibold text-red-600">{post?.title}</h2>
                             <span className="flex items-center gap-2 my-3">
                                 <PiMapPinAreaFill className="text-red-500 mx-1" size={20} />
-                                <span className="text-[15px] ">
+                                <span className="text-[14px] ">
                                     {post?.room.ward}, {post?.room.district}, {post?.room.city}
                                 </span>
                             </span>
-                            <div className="h-[40px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
+                            <div className="h-[35px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
                                 <span className="flex items-center gap-1">
                                     <MdOutlineAttachMoney size={20} className="text-green-500" />
                                     <span className="font-semibold text-[20px] text-green-500">
@@ -253,39 +254,41 @@ function DetailPost() {
                         </div>
                     </div>
                     <div className="w-[30%]">
-                        <div className=" bg-yellow-400 p-3 shadow-lg rounded-md flex flex-col items-center text-center mb-7">
+                        <div className=" bg-white p-3 shadow-lg rounded-lg flex flex-col items-center text-center mb-7 border border-gray-300">
                             <img
                                 src={post?.user?.avatar || '/default-avatar.png'}
                                 alt="Landlord Avatar"
-                                className="w-[80px] h-[80px] rounded-full cursor-pointer"
+                                className="w-[80px] h-[80px] rounded-full cursor-pointer shadow-lg mt-2"
                                 onClick={() => navigate(`/profiles/${post?.user?.id}`)}
                             />
                             <h3 className="mt-2 font-semibold text-[20px] flex items-center gap-1">
                                 {post?.user?.first_name} {post?.user?.last_name}
-                                {post?.user?.reputation && (
-                                    <AiFillSafetyCertificate size={20} className="text-green-500" />
-                                )}
+                                <button text="Uy tín">
+                                    {post?.user?.reputation && (
+                                        <AiFillSafetyCertificate size={20} className="text-green-500" />
+                                    )}
+                                </button>
                             </h3>
 
                             <a
                                 href={`tel:${post?.landlord?.phone}`}
                                 className="flex items-center justify-center w-full mt-4 bg-green-500 text-white py-2 rounded-lg"
                             >
+                                <IoIosCall size={20} className="mr-1 text-white " />
                                 <span className="mr-2">Gọi {post?.user?.phone}</span>
                             </a>
 
                             <a
                                 href={`https://zalo.me/${post?.user?.phone}`}
                                 target="_blank"
-                                className=" flex items-center justify-center w-full mt-4  bg-white py-2 rounded-lg"
+                                className=" flex items-center justify-center w-full mt-4  bg-gray-300 py-2 rounded-lg border border-gray-300"
                             >
-                                <img src={zalo} alt="Zalo" className="w-10 h-10 object-cover mr-1" />
+                                <img src={zalo} alt="Zalo" className="w-8 h-8 object-cover mr-1" />
                                 <span className="mr-2">Nhắn Zalo</span>
                             </a>
-
-                            <button className="w-full mt-4 flex items-center justify-center bg-white border border-gray-300 text-gray-600 py-2 rounded-lg">
-                                <BiHeart size={20} className="mr-1" />
-                                <span className="mr-2">Yêu thích</span>
+                            <button className="w-full mt-4 flex items-center justify-center bg-gray-300 border border-gray-300 py-2 rounded-lg">
+                                <SlUserFollow size={20} className="mr-1" />
+                                <span className="mr-2">Theo dõi</span>
                             </button>
                         </div>
                         <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">

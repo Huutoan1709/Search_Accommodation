@@ -33,20 +33,20 @@ const ManagePost = () => {
         if (isBlock) return 'Đã khóa';
         if (isActive && !isApproved) return 'Chờ duyệt';
         if (!isActive) return 'Đã ẩn';
-        if (isActive && isApproved) return 'Đang hoạt động';
+        if (isActive && isApproved) return 'Hoạt động';
         return '';
     };
 
     const getStatusClass = (status) => {
         switch (status) {
-            case 'Đang hoạt động':
-                return 'bg-green-300 text-green-800 font-semibold';
+            case 'Hoạt động':
+                return 'text-green-600 font-semibold';
             case 'Chờ duyệt':
-                return 'bg-yellow-200 text-yellow-800 font-semibold';
+                return ' text-yellow-500 font-semibold';
             case 'Đã ẩn':
-                return 'bg-gray-300 text-gray-800 font-semibold';
+                return ' text-gray-600 font-semibold';
             case 'Đã khóa':
-                return 'bg-red-300 text-red-800 font-semibold';
+                return ' text-red-500 font-semibold';
             default:
                 return '';
         }
@@ -155,7 +155,7 @@ const ManagePost = () => {
             <div className="py-4 border-b border-gray-200 flex items-center justify-between">
                 <h1 className="text-3xl font-medium">Quản lý tin đăng</h1>
 
-                <div className="py-4 border-b border-gray-200 flex items-center justify-between">
+                <div className="py-4 border-b border-gray-200 flex items-center justify-between gap-3">
                     <input
                         type="text"
                         placeholder="Tìm kiếm theo mã tin, tiêu đề hoặc giá"
@@ -169,7 +169,7 @@ const ManagePost = () => {
                         onChange={(e) => handleFilterChange(e.target.value)}
                     >
                         <option value="">Tất cả trạng thái</option>
-                        <option value="Đang hoạt động">Đang hoạt động</option>
+                        <option value="Hoạt động">Hoạt động</option>
                         <option value="Chờ duyệt">Chờ duyệt</option>
                         <option value="Đã ẩn">Đã ẩn</option>
                         <option value="Đã khóa">Đã khóa</option>

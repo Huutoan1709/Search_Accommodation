@@ -22,6 +22,9 @@ import AdminUser from '../pages/Admin/AdminUser';
 import AdminPost from '../pages/Admin/AdminPost';
 import AdminOverview from '../pages/Admin/AdminOverview';
 import ApprovedPost from '../pages/Admin/ApprovedPost';
+import MyReviews from '../pages/User/Myreviews/MyReview';
+import AdminRoomType from '../pages/Admin/AdminRoomType';
+import AdminSupportRequest from '../pages/Admin/AdminSupportRequest';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -40,12 +43,15 @@ const profileRoutes = [
     { path: 'managepost', component: ManagePost },
     { path: 'manageroom', component: ManageRoom },
     { path: 'updateinfo', component: Updateinfo },
+    { path: 'myreviews', component: MyReviews },
 ];
 const AdminRoutes = [
     { path: '/admin', component: AdminOverview },
-    { path: 'user', component: AdminUser },
+    { path: 'listuser', component: AdminUser },
     { path: 'post', component: AdminPost },
     { path: 'approved-post', component: ApprovedPost },
+    { path: 'roomtype', component: AdminRoomType },
+    { path: 'supportrequest', component: AdminSupportRequest },
 ];
 
 const privateRoutes = [

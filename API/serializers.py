@@ -45,7 +45,7 @@ class UserSerializer(ModelSerializer):
         return average_rating if average_rating is not None else 0
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating','is_superuser','is_active']
 
 
 class UserInfoSerializer(UserSerializer):
@@ -70,8 +70,6 @@ class UserInfoSerializer(UserSerializer):
         extra_kwargs = {
             'password':
                 {'write_only': True},
-            'is_active':
-                {'write_only': True}
         }
 
 
@@ -208,7 +206,7 @@ class FavoritePostSerializer(ModelSerializer):
 
 #
 class SupportRequestsSerializer(ModelSerializer):
-    user = UserSerializer(read_only=True)
+    user = UserInfoSerializer()
 
     class Meta:
         model = SupportRequests

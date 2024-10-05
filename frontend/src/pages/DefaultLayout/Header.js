@@ -12,11 +12,12 @@ import { ImProfile } from 'react-icons/im';
 import { BiSupport } from 'react-icons/bi';
 import { CgProfile } from 'react-icons/cg';
 import { GoCodeReview } from 'react-icons/go';
+import { notifySuccess } from '../../components/ToastManager';
 
 const Header = () => {
     const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
-    const location = useLocation(); // Get current location
+    const location = useLocation();
 
     useEffect(() => {
         if (user) {
@@ -35,8 +36,8 @@ const Header = () => {
     };
     const handleLogoutClick = () => {
         if (logout) logout();
-        navigate('/');
-        window.location.reload();
+        notifySuccess('Đăng xuất thành công');
+        navigate('/login');
     };
     const handlecreateClick = () => {
         navigate('/profile/createpost');
@@ -54,7 +55,7 @@ const Header = () => {
         navigate('/supportrequest');
     };
     const handleReviewClick = () => {
-        navigate('/reviews');
+        navigate('/profile/myreviews');
     };
     const handleUserPageClick = () => {
         navigate('/profiles/current/');
@@ -69,16 +70,15 @@ const Header = () => {
         navigate('/can-ho-dich-vu');
     };
 
-    // Check if the current path matches the route to highlight
     const isActive = (path) => {
         return location.pathname === path ? 'active' : '';
     };
 
     return (
         <header className="header">
-            <div className="header-logo">
-                <img src={Logomotel} alt="Logo" />
-                <span></span>
+            <div className="header-logo flex items-center gap-2">
+                <img src={Logomotel} alt="Logo" className="w-12 h-12 object-cover rounded-md shadow-lg" />
+                <span className="font-bold text-2xl tracking-wide text-gray-800">TOA_ACCOMMODATION</span>
             </div>
             <nav className="header-nav">
                 <span className={`cursor-pointer ${isActive('/')}`} onClick={handleHomeClick}>

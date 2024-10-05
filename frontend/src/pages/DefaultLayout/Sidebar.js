@@ -84,7 +84,7 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
                     {roomtype.map((room) => (
                         <p
                             key={room.id}
-                            onClick={() => handleRoomTypeClick(room.name)} // Xử lý click loại phòng
+                            onClick={() => handleRoomTypeClick(room.name)}
                             className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-500 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
                         >
                             <MdNavigateNext size={14} />

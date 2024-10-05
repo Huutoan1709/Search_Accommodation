@@ -193,6 +193,29 @@ function Register() {
                             </div>
                         </div>
                         <div>
+                            <label className="block text-2xl font-medium text-gray-700 mb-2">Mục đích sử dụng:</label>
+                            <div className="flex space-x-4">
+                                <label>
+                                    <input
+                                        type="radio"
+                                        value="CUSTOMER"
+                                        checked={role === 'CUSTOMER'}
+                                        onChange={(e) => setRole(e.target.value)}
+                                    />
+                                    Tìm trọ
+                                </label>
+                                <label>
+                                    <input
+                                        type="radio"
+                                        value="LANDLORD"
+                                        checked={role === 'LANDLORD'}
+                                        onChange={(e) => setRole(e.target.value)}
+                                    />
+                                    Cho thuê
+                                </label>
+                            </div>
+                        </div>
+                        <div>
                             <label className="block text-2xl font-medium text-gray-700 mb-2">Giới tính:</label>
                             <div className="flex space-x-4">
                                 <label>

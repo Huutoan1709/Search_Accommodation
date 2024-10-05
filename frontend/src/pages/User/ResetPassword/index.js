@@ -44,7 +44,8 @@ const ResetPassword = () => {
                     setTimeout(() => navigate('/login'), 3000);
                 }
             } catch (err) {
-                setError('Có lỗi xảy ra khi đặt lại mật khẩu.');
+                const errorMsg = err.response?.data?.error || 'Có lỗi xảy ra khi đặt lại mật khẩu.';
+                setError(errorMsg);
             }
         } else {
             formData.append('email', email);
@@ -57,7 +58,8 @@ const ResetPassword = () => {
                     setTimer(60);
                 }
             } catch (err) {
-                notifyError('Email không đúng hoặc không tồn tại!!!');
+                const errorMsg = err.response?.data?.error || 'Email không đúng hoặc không tồn tại.';
+                notifyError(errorMsg);
             }
         }
     };
