@@ -13,6 +13,7 @@ import hochiminh from '../../assets/ho-chi-minh.jpg';
 import danang from '../../assets/danang.jpg';
 import Search from '../DefaultLayout/Search';
 import BackToTop from '../../components/BackToTop';
+import ChatBot from '../../components/ChatBot';
 
 const Home = ({ room_type = 'Phòng trọ' }) => {
     const [searchParams, setSearchParams] = useState({ room_type });
@@ -120,6 +121,10 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
                         <Sidebar setSearchParams={setSearchParams} room_type={room_type} searchParams={searchParams} />
                     </div>
                 </div>
+            </div>
+            {/* ChatBot Component - Floating at the bottom right */}
+            <div className="fixed bottom-4 right-4">
+                <ChatBot />
             </div>
             <BackToTop />
             <Footer />

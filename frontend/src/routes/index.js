@@ -25,6 +25,7 @@ import ApprovedPost from '../pages/Admin/ApprovedPost';
 import MyReviews from '../pages/User/Myreviews/MyReview';
 import AdminRoomType from '../pages/Admin/AdminRoomType';
 import AdminSupportRequest from '../pages/Admin/AdminSupportRequest';
+import ChatBot from '../components/ChatBot';
 const publicroutes = [
     { path: '/', component: Home },
     { path: '/login', component: Login },
@@ -37,6 +38,7 @@ const publicroutes = [
     { path: '/nha-nguyen-can', component: NhaNguyenCan },
     { path: '/chung-cu', component: ChungCu },
     { path: '/can-ho-dich-vu', component: CanHoDichVu },
+    { path: '/chatbot', component: ChatBot },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },
