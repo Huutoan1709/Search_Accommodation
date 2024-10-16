@@ -3,6 +3,8 @@ import { Bar, Doughnut } from 'react-chartjs-2';
 import { Chart, ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend } from 'chart.js';
 import { FaUserAlt, FaClipboardList, FaUsers, FaWarehouse } from 'react-icons/fa';
 import API, { authApi, endpoints } from '../../API';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 Chart.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend);
 
@@ -14,15 +16,15 @@ const AdminOverview = () => {
     const [postStatistics, setPostStatistics] = useState({ locked: 0, active: 0, hidden: 0 });
     const [topLandlords, setTopLandlords] = useState([]);
     const [cityPostCounts, setCityPostCounts] = useState({});
-    const [filter, setFilter] = useState('month');
-    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const currentDate = new Date();
+    const [startDate, setStartDate] = useState(new Date(currentDate.getFullYear(), 0, 1));
+    const [endDate, setEndDate] = useState(currentDate);
 
     useEffect(() => {
         fetchCounts();
         fetchPostStatistics();
         fetchTopLandlords();
-    }, [selectedMonth, selectedYear, filter]);
+    }, [startDate, endDate]);
 
     const fetchCounts = async () => {
         try {
@@ -47,15 +49,15 @@ const AdminOverview = () => {
             const response = await authApi().get(`${endpoints.post}?all=true`);
             const posts = response.data.results;
 
+            // Cập nhật endDate nếu nó cùng tháng và năm với startDate
+            const adjustedEndDate =
+                startDate.getFullYear() === endDate.getFullYear() && startDate.getMonth() === endDate.getMonth()
+                    ? new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0) // Ngày cuối cùng của tháng
+                    : endDate;
+
             const filteredPosts = posts.filter((post) => {
                 const postDate = new Date(post.created_at);
-                if (filter === 'month') {
-                    return postDate.getMonth() + 1 === selectedMonth && postDate.getFullYear() === selectedYear;
-                }
-                if (filter === 'year') {
-                    return postDate.getFullYear() === selectedYear;
-                }
-                return false;
+                return postDate >= startDate && postDate <= adjustedEndDate;
             });
 
             let locked = 0;
@@ -109,7 +111,7 @@ const AdminOverview = () => {
         labels: ['Khóa', 'Đang hoạt động', 'Ẩn'],
         datasets: [
             {
-                label: 'Trạng thái tin đăng',
+                label: 'Số lượng tin đăng',
                 data: [postStatistics.locked, postStatistics.active, postStatistics.hidden],
                 backgroundColor: ['#FF6384', '#36A2EB', '#FFA07A'],
             },
@@ -118,15 +120,15 @@ const AdminOverview = () => {
 
     const cityCountsArray = Object.entries(cityPostCounts)
         .sort(([, countA], [, countB]) => countB - countA)
-        .slice(0, 10); // Get top 10 cities
+        .slice(0, 10);
 
     const barData = {
         labels: cityCountsArray.map(([city]) => city),
         datasets: [
             {
-                label: 'Số bài đăng theo thành phố',
+                label: 'Số lượng tin đăng',
                 data: cityCountsArray.map(([, count]) => count),
-                backgroundColor: '#36A2EB', // Bar color
+                backgroundColor: '#36A2EB',
             },
         ],
     };
@@ -142,12 +144,6 @@ const AdminOverview = () => {
                 ))}
             </div>
         );
-    };
-
-    const handleFilterChange = (selectedFilter) => {
-        setFilter(selectedFilter);
-        setSelectedMonth(new Date().getMonth() + 1);
-        setSelectedYear(new Date().getFullYear());
     };
 
     return (
@@ -184,35 +180,37 @@ const AdminOverview = () => {
                     <h3 className="text-xl font-semibold">Chủ trọ</h3>
                 </div>
             </div>
-
+            <div className="flex items-center justify-center gap-5">
+                <h3 className="text-2xl font-semibold mb-5">Chọn khoảng thời gian thống kê</h3>
+                <div className="flex space-x-4 mb-4">
+                    <DatePicker
+                        className="p-2 bg-yellow-50 cursor-pointer items-center text-black"
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        dateFormat="MM/yyyy"
+                        showMonthYearPicker
+                        placeholderText="Chọn tháng/năm bắt đầu"
+                    />
+                    <DatePicker
+                        className="p-2 bg-yellow-50 cursor-pointer items-center  text-black"
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        dateFormat="MM/yyyy"
+                        showMonthYearPicker
+                        placeholderText="Chọn tháng/năm kết thúc"
+                    />
+                </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <div className="relative bg-white shadow-lg rounded-lg p-6 w-full h-full flex items-center justify-center">
                     <h3 className=" text-2xl font-semibold mb-auto">Trạng thái tin đăng</h3>
-                    <div className="w-full h-full">
+                    <div className="w-full h-full mt-20 mr-28">
                         <Doughnut data={donutData} />
-                    </div>
-                    <div className="absolute top-4 right-4 flex space-x-2">
-                        <button
-                            onClick={() => handleFilterChange('month')}
-                            className={`px-4 py-2 rounded-lg ${
-                                filter === 'month' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                            }`}
-                        >
-                            Theo tháng
-                        </button>
-                        <button
-                            onClick={() => handleFilterChange('year')}
-                            className={`px-4 py-2 rounded-lg ${
-                                filter === 'year' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                            }`}
-                        >
-                            Theo năm
-                        </button>
                     </div>
                 </div>
 
                 <div className="relative bg-white shadow-lg rounded-lg p-6">
-                    <h3 className="text-2xl font-semibold mb-4">Số bài đăng theo thành phố</h3>
+                    <h3 className="text-2xl font-semibold mb-20">Số bài đăng theo thành phố</h3>
                     <div>
                         <Bar data={barData} />
                     </div>

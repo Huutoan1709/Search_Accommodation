@@ -10,7 +10,7 @@ import { ImProfile } from 'react-icons/im';
 import { BiHeart, BiSupport } from 'react-icons/bi';
 import { GoCodeReview } from 'react-icons/go';
 import { GrNavigate } from 'react-icons/gr';
-
+import { notifySuccess } from '../../components/ToastManager';
 const SidebarUser = () => {
     const location = useLocation();
     const activeSection = location.pathname.split('/')[2];
@@ -20,6 +20,7 @@ const SidebarUser = () => {
     const handleLogoutClick = () => {
         if (logout) logout();
         navigate('/');
+        notifySuccess('Đăng xuất thành công');
     };
 
     const navigateToSection = (section) => {
@@ -50,7 +51,7 @@ const SidebarUser = () => {
                         />
                         <div className="flex flex-col justify-center">
                             <span className="font-semibold text-[18px]">
-                                {user?.first_name || 'Tên người dùng'} {user?.last_name || 'Họ'}
+                                {user?.first_name || 'Tên'} {user?.last_name || ''}
                             </span>
                             <small className="text-[14px]">{user?.phone || 'Số điện thoại'}</small>
                         </div>
@@ -96,6 +97,21 @@ const SidebarUser = () => {
                                     </span>
                                 </div>
                             ))}
+                            <div
+                                className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
+                                    activeSection === 'current' ? 'active' : ''
+                                }`}
+                                onClick={handleUserPageClick}
+                            >
+                                <ImProfile size={20} className="font-normal" />
+                                <span
+                                    className={`w-full ml-3 ${
+                                        activeSection === 'current' ? 'font-bold' : 'font-normal'
+                                    }`}
+                                >
+                                    Trang cá nhân
+                                </span>
+                            </div>
                         </>
                     )}
                     <div
@@ -107,17 +123,6 @@ const SidebarUser = () => {
                         <FaRegEdit size={20} className="font-normal" />
                         <span className={`w-full ml-3 ${activeSection === 'updateinfo' ? 'font-bold' : 'font-normal'}`}>
                             Sửa thông tin cá nhân
-                        </span>
-                    </div>
-                    <div
-                        className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                            activeSection === 'current' ? 'active' : ''
-                        }`}
-                        onClick={handleUserPageClick}
-                    >
-                        <ImProfile size={20} className="font-normal" />
-                        <span className={`w-full ml-3 ${activeSection === 'current' ? 'font-bold' : 'font-normal'}`}>
-                            Trang cá nhân
                         </span>
                     </div>
                     {user?.role === 'CUSTOMER' && (

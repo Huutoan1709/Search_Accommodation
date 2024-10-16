@@ -7,6 +7,7 @@ import PaginationUser from '../../components/PaginationUser';
 import { BiDotsHorizontalRounded, BiLock, BiLockOpen } from 'react-icons/bi';
 import { BsEyeFill } from 'react-icons/bs';
 import ModalUserDetails from './ModalUserDetails';
+import CreateUserModal from './CreateUserModal';
 
 const AdminUser = () => {
     const [users, setUsers] = useState([]);
@@ -17,6 +18,7 @@ const AdminUser = () => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [selectedUser, setSelectedUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
 
     const fetchUsers = async (page = 1) => {
         try {
@@ -35,18 +37,6 @@ const AdminUser = () => {
         fetchUsers(currentPage);
     }, [currentPage]);
 
-    const handleDelete = async (userId) => {
-        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa người dùng này không?');
-        if (confirmDelete) {
-            try {
-                await authApi().delete(endpoints.deleteUser(userId));
-                notifySuccess('Xóa người dùng thành công');
-                fetchUsers(currentPage);
-            } catch (error) {
-                console.error('Failed to delete user:', error);
-            }
-        }
-    };
     const handleLock = async (userId) => {
         const confirmLock = window.confirm('Bạn có chắc chắn muốn khóa người dùng này không?');
         if (confirmLock) {
@@ -72,20 +62,12 @@ const AdminUser = () => {
         }
     };
 
-    const toggleUserStatus = async (userId, currentStatus) => {
-        const confirmToggle = window.confirm(
-            `Bạn có chắc chắn muốn ${currentStatus ? 'ngừng hoạt động' : 'hoạt động'} người dùng này không?`,
-        );
-        if (confirmToggle) {
-            try {
-                const newStatus = !currentStatus;
-                await authApi().patch(endpoints.toggleUserStatus(userId), { is_active: newStatus });
-                notifySuccess(`Người dùng đã được ${newStatus ? 'hoạt động' : 'ngừng hoạt động'}`);
-                fetchUsers(currentPage);
-            } catch (error) {
-                console.error('Failed to toggle user status:', error);
-            }
-        }
+    const handleOpenCreateUserModal = () => {
+        setIsCreateUserModalOpen(true);
+    };
+
+    const handleCloseCreateUserModal = () => {
+        setIsCreateUserModalOpen(false);
     };
 
     const handleSearchChange = (event) => {
@@ -119,7 +101,7 @@ const AdminUser = () => {
                         className="border p-2 rounded"
                     />
                     <button
-                        onClick={() => console.log('Tạo người dùng mới')}
+                        onClick={handleOpenCreateUserModal}
                         className="bg-[#333A48] text-white px-4 py-2 rounded-md"
                     >
                         Thêm người dùng
@@ -159,7 +141,6 @@ const AdminUser = () => {
                                 <td className="p-3 border">{user?.email}</td>
                                 <td className="p-3 border">
                                     <button
-                                        onClick={() => toggleUserStatus(user.id, user.is_active)}
                                         className={`px-4 py-2 rounded-md font-semibold ${
                                             user.is_active ? 'text-green-500' : 'text-red-500'
                                         } hover:opacity-80 transition`}
@@ -191,18 +172,7 @@ const AdminUser = () => {
                                                     <BsEyeFill size={15} className="inline mr-2" />
                                                     Chi tiết
                                                 </li>
-                                                <li
-                                                    onClick={() => {
-                                                        handleDelete(user.id);
-                                                        setOpenDropdown(null);
-                                                    }}
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <div className="flex items-center ">
-                                                        <MdDelete size={15} className="inline mr-2" />
-                                                        Xóa
-                                                    </div>
-                                                </li>
+
                                                 {user.is_active ? (
                                                     <li
                                                         onClick={() => {
@@ -241,7 +211,7 @@ const AdminUser = () => {
                     )}
                 </tbody>
             </table>
-
+            <CreateUserModal isOpen={isCreateUserModalOpen} onClose={handleCloseCreateUserModal} />
             {selectedUser && (
                 <ModalUserDetails userId={selectedUser.id} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             )}

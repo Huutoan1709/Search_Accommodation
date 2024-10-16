@@ -70,13 +70,13 @@ const ManagePost = () => {
         const status = getStatus(post?.is_active, post?.is_approved, post?.is_block);
         const matchesStatus = filterStatus === '' || status === filterStatus;
         const matchesSearch =
-            post.id.toString().includes(searchTerm) || // Tìm kiếm theo mã tin
-            post.title.toLowerCase().includes(searchTerm.toLowerCase()) || // Tìm kiếm theo tiêu đề
-            post.room.price.toString().includes(searchTerm); // Tìm kiếm theo giá
+            post.id.toString().includes(searchTerm) ||
+            post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            post.room.price.toString().includes(searchTerm);
 
         return matchesStatus && matchesSearch;
     });
-    // Phân trang
+
     const totalPosts = filteredPosts.length;
     const totalPages = Math.ceil(totalPosts / postsPerPage);
     const indexOfLastPost = currentPage * postsPerPage;
@@ -109,7 +109,6 @@ const ManagePost = () => {
         }
     };
 
-    // Hàm để hiện bài đăng
     const handleShow = async (postId) => {
         const confirmShow = window.confirm('Bạn có chắc chắn muốn hiện bài đăng này không?');
         if (confirmShow) {
@@ -193,7 +192,9 @@ const ManagePost = () => {
                     {currentPosts.length > 0 ? (
                         currentPosts.map((post) => (
                             <tr key={post.id} className="text-center odd:bg-gray-100 even:bg-white">
-                                <td className="p-3 border">#{post.id}</td>
+                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    #{post.id}
+                                </td>
                                 <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
                                     <img
                                         src={post?.images[0]?.url}
@@ -204,9 +205,15 @@ const ManagePost = () => {
                                 <td className="p-3 border  cursor-pointer" onClick={() => handlePostClick(post)}>
                                     {post?.title?.length > 20 ? `${post?.title.slice(0, 20)}...` : post?.title}
                                 </td>
-                                <td className="p-3 border">{post?.room?.price}</td>
-                                <td className="p-3 border">{formatDate(post?.created_at)}</td>
-                                <td className="p-3 border">{calculateEndDate(post?.created_at)}</td>
+                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {post?.room?.price}
+                                </td>
+                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {formatDate(post?.created_at)}
+                                </td>
+                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {calculateEndDate(post?.created_at)}
+                                </td>
                                 <td
                                     className={`p-3 border ${getStatusClass(
                                         getStatus(post?.is_active, post?.is_approved, post?.is_block),

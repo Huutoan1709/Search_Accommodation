@@ -148,6 +148,7 @@ const ApprovedPost = ({ post }) => {
                         </th>
                         <th className="p-3 border">Mã Tin</th>
                         <th className="p-3 border">Loại phòng</th>
+                        <th className="p-3 border">Hình Ảnh</th>
                         <th className="p-3 border">Tiêu đề</th>
                         <th className="p-3 border">Người đăng</th>
                         <th className="p-3 border">Giá(triệu)</th>
@@ -161,19 +162,31 @@ const ApprovedPost = ({ post }) => {
                     {filteredPosts.length > 0 ? (
                         filteredPosts.map((post, index) => (
                             <tr key={post.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} text-center`}>
-                                <td className="p-3 border">
+                                <td className="p-2 border">
                                     <input
                                         type="checkbox"
                                         checked={selectedPosts.has(post.id)}
                                         onChange={() => togglePostSelection(post.id)}
                                     />
                                 </td>
-                                <td className="p-3 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
                                     #{post.id}
                                 </td>
-                                <td className="p-3 border">{post?.room?.room_type?.name}</td>
-                                <td className="p-3 border">{truncateTitle(post?.title, 50)}</td>
-                                <td className="p-3 border">
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {post?.room?.room_type?.name}
+                                </td>
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    <img
+                                        src={post.images[0]?.url}
+                                        alt={post.user?.username}
+                                        className="w-16 h-16 object-cover rounded-md mx-auto"
+                                    />
+                                </td>
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {truncateTitle(post?.title, 50)}
+                                </td>
+
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
                                     <div className="flex items-center justify-center space-x-2">
                                         <img
                                             src={post.user?.avatar}
@@ -183,14 +196,20 @@ const ApprovedPost = ({ post }) => {
                                         <span>{post.user?.username}</span>
                                     </div>
                                 </td>
-                                <td className="p-3 border">{post.room?.price}</td>
-                                <td className="p-3 border">{post.room?.area}</td>
-                                <td className="p-3 border">{new Date(post.created_at).toLocaleDateString()}</td>
-                                <td className="p-3 border">
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {post.room?.price}
+                                </td>
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {post.room?.area}
+                                </td>
+                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
+                                    {new Date(post.created_at).toLocaleDateString()}
+                                </td>
+                                <td className="p-2 border">
                                     {post.is_approved === false ? (
                                         <button
                                             onClick={() => handleApproved(post.id)}
-                                            className="bg-yellow-400 text-black px-2 py-1 rounded hover:bg-yellow-500"
+                                            className="bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500"
                                         >
                                             Chờ duyệt
                                         </button>
@@ -198,7 +217,7 @@ const ApprovedPost = ({ post }) => {
                                         <span className="font-semibold text-green-600">Đã duyệt</span>
                                     )}
                                 </td>
-                                <td className="p-3 border relative">
+                                <td className="p-2 border relative">
                                     <button
                                         onClick={() => setOpenDropdown(openDropdown === post.id ? null : post.id)}
                                         className="flex items-center text-gray-600 hover:text-gray-900 focus:outline-none"

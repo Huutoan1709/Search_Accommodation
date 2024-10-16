@@ -7,6 +7,9 @@ import { useNavigate } from 'react-router-dom';
 const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
     const [roomtype, setRoomType] = useState([]);
     const [error, setError] = useState('');
+    const [selectedRoomType, setSelectedRoomType] = useState(null);
+    const [selectedPriceRange, setSelectedPriceRange] = useState(null);
+    const [selectedAreaRange, setSelectedAreaRange] = useState(null);
     const navigate = useNavigate();
     useEffect(() => {
         const fetchRoomTypes = async () => {
@@ -27,24 +30,27 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
     if (!roomtype) {
         return <div>Loading...</div>;
     }
-    const handlePriceClick = (minPrice, maxPrice) => {
+    const handlePriceClick = (minPrice, maxPrice, index) => {
         setSearchParams({
             ...searchParams,
             min_price: minPrice,
             max_price: maxPrice,
             room_type: room_type,
         });
+        setSelectedPriceRange(index);
     };
 
-    const handleAreaClick = (minArea, maxArea) => {
+    const handleAreaClick = (minArea, maxArea, index) => {
         setSearchParams({
             ...searchParams,
             min_area: minArea,
             max_area: maxArea,
             room_type: room_type,
         });
+        setSelectedAreaRange(index);
     };
-    const handleRoomTypeClick = (roomType) => {
+    const handleRoomTypeClick = (roomType, id) => {
+        setSelectedRoomType(id);
         if (roomType === 'Nhà nguyên căn') {
             navigate('/nha-nguyen-can');
         }
@@ -66,7 +72,7 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
         { label: 'Từ 5 - 7 triệu', min: 5, max: 7 },
         { label: 'Từ 7 - 10 triệu', min: 7, max: 10 },
         { label: 'Từ 10 - 15 triệu', min: 10, max: 15 },
-        { label: 'Trên 15 triệu', min: 15, max: 1000 },
+        { label: 'Trên 15 triệu', min: 15, max: '' },
     ];
     const areaRanges = [
         { label: 'Dưới 20 m²', min: 0, max: 20 },
@@ -74,7 +80,7 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
         { label: 'Từ 30 - 50 m²', min: 30, max: 50 },
         { label: 'Từ 50 - 70 m²', min: 50, max: 70 },
         { label: 'Từ 70 - 90 m²', min: 70, max: 90 },
-        { label: 'Trên 90 m²', min: 90, max: '1000' },
+        { label: 'Trên 90 m²', min: 90, max: '' },
     ];
     return (
         <>
@@ -84,8 +90,13 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
                     {roomtype.map((room) => (
                         <p
                             key={room.id}
-                            onClick={() => handleRoomTypeClick(room.name)}
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-500 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            onClick={() => handleRoomTypeClick(room.name, room.id)}
+                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
+                                ${
+                                    selectedRoomType === room.id
+                                        ? 'text-red-500 font-semibold'
+                                        : 'text-gray-600 hover:text-red-500'
+                                }`}
                         >
                             <MdNavigateNext size={14} />
                             {room.name}
@@ -100,8 +111,13 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
                     {priceRanges.map((range, index) => (
                         <p
                             key={index}
-                            onClick={() => handlePriceClick(range.min, range.max)}
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            onClick={() => handlePriceClick(range.min, range.max, index)}
+                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
+                                ${
+                                    selectedPriceRange === index
+                                        ? 'text-red-600 font-semibold'
+                                        : 'text-gray-600 hover:text-red-600'
+                                }`}
                         >
                             <MdNavigateNext size={14} /> {range.label}
                         </p>
@@ -115,14 +131,20 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
                     {areaRanges.map((range, index) => (
                         <p
                             key={index}
-                            onClick={() => handleAreaClick(range.min, range.max)}
-                            className="text-[13px] flex items-center gap-1 text-gray-600 text-xl hover:text-red-600 cursor-pointer border-b border-gray-200 pb-1 border-dashed"
+                            onClick={() => handleAreaClick(range.min, range.max, index)}
+                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
+                                ${
+                                    selectedAreaRange === index
+                                        ? 'text-red-600 font-semibold'
+                                        : 'text-gray-600 hover:text-red-600'
+                                }`}
                         >
                             <MdNavigateNext size={14} /> {range.label}
                         </p>
                     ))}
                 </div>
             </div>
+
             <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
                 <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Tin mới đăng</h3>
                 <NewPost />

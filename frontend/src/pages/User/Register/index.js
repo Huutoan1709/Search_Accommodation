@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import * as yup from 'yup';
 import Footer from '../../DefaultLayout/footer';
-import { notifyError, notifySuccess, notifyWarning } from '../../../components/ToastManager';
+import { notifyError, notifySuccess } from '../../../components/ToastManager';
 
 function Register() {
     const [first_name, setFirstname] = useState('');

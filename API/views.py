@@ -649,3 +649,15 @@ class ResetPasswordViewSet(viewsets.ViewSet):
 
         except User.DoesNotExist:
             return response.Response({'error': 'Email không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+from django.utils.decorators import method_decorator
+from django.views import View
+from oauth2_provider.views import TokenView
+from rest_framework.decorators import api_view
+from django.http import JsonResponse
+
+@api_view(['POST'])
+def convert_token_view(request):
+    token_view = TokenView.as_view()
+    return token_view(request)

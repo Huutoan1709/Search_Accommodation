@@ -45,7 +45,7 @@ class UserSerializer(ModelSerializer):
         return average_rating if average_rating is not None else 0
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating','is_superuser','is_active']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating','is_superuser','is_active','is_block']
 
 
 class UserInfoSerializer(UserSerializer):

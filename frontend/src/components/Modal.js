@@ -19,27 +19,6 @@ function Modal({ field, setIsModal, handleApply }) {
     const [wards, setWards] = useState([]);
     const [roomTypeOptions, setRoomTypeOptions] = useState([]);
 
-    const options = {
-        area: [
-            'Tất cả diện tích',
-            'Dưới 20 m²',
-            'Từ 20 - 30m²',
-            'Từ 30 - 40m²',
-            'Từ 40 - 60m²',
-            'Từ 60 - 90 m²',
-            'Trên 90 m²',
-        ],
-        price: [
-            'Tất cả mức giá',
-            'Dưới 1 triệu',
-            'Từ 1 - 3 triệu',
-            'Từ 3 - 5 triệu',
-            'Từ 5 - 7 triệu',
-            'Từ 7 - 10 triệu',
-            'Trên 10 triệu',
-        ],
-    };
-
     useEffect(() => {
         if (field === 'area') {
             setSelected('Tất cả diện tích');

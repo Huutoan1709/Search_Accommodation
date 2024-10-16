@@ -24,9 +24,9 @@ const ManageRoom = () => {
     useEffect(() => {
         const fetchRooms = async () => {
             try {
-                const response = await authApi().get(endpoints.myrooms); // API lấy danh sách phòng
+                const response = await authApi().get(endpoints.myrooms);
                 setRooms(response.data);
-                setInitialRooms(response.data); // Lưu trạng thái ban đầu
+                setInitialRooms(response.data);
             } catch (error) {
                 console.error('Failed to fetch rooms:', error);
             }
@@ -42,7 +42,6 @@ const ManageRoom = () => {
     }, [statusFilter]);
 
     useEffect(() => {
-        // Reset other filter when switching filter type
         if (priceFilter && statusFilter) {
             setStatusFilter('');
         }
@@ -51,13 +50,13 @@ const ManageRoom = () => {
     const handlePriceFilterChange = (event) => {
         const value = event.target.value;
         setPriceFilter(value);
-        setCurrentPage(1); // Reset trang về 1 khi thay đổi bộ lọc
+        setCurrentPage(1);
     };
 
     const handleStatusFilterChange = (event) => {
         const value = event.target.value;
         setStatusFilter(value);
-        setCurrentPage(1); // Reset trang về 1 khi thay đổi bộ lọc
+        setCurrentPage(1);
     };
 
     const handleShowCreateRoom = () => {
@@ -86,11 +85,10 @@ const ManageRoom = () => {
             } catch (error) {
                 console.error('Failed to delete room:', error);
 
-                // Kiểm tra xem có thông báo lỗi từ server không
                 if (error.response && error.response.data) {
-                    notifyError(error.response.data.error); // Hiển thị thông báo lỗi từ server
+                    notifyError(error.response.data.error);
                 } else {
-                    notifyError('Xóa phòng thất bại'); // Thông báo lỗi mặc định
+                    notifyError('Xóa phòng thất bại');
                 }
             }
         }
@@ -107,7 +105,6 @@ const ManageRoom = () => {
     const filteredRooms = () => {
         let sortedRooms = [...rooms];
 
-        // Apply filters
         if (priceFilter) {
             sortedRooms = sortedRooms.sort((a, b) => (priceFilter === 'asc' ? a.price - b.price : b.price - a.price));
         }

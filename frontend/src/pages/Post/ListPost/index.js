@@ -12,7 +12,7 @@ const ListPost = ({ searchParams }) => {
     const [count, setCount] = useState(0);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const postsPerPage = 10; // =page_size (pagination django)
+    const postsPerPage = 10;
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('');
     const lastUrl = useRef('');
@@ -52,15 +52,32 @@ const ListPost = ({ searchParams }) => {
             setTitle(`Danh sách bài đăng toàn quốc hiện có ${count} bài đăng.`);
         } else {
             let titleText = 'Danh sách bài đăng';
-            if (searchParams.room_type) titleText += ` cho thuê ${searchParams.room_type}`;
-            if (searchParams.ward) titleText += ` phường ${searchParams.ward}`;
-            if (searchParams.district) titleText += `, ${searchParams.district}`;
-            if (searchParams.city) titleText += `, ${searchParams.city}`;
-            if (searchParams.min_price && searchParams.max_price) {
-                titleText += ` giá từ ${searchParams.min_price} đến ${searchParams.max_price}`;
+
+            // Check each search parameter and append to titleText
+            if (searchParams.room_type) {
+                titleText += ` cho thuê ${searchParams.room_type}`;
+            }
+            if (searchParams.ward) {
+                titleText += ` tại phường ${searchParams.ward}`;
+            }
+            if (searchParams.district) {
+                titleText += ` tại huyện ${searchParams.district}`;
+            }
+            if (searchParams.city) {
+                titleText += ` tại thành phố ${searchParams.city}`;
+            }
+            if (searchParams.min_area) {
+                titleText += ` và diện tích từ ${searchParams.min_area}m²`;
             }
             if (searchParams.max_area) {
-                titleText += `, diện tích dưới ${searchParams.max_area}m²`;
+                titleText += ` đến ${searchParams.max_area}m²`;
+            }
+
+            if (searchParams.min_price) {
+                titleText += `và giá từ ${searchParams.min_price} triệu`;
+            }
+            if (searchParams.max_price) {
+                titleText += ` đến ${searchParams.max_price} triệu`;
             }
 
             setTitle(titleText);
@@ -105,11 +122,10 @@ const ListPost = ({ searchParams }) => {
                         />
                     ))
                 ) : (
-                    <p>CHƯA CÓ BÀI ĐĂNG.....</p>
+                    <p className="items-center justify-center">CHƯA CÓ BÀI ĐĂNG LIÊN QUAN.....</p>
                 )}
             </div>
 
-            {/* Pagination Component */}
             <Pagination
                 currentPage={currentPage}
                 totalPages={totalPages}

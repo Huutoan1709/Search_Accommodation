@@ -10,7 +10,6 @@ import random
 import string
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models import UniqueConstraint
-EXPIRATION_BOOKING = 2
 
 
 class BaseModel(models.Model):

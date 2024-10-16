@@ -122,7 +122,6 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
                     </div>
                 </div>
             </div>
-            {/* ChatBot Component - Floating at the bottom right */}
             <div className="fixed bottom-4 right-4">
                 <ChatBot />
             </div>

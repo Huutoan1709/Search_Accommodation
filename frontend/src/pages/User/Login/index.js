@@ -66,7 +66,7 @@ function Login() {
     };
 
     const handleGoogleLoginSuccess = async (response) => {
-        const googleToken = response.credential; // Nhận token Google trả về
+        const googleToken = response.credential;
         console.log('Google Token:', googleToken);
 
         try {

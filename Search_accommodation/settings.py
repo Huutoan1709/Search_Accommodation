@@ -18,11 +18,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'oauth2_provider',
+    'social_django',
     'cloudinary_storage',
     'cloudinary',
     'django_filters',
     'corsheaders',
     'django.contrib.humanize',
+
 ]
 
 MIDDLEWARE = [
@@ -105,10 +107,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
-    # 'DEFAULT_PERMISSION_CLASSES': [
-    #     'rest_framework.permission.AllowAny'
-    # ]
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    # ),
 }
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -148,5 +151,12 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nguyenhuutoan010@gmail.com'
 EMAIL_HOST_PASSWORD = 'vosoawnodgzbcqzk'
 
+AUTHENTICATION_BACKENDS = (
+    'social_core.backends.google.GoogleOAuth2',  # Thêm Google OAuth backend
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+#
+#
 # CLIENT_ID = '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0'
 # CLIENT_SECRET = 'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0'
