@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../../API';
-import { MdDelete } from 'react-icons/md';
+import { MdEdit } from 'react-icons/md';
 import PaginationUser from '../../../components/PaginationUser';
 import { notifySuccess } from '../../../components/ToastManager';
 import { AiFillStar } from 'react-icons/ai';
@@ -9,7 +9,10 @@ const MyReviews = () => {
     const [reviews, setReviews] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState('');
-    const [filterRating, setFilterRating] = useState(''); // Filter by star rating
+    const [filterRating, setFilterRating] = useState('');
+    const [editingReview, setEditingReview] = useState(null);
+    const [editedComment, setEditedComment] = useState('');
+    const [editedRating, setEditedRating] = useState(5);
     const reviewsPerPage = 10;
 
     useEffect(() => {
@@ -24,16 +27,33 @@ const MyReviews = () => {
         fetchReviews();
     }, []);
 
-    const handleDeleteReview = async (reviewId) => {
-        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa đánh giá này không?');
-        if (confirmDelete) {
-            try {
-                await authApi().delete(endpoints.deletereview(reviewId));
-                notifySuccess('Xóa đánh giá thành công');
-                setReviews(reviews.filter((review) => review.id !== reviewId));
-            } catch (error) {
-                console.error('Failed to delete review:', error);
-            }
+    const handleEditReview = (review) => {
+        setEditingReview(review);
+        setEditedComment(review.comment);
+        setEditedRating(review.rating);
+    };
+
+    const handleSaveReview = async () => {
+        if (!editingReview) return;
+
+        try {
+            await authApi().patch(endpoints.updatereview(editingReview.id), {
+                comment: editedComment,
+                rating: editedRating,
+            });
+
+            notifySuccess('Cập nhật đánh giá thành công');
+            setReviews(
+                reviews.map((review) =>
+                    review.id === editingReview.id
+                        ? { ...review, comment: editedComment, rating: editedRating }
+                        : review,
+                ),
+            );
+
+            setEditingReview(null);
+        } catch (error) {
+            console.error('Failed to update review:', error);
         }
     };
 
@@ -66,21 +86,19 @@ const MyReviews = () => {
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
+        return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(
+            2,
+            '0',
+        )}/${date.getFullYear()}`;
     };
 
-    const renderStars = (rating) => {
-        return (
-            <div className="flex justify-center">
-                {Array.from({ length: 5 }, (_, index) => (
-                    <AiFillStar key={index} color={index < rating ? '#f39c12' : '#e0e0e0'} />
-                ))}
-            </div>
-        );
-    };
+    const renderStars = (rating) => (
+        <div className="flex justify-center">
+            {Array.from({ length: 5 }, (_, index) => (
+                <AiFillStar key={index} color={index < rating ? '#f39c12' : '#e0e0e0'} />
+            ))}
+        </div>
+    );
 
     return (
         <div className="px-4 py-6 relative">
@@ -115,7 +133,7 @@ const MyReviews = () => {
                         <th className="p-3 border">Nội dung</th>
                         <th className="p-3 border">Đánh giá</th>
                         <th className="p-3 border">Ngày tạo</th>
-                        <th className="p-3 border">Chủ nhà</th>
+                        <th className="p-3 border">Đánh giá cho</th>
                         <th className="p-3 border">Tùy chọn</th>
                     </tr>
                 </thead>
@@ -144,11 +162,11 @@ const MyReviews = () => {
                                 </td>
                                 <td className="p-3 border">
                                     <button
-                                        className="bg-red-500 text-white px-3 py-2 rounded mr-2 hover:bg-red-600"
-                                        onClick={() => handleDeleteReview(review.id)}
-                                        title="Xóa"
+                                        className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
+                                        onClick={() => handleEditReview(review)}
+                                        title="Chỉnh sửa"
                                     >
-                                        <MdDelete size={15} />
+                                        <MdEdit size={15} />
                                     </button>
                                 </td>
                             </tr>
@@ -163,6 +181,56 @@ const MyReviews = () => {
                 </tbody>
             </table>
             <PaginationUser currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
+
+            {/* Modal chỉnh sửa đánh giá */}
+            {editingReview && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+                    <div className="bg-white p-6 rounded-xl shadow-2xl w-[500px] max-w-full">
+                        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Chỉnh sửa đánh giá</h2>
+
+                        {/* Chọn số sao */}
+                        <div className="flex justify-center gap-2 mb-4">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                    key={star}
+                                    className={`text-3xl transition-colors duration-200 ${
+                                        editedRating >= star ? 'text-yellow-400' : 'text-gray-300'
+                                    }`}
+                                    onClick={() => setEditedRating(star)}
+                                >
+                                    ★
+                                </button>
+                            ))}
+                        </div>
+                        <p className="text-center text-gray-500 mb-4">{editedRating}/5 sao</p>
+
+                        {/* Nhập nội dung đánh giá */}
+                        <textarea
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition-all mb-4"
+                            rows="4"
+                            placeholder="Mô tả trải nghiệm của bạn"
+                            value={editedComment}
+                            onChange={(e) => setEditedComment(e.target.value)}
+                        />
+
+                        {/* Nút lưu và hủy */}
+                        <div className="flex justify-end gap-3">
+                            <button
+                                className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-all"
+                                onClick={() => setEditingReview(null)}
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
+                                onClick={handleSaveReview}
+                            >
+                                Lưu
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
