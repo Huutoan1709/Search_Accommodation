@@ -6,9 +6,12 @@ import { RiCrop2Line } from 'react-icons/ri';
 import { PiBuildingApartmentBold } from 'react-icons/pi';
 import Modal from '../../components/Modal';
 import { LuRefreshCcw } from 'react-icons/lu';
+import { BiSearch } from 'react-icons/bi';
+import LocationSearch from './LocationSearch';
 
 function Search({ setSearchParams, room_type }) {
     const [isModal, setIsModal] = useState(false);
+    const [isLocationSearchOpen, setIsLocationSearchOpen] = useState(false);
     const [selectedValues, setSelectedValues] = useState({
         city: '',
         district: '',
@@ -111,6 +114,55 @@ function Search({ setSearchParams, room_type }) {
         });
         setSearchParams({ room_type: room_type });
     };
+    const buildSearchParams = (values) => {
+        const params = {
+            min_price: values.min_price || '',
+            max_price: values.max_price || '',
+            min_area: values.min_area || '',
+            max_area: values.max_area || '',
+            city: values.city.name || '',
+            district: values.district.name || '',
+            ward: values.ward || '',
+            room_type: values.room_type || '',
+            min_latitude: values.min_latitude || '',
+            max_latitude: values.max_latitude || '',
+            min_longitude: values.min_longitude || '',
+            max_longitude: values.max_longitude || '',
+        };
+
+        return Object.entries(params)
+            .filter(([_, value]) => value !== '')
+            .map(([key, value]) => `${key}=${value}`)
+            .join('&');
+    };
+
+    const handleSearchAroundClick = () => {
+        setIsLocationSearchOpen(true);
+    };
+
+    const handleLocationSearchClose = () => {
+        setIsLocationSearchOpen(false);
+    };
+
+    const handleLocationSearchSubmit = (params) => {
+        const { latitude, longitude } = params;
+
+        const minLatitude = latitude - 0.04;
+        const maxLatitude = latitude + 0.04;
+        const minLongitude = longitude - 0.04;
+        const maxLongitude = longitude + 0.04;
+
+        const updatedParams = {
+            ...params,
+            min_latitude: minLatitude,
+            max_latitude: maxLatitude,
+            min_longitude: minLongitude,
+            max_longitude: maxLongitude,
+        };
+
+        setSearchParams(buildSearchParams(updatedParams));
+        console.log('Tìm kiếm xung quanh:', updatedParams);
+    };
 
     const truncateText = (text) => {
         return text.length > 20 ? text.slice(0, 20) + '...' : text;
@@ -161,6 +213,15 @@ function Search({ setSearchParams, room_type }) {
                         className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
                     />
                 </span>
+
+                <span
+                    type="button"
+                    onClick={handleSearchAroundClick}
+                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
+                >
+                    <BiSearch />
+                    Xung quanh
+                </span>
                 <span
                     type="button"
                     onClick={handleReset}
@@ -171,6 +232,9 @@ function Search({ setSearchParams, room_type }) {
                 </span>
             </div>
             {isModal && <Modal field={selectedField} setIsModal={setIsModal} handleApply={handleApply} />}
+            {isLocationSearchOpen && (
+                <LocationSearch onSubmit={handleLocationSearchSubmit} onClose={handleLocationSearchClose} />
+            )}
         </>
     );
 }

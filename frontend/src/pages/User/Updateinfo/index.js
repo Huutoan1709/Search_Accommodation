@@ -139,6 +139,7 @@ const UpdateInfo = () => {
                             name="phone"
                             value={user.phone}
                             onChange={handleInputChange}
+                            disabled
                             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
                         />
                     </div>

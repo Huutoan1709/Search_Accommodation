@@ -20,14 +20,14 @@ function MapBox({ latitude, longitude, onCoordinatesChange }) {
     }, [latitude, longitude]);
 
     const handleMapClick = (event) => {
-        const { lng, lat } = event.lngLat; // Lấy tọa độ từ object
+        const { lng, lat } = event.lngLat;
         if (onCoordinatesChange) {
-            onCoordinatesChange(lat, lng); // Gọi callback để cập nhật tọa độ trong CreateRoom
+            onCoordinatesChange(lat, lng);
         }
         setViewport((prev) => ({
             ...prev,
             latitude: lat,
-            longitude: lng, // Cập nhật vị trí cho marker mới
+            longitude: lng,
         }));
     };
 

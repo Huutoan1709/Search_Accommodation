@@ -236,9 +236,11 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
             if (showEdit) {
                 await authApi().patch(endpoints.updateroom(roomData.id), dataToUpdate);
                 notifySuccess('Cập nhật phòng thành công!');
+                window.location.reload();
             } else {
                 await authApi().post(endpoints.room, dataToCreate);
                 notifySuccess('Tạo phòng thành công!');
+                window.location.reload();
             }
 
             if (typeof onClose === 'function') {

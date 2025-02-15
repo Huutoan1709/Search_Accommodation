@@ -36,7 +36,7 @@ const ListPost = ({ searchParams }) => {
         } finally {
             setLoading(false);
         }
-        console.log('fetchData', url);
+        console.log('fetchData posts', url);
     };
 
     useEffect(() => {
@@ -74,7 +74,7 @@ const ListPost = ({ searchParams }) => {
             }
 
             if (searchParams.min_price) {
-                titleText += `và giá từ ${searchParams.min_price} triệu`;
+                titleText += ` và giá từ ${searchParams.min_price} triệu`;
             }
             if (searchParams.max_price) {
                 titleText += ` đến ${searchParams.max_price} triệu`;

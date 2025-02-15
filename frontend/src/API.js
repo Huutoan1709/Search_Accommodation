@@ -38,7 +38,7 @@ export const endpoints = {
     following: (userId) => `/user/${userId}/following/`,
     deleteImage: (postId, imageId) => `/post/${postId}/images/${imageId}/`,
     myreviews: '/user/my-reviews/',
-    deletereview: (reviewId) => `/review/${reviewId}/`,
+    updatereview: (reviewId) => `/review/${reviewId}/`,
     deleteSupportRequest: (requestId) => `/support-request/${requestId}/`,
     deleteUser: (userId) => `/user/${userId}/`,
     detailuseradmin: (userId) => `/user/${userId}/`,
