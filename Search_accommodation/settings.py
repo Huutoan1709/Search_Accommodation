@@ -41,6 +41,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Search_accommodation.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:3001",
 
 ]
 import os

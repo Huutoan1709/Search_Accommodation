@@ -7,7 +7,7 @@ import { PiMapPinAreaFill } from 'react-icons/pi';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { MdOutlineAttachMoney } from 'react-icons/md';
-import { BiArea, BiCabinet, BiHeart } from 'react-icons/bi';
+import { BiArea, BiCabinet } from 'react-icons/bi';
 import { CiStopwatch } from 'react-icons/ci';
 import { CiHashtag } from 'react-icons/ci';
 import { BiBed, BiRuler, BiMoney } from 'react-icons/bi';
@@ -24,6 +24,7 @@ import BackToTop from '../../../components/BackToTop';
 import { AiFillSafetyCertificate } from 'react-icons/ai';
 import { IoIosCall } from 'react-icons/io';
 import { SlUserFollow } from 'react-icons/sl';
+import AroundPost from '../AroundPost';
 function DetailPost() {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
@@ -100,7 +101,7 @@ function DetailPost() {
                   }
                 : null;
         })
-        .filter(Boolean); // Loại bỏ các giá trị null
+        .filter(Boolean);
 
     const prices = post?.room?.prices?.map((price) => ({
         label: price.name,
@@ -253,6 +254,7 @@ function DetailPost() {
                             </div>
                         </div>
                     </div>
+
                     <div className="w-[30%]">
                         <div className=" bg-white p-3 shadow-lg rounded-lg flex flex-col items-center text-center mb-7 border border-gray-300">
                             <img
@@ -300,6 +302,8 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
+            <AroundPost city={post?.room?.city} district={post?.room?.district} />
+
             <BackToTop />
             <Footer />
         </div>

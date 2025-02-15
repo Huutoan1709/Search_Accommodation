@@ -17,6 +17,7 @@ from .models import PasswordResetOTP
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.shortcuts import render
+from django.db.models import Q
 
 
 
@@ -50,7 +51,6 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
     serializer_class = UserInfoSerializer
     queryset = User.objects.all()
     pagination_class = paginators.UserPagination
-
 
     def get_permissions(self):
         if self.action in ['get_follower', 'get_following', 'follow', 'current_user', 'my_rooms', 'my_post',
@@ -147,7 +147,6 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         return response.Response(status=status.HTTP_200_OK)
 
-
     @action(methods=['post'], url_path='favorite-post', detail=False)
     def favorite_post(self, request):
         post_id = request.data.get('post_id')
@@ -189,13 +188,13 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
         serializer = ReviewSerializer(reviews, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
+
     @action(methods=['get'], detail=True, url_path='review')
     def get_reviews(self, request, pk=None):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
             return response.Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
 
         reviews = Reviews.objects.filter(landlord=user).order_by('-id')
 
@@ -253,8 +252,8 @@ class RoomViewSet(viewsets.ViewSet, UpdatePartialAPIView, generics.ListCreateAPI
         if latitude and longitude:
             lat = float(latitude)
             lon = float(longitude)
-            queryset = queryset.filter(latitude__range=(lat - 0.03, lat + 0.03),
-                                       longitude__range=(lon - 0.03, lon + 0.03))
+            queryset = queryset.filter(latitude__range=(lat - 0.04, lat + 0.04),
+                                       longitude__range=(lon - 0.04, lon + 0.04))
 
         return queryset
 
@@ -325,14 +324,14 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Post.objects.filter(is_active = True, is_approved=True,is_block = False)
+        queryset = Post.objects.filter(is_active=True, is_approved=True, is_block=False)
 
         if self.request.query_params.get('all', None) == 'true':
             queryset = Post.objects.all()
-        if self.action in ['destroy', 'partial_update', 'update','delete_image']:
+        if self.action in ['destroy', 'partial_update', 'update', 'delete_image']:
             queryset = Post.objects.all()
-        if(self.action) in ['images']:
-            queryset = Post.objects.filter(is_active= True)
+        if (self.action) in ['images']:
+            queryset = Post.objects.filter(is_active=True)
 
         # Lấy các giá trị từ query params
         min_price = self.request.query_params.get('min_price', None)
@@ -343,6 +342,11 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         district = self.request.query_params.get('district', None)
         city = self.request.query_params.get('city', None)
         room_type = self.request.query_params.get('room_type', None)
+        # Tìm kiếm xung quanh bằng cách sử dụng tọa độ
+        min_latitude = self.request.query_params.get('min_latitude', None)
+        max_latitude = self.request.query_params.get('max_latitude', None)
+        min_longitude = self.request.query_params.get('min_longitude', None)
+        max_longitude = self.request.query_params.get('max_longitude', None)
         # Lọc theo price
         if min_price and max_price:
             queryset = queryset.filter(room__price__range=(min_price, max_price))
@@ -368,6 +372,13 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             queryset = queryset.filter(room__city__iexact=city.strip())
         if room_type:
             queryset = queryset.filter(room__room_type__name__iexact=room_type.strip())
+
+        # Tìm kiếm xung quanh theo tọa độ (latitude, longitude)
+        if min_latitude and max_latitude and min_longitude and max_longitude:
+            queryset = queryset.filter(
+                Q(room__latitude__gte=min_latitude) & Q(room__latitude__lte=max_latitude) &
+                Q(room__longitude__gte=min_longitude) & Q(room__longitude__lte=max_longitude)
+            )
         # Chỉ lọc những bài đăng đã duyệt khi action là 'list'
         if self.action == 'list':
             queryset = queryset.filter(is_approved=True)
@@ -379,11 +390,12 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             # Bất kỳ người dùng nào đều có thể xem danh sách bài đăng
             return [permissions.AllowAny()]
 
-        if self.action in ['create', 'partial_update', 'update','destroy']:
+        if self.action in ['create', 'partial_update', 'update', 'destroy']:
             # Sử dụng lớp quyền tùy chỉnh để kiểm tra quyền
             return [perms.IsAdminWebmasterOrLandlord()]
 
         return [permissions.AllowAny()]
+
     def get_serializer_class(self):
         serializers = {
             'list': PostSerializer,
@@ -457,7 +469,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
 
     @action(methods=['get'], detail=False, url_path='wait-approved')
     def get_wait_approved(self, request):
-        approved = Post.objects.filter(is_approved=False, is_block = False).all()
+        approved = Post.objects.filter(is_approved=False, is_block=False).all()
         serializer = DetailPostSerializer(approved, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -506,6 +518,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             return response.Response({'message': 'Ảnh đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
         except PostImage.DoesNotExist:
             return response.Response({'error': 'Ảnh không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):
     serializer_class = PriceSerializer
@@ -656,6 +669,7 @@ from django.views import View
 from oauth2_provider.views import TokenView
 from rest_framework.decorators import api_view
 from django.http import JsonResponse
+
 
 @api_view(['POST'])
 def convert_token_view(request):

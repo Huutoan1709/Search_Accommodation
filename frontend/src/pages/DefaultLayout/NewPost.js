@@ -13,14 +13,9 @@ const NewPost = () => {
         const fetchPosts = async () => {
             try {
                 let res = await API.get(endpoints['post']);
-                let sortedPosts = res.data.results
-                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                    .filter((post) => {
-                        let differenceInHours = (new Date() - new Date(post.created_at)) / (1000 * 60 * 60);
-                        return differenceInHours <= 72;
-                    });
+                let sortedPosts = res.data.results.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sắp xếp bài đăng theo thời gian mới nhất
 
-                setPosts(sortedPosts.slice(0, 10));
+                setPosts(sortedPosts.slice(0, 20)); // Lấy tối đa 20 bài đăng
             } catch (err) {
                 console.error(err);
             }
