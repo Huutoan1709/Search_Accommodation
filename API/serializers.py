@@ -1,11 +1,13 @@
 from rest_framework import serializers
 from .models import User, Follow, PostImage, Post, Price, Rooms, RoomType, Reviews, FavoritePost, Amenities, \
-    SupportRequests
+    SupportRequests, PostVideo
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
 from django.utils.timesince import timesince
 from django.db.models import Avg
+
+
 class UserSerializer(ModelSerializer):
     followed = SerializerMethodField()
     reputation = SerializerMethodField()
@@ -32,7 +34,6 @@ class UserSerializer(ModelSerializer):
     def get_reputation(self, obj):
         landlord_reviews = Reviews.objects.filter(landlord=obj, is_active=True)
 
-
         total_rating = landlord_reviews.aggregate(average_rating=Avg('rating'))['average_rating']
 
         if total_rating and total_rating >= 4.0:
@@ -43,9 +44,11 @@ class UserSerializer(ModelSerializer):
         landlord_reviews = Reviews.objects.filter(landlord=obj, is_active=True)
         average_rating = landlord_reviews.aggregate(average_rating=Avg('rating'))['average_rating']
         return average_rating if average_rating is not None else 0
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed','reputation','average_rating','is_superuser','is_active','is_block']
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name', 'role', 'followed', 'reputation',
+                  'average_rating', 'is_superuser', 'is_active', 'is_block']
 
 
 class UserInfoSerializer(UserSerializer):
@@ -65,7 +68,7 @@ class UserInfoSerializer(UserSerializer):
         return Follow.objects.filter(follower=obj, is_active=True).count()
 
     class Meta(UserSerializer.Meta):
-        fields = UserSerializer.Meta.fields + ['id', 'gender', 'date_joined', 'last_login', 'email', 'phone','address',
+        fields = UserSerializer.Meta.fields + ['id', 'gender', 'date_joined', 'last_login', 'email', 'phone', 'address',
                                                'follower_count', 'following_count', 'password']
         extra_kwargs = {
             'password':
@@ -76,7 +79,7 @@ class UserInfoSerializer(UserSerializer):
 class RoomTypeSerializer(ModelSerializer):
     class Meta:
         model = RoomType
-        fields = ['id', 'name', 'description','created_at','is_active']
+        fields = ['id', 'name', 'description', 'created_at', 'is_active']
 
 
 class PriceSerializer(ModelSerializer):
@@ -110,6 +113,7 @@ class RoomsSerializer(ModelSerializer):
             'landlord': {'read_only': True},
         }
 
+
 class DetailRoomSerializer(RoomsSerializer):
     prices = SerializerMethodField()
     amenities = serializers.PrimaryKeyRelatedField(many=True, queryset=Amenities.objects.all())
@@ -121,7 +125,8 @@ class DetailRoomSerializer(RoomsSerializer):
         return PriceSerializer(active_prices, many=True).data
 
     class Meta(RoomsSerializer.Meta):
-        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord','created_at','room_type', 'has_post']
+        fields = RoomsSerializer.Meta.fields + ['latitude', 'longitude', 'prices', 'amenities', 'landlord',
+                                                'created_at', 'room_type', 'has_post']
 
 
 class WriteRoomSerializer(RoomsSerializer):
@@ -143,6 +148,18 @@ class PostImageSerializer(ModelSerializer):
         fields = ['id', 'url']
 
 
+class PostVideoSerializer(ModelSerializer):
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        if instance.video:
+            rep['video'] = instance.video.url  # Lấy URL của video
+        return rep
+
+    class Meta:
+        model = PostVideo
+        fields = ['id', 'video', 'post']
+
+
 class UserPostSerializer(ModelSerializer):
     class Meta:
         model = User
@@ -150,12 +167,18 @@ class UserPostSerializer(ModelSerializer):
 
 
 class PostSerializer(ModelSerializer):
+    video = SerializerMethodField()
     images = SerializerMethodField()
     user = UserInfoSerializer()
     room = RoomsSerializer()
     created_at_humanized = SerializerMethodField()
+
     def get_created_at_humanized(self, obj):
         return timesince(obj.created_at) + ' trước'
+
+    def get_video(self, obj):
+        video_instance = getattr(obj, 'Post_Video', None)  # Lấy video nếu có
+        return PostVideoSerializer(video_instance).data if video_instance else None
 
     def get_images(self, obj):
         active_images = obj.Post_Images.filter(is_active=True)
@@ -163,7 +186,8 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room','created_at_humanized','is_active','is_approved','is_block']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room', 'created_at_humanized', 'is_active',
+                  'is_approved', 'is_block']
         extra_kwargs = {
             'user': {'read_only': True},
         }
@@ -174,7 +198,7 @@ class DetailPostSerializer(PostSerializer):
 
     class Meta(PostSerializer.Meta):
         model = Post
-        fields = PostSerializer.Meta.fields+['is_approved',]
+        fields = PostSerializer.Meta.fields + ['is_approved', ]
 
 
 class CreatePostSerializer(ModelSerializer):
@@ -218,15 +242,17 @@ class SupportRequestsSerializer(ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     customer = UserInfoSerializer()
     landlord = UserInfoSerializer()
+
     class Meta:
         model = Reviews
         fields = ['id', 'customer', 'landlord', 'rating', 'comment', 'selected_criteria', 'created_at']
 
+
 class CreateReviewSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+
     class Meta(ReviewSerializer.Meta):
         model = ReviewSerializer.Meta.model
-
 
     def validate(self, data):
         customer = data.get('customer')
@@ -242,4 +268,3 @@ class CreateReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Chỉ người dùng có vai trò 'LANDLORD' mới có thể nhận đánh giá.")
 
         return data
-

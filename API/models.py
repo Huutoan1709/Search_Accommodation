@@ -69,6 +69,13 @@ class PostImage(BaseModel):
     url = CloudinaryField()
     post = models.ForeignKey('Post', related_name='Post_Images', on_delete=models.CASCADE)
 
+class PostVideo(BaseModel):
+    video = CloudinaryField(resource_type='video', null=True, blank=True)
+    post = models.OneToOneField('Post', related_name='Post_Video', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"Video for Post: {self.post.title}"
+
 
 class Post(BaseModel):
     title = models.CharField(max_length=400)
@@ -194,3 +201,4 @@ class PasswordResetOTP(models.Model):
 
     def __str__(self):
         return f"OTP for {self.user.email}"
+

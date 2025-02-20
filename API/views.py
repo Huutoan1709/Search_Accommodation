@@ -479,6 +479,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         serializer = DetailPostSerializer(block, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
+
     @action(methods=['post'], detail=True, url_path='images')
     def images(self, request, pk=None):
         if request.method == 'POST':
