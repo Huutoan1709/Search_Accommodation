@@ -71,7 +71,7 @@ function LocationSearch({ onClose, onSubmit }) {
 
         const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
             address,
-        )}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
+        )}.json?access_token=pk.eyJ1IjoiaHV1dG9hbjE3MDkiLCJhIjoiY204Y2lsZ20wMTg0ODJrb2xrM3RkbWI1MCJ9.78vKIOvNFkWeyR6IEB1W2w`;
 
         try {
             const response = await fetch(geocodingUrl);

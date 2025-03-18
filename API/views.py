@@ -2,11 +2,11 @@ from .models import User
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
     SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
-    CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer
+    CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer, PostVideoSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
-    Amenities, PasswordResetOTP
+    Amenities, PasswordResetOTP, PostVideo
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
 from django.core.mail import send_mail
@@ -18,7 +18,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.shortcuts import render
 from django.db.models import Q
-
+import jwt
+from datetime import datetime, timedelta
 
 
 # from django_filters.rest_framework import DjangoFilterBackend
@@ -330,7 +331,7 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             queryset = Post.objects.all()
         if self.action in ['destroy', 'partial_update', 'update', 'delete_image']:
             queryset = Post.objects.all()
-        if (self.action) in ['images']:
+        if (self.action) in ['images','video']:
             queryset = Post.objects.filter(is_active=True)
 
         # Lấy các giá trị từ query params
@@ -479,7 +480,6 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         serializer = DetailPostSerializer(block, many=True)
         return response.Response(serializer.data, status=status.HTTP_200_OK)
 
-
     @action(methods=['post'], detail=True, url_path='images')
     def images(self, request, pk=None):
         if request.method == 'POST':
@@ -519,6 +519,49 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             return response.Response({'message': 'Ảnh đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
         except PostImage.DoesNotExist:
             return response.Response({'error': 'Ảnh không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(methods=['post'], detail=True, url_path='video')
+    def video(self, request, pk=None):
+        post = self.get_object()
+
+        # Kiểm tra nếu không có video trong request
+        if 'video' not in request.FILES:
+            return response.Response({'error': 'No video file provided'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Kiểm tra xem bài đăng đã có video chưa
+        if hasattr(post, 'Post_Video'):
+            return response.Response({'error': 'This post already has a video'}, status=status.HTTP_400_BAD_REQUEST)
+
+        post_video = PostVideo(post=post, video=request.FILES['video'])
+        post_video.save()
+
+        return response.Response(PostVideoSerializer(post_video).data, status=status.HTTP_201_CREATED)
+
+    @action(methods=['delete'], detail=True, url_path='deletevideo')
+    def delete_video(self, request, pk=None):
+        try:
+            post = self.get_object()
+
+            # Kiểm tra quyền xóa
+            if request.user.role not in ['ADMIN', 'WEBMASTER', 'LANDLORD'] or post.user != request.user:
+                return response.Response(
+                    {'error': 'Chỉ ADMIN, WEBMASTER hoặc chủ bài đăng mới có thể xóa video.'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+            # Kiểm tra xem bài đăng có video không
+            try:
+                post_video = PostVideo.objects.get(post=post)
+            except PostVideo.DoesNotExist:
+                return response.Response({'error': 'Bài đăng không có video.'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Xóa video
+            post_video.delete()
+
+            return response.Response({'message': 'Video đã được xóa thành công.'}, status=status.HTTP_204_NO_CONTENT)
+        except Exception as e:
+            return response.Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class PriceViewSet(viewsets.ViewSet, DestroySoftAPIView, UpdatePartialAPIView):

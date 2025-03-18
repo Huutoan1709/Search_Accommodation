@@ -29,6 +29,7 @@ const NewPost = () => {
 
     return posts.map((post) => {
         const handlePostClick = () => navigate(`/post/${post.id}`);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         return (
             <div

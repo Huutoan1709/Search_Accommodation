@@ -7,6 +7,8 @@ import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { FaLock, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import MapBox from '../../../components/MapBox';
 
+import CreateModalVideo from '../../../components/CreateModalVideo';
+import { set } from 'lodash';
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
@@ -17,7 +19,8 @@ const CreatePost = () => {
     const [postContent, setPostContent] = useState('');
     const [loading, setLoading] = useState(false);
     const [amenities, setAmenities] = useState({});
-
+    const [showVideoModal, setShowVideoModal] = useState(false);
+    const [newPostId, setNewPostId] = useState(null);
     useEffect(() => {
         const fetchRooms = async () => {
             try {
@@ -95,6 +98,7 @@ const CreatePost = () => {
 
             const response = await authApi().post(endpoints.post, postData);
             const postId = response.data.id;
+            setNewPostId(postId);
 
             const formData = new FormData();
             images.forEach((image) => {
@@ -108,10 +112,10 @@ const CreatePost = () => {
             });
 
             notifySuccess('Tạo bài đăng và tải lên hình ảnh thành công!');
-
+            setShowVideoModal(true);
             setPostTitle('');
             setPostContent('');
-            setSelectedRoom(null);
+            setSelectedRoom('Chọn phòng');
             setImages([]);
         } catch (error) {
             console.error('Failed to create post or upload images:', error);
@@ -120,6 +124,7 @@ const CreatePost = () => {
             setLoading(false);
         }
     };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
@@ -291,7 +296,7 @@ const CreatePost = () => {
                                     </div>
                                 </div>
 
-                                <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
+                                <div className="bg-white p-6 rounded-lg shadow-md space-y-4 mt-6">
                                     <h2 className="text-2xl font-bold text-red-400">Hình ảnh</h2>
                                     <p className="text-md text-gray-500 mb-2">
                                         Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn
@@ -404,6 +409,7 @@ const CreatePost = () => {
                     </div>
                 )}
             </div>
+            <CreateModalVideo isOpen={showVideoModal} onClose={() => setShowVideoModal(false)} postId={newPostId} />
         </div>
     );
 };

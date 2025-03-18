@@ -137,6 +137,7 @@ function Search({ setSearchParams, room_type }) {
     };
 
     const handleSearchAroundClick = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setIsLocationSearchOpen(true);
     };
 

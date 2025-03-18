@@ -41,7 +41,7 @@ function MapBox({ latitude, longitude, onCoordinatesChange }) {
                 }}
                 onClick={handleMapClick} // Sự kiện click để cập nhật vị trí marker
                 mapStyle="mapbox://styles/mapbox/streets-v11"
-                mapboxAccessToken="pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A"
+                mapboxAccessToken="pk.eyJ1IjoiaHV1dG9hbjE3MDkiLCJhIjoiY204Y2lsZ20wMTg0ODJrb2xrM3RkbWI1MCJ9.78vKIOvNFkWeyR6IEB1W2w"
                 scrollZoom={true}
                 dragPan={true}
                 dragRotate={true}

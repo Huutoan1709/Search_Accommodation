@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 
 const ITEMS_PER_PAGE = 4;
 
-const AroundPost = ({ city, district }) => {
+const AroundPost = ({ city, district, currentPostId }) => {
     const [posts, setPosts] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const navigate = useNavigate();
@@ -16,7 +16,8 @@ const AroundPost = ({ city, district }) => {
         const fetchAroundPosts = async () => {
             try {
                 const res = await API.get(`${endpoints['post']}?city=${city}&district=${district}&limit=12`);
-                setPosts(res.data.results);
+                const filteredPosts = res.data.results.filter((post) => post.id !== currentPostId);
+                setPosts(filteredPosts);
             } catch (err) {
                 console.error(err);
             }
@@ -25,7 +26,7 @@ const AroundPost = ({ city, district }) => {
         if (city && district) {
             fetchAroundPosts();
         }
-    }, [city, district]);
+    }, [city, district, currentPostId]);
 
     const nextSlide = () => {
         setCurrentIndex((prevIndex) => (prevIndex + ITEMS_PER_PAGE >= posts.length ? 0 : prevIndex + ITEMS_PER_PAGE));
@@ -37,6 +38,10 @@ const AroundPost = ({ city, district }) => {
         );
     };
 
+    const handlePostClick = (postId) => {
+        navigate(`/post/${postId}`);
+        window.location.reload();
+    };
     return (
         <div className="w-[1024px] m-auto mt-8 bg-white rounded-lg p-6 relative shadow-md border ">
             <h3 className="font-semibold  text-black-500 text-2xl pb-2">Tin đăng cùng khu vực ({posts.length})</h3>
@@ -62,6 +67,7 @@ const AroundPost = ({ city, district }) => {
                                 <div
                                     key={post.id}
                                     className="min-w-[24%] bg-white rounded-lg overflow-hidden cursor-pointer"
+                                    onClick={() => handlePostClick(post.id)}
                                 >
                                     <img
                                         src={post?.images[0]?.url}

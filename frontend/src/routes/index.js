@@ -26,8 +26,10 @@ import MyReviews from '../pages/User/Myreviews/MyReview';
 import AdminRoomType from '../pages/Admin/AdminRoomType';
 import AdminSupportRequest from '../pages/Admin/AdminSupportRequest';
 import ChatBot from '../components/ChatBot';
+import CreateModalVideo from '../components/CreateModalVideo';
 const publicroutes = [
     { path: '/', component: Home },
+
     { path: '/login', component: Login },
     { path: '/register', component: Register },
     { path: '/post/:postId', component: DetailPost },
@@ -39,6 +41,7 @@ const publicroutes = [
     { path: '/chung-cu', component: ChungCu },
     { path: '/can-ho-dich-vu', component: CanHoDichVu },
     { path: '/chatbot', component: ChatBot },
+    { path: '/createmodalvideo', component: CreateModalVideo },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },

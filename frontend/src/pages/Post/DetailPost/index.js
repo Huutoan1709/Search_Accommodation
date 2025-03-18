@@ -115,7 +115,7 @@ function DetailPost() {
             <div className="w-[1024px] flex m-auto">
                 <div className="w-full flex gap-4 mt-6">
                     <div className="w-[70%]">
-                        <SliderCustom images={post?.images} />
+                        <SliderCustom images={post?.images} video={post.video?.video} />
                         <div className="rounded-md shadow-md bg-white p-4">
                             <h2 className="text-3xl font-semibold text-red-600">{post?.title}</h2>
                             <span className="flex items-center gap-2 my-3">
@@ -302,7 +302,7 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
-            <AroundPost city={post?.room?.city} district={post?.room?.district} />
+            <AroundPost city={post?.room?.city} district={post?.room?.district} currentPostId={post?.id} />
 
             <BackToTop />
             <Footer />

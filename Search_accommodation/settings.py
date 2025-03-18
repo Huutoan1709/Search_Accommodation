@@ -24,7 +24,6 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'django.contrib.humanize',
-
 ]
 
 MIDDLEWARE = [
@@ -42,8 +41,8 @@ ROOT_URLCONF = 'Search_accommodation.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:3001",
-
 ]
+
 import os
 TEMPLATES = [
     {
@@ -56,7 +55,6 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-
             ],
         },
     },

@@ -50,7 +50,7 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
                         100.000+ bài đăng và 1.000.000 lượt xem mỗi tháng
                     </p>
                 </div>
-                <div className="sticky top-20 z-50 w-full p-4">
+                <div className="sticky top-20 z-50 w-full">
                     <Search setSearchParams={setSearchParams} room_type={room_type} />
                 </div>
                 <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
