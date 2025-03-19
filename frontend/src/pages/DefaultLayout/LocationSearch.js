@@ -8,6 +8,7 @@ import { BiSearch } from 'react-icons/bi';
 function LocationSearch({ onClose, onSubmit }) {
     const [cities, setCities] = useState([]);
     const [districts, setDistricts] = useState([]);
+    const [radius, setRadius] = useState(5); // Default 5km radius
     const [formData, setFormData] = useState({
         city: '',
         cityName: '',
@@ -96,13 +97,15 @@ function LocationSearch({ onClose, onSubmit }) {
         debouncedHandleGeocode();
     }, [formData.districtName, formData.cityName]);
 
-    // Tính toán khoảng cách tìm kiếm xung quanh
+    // Tính toán khoảng cách tìm kiếm xung quanh dựa trên bán kính
     const getSearchCoordinates = (latitude, longitude) => {
         if (latitude && longitude) {
-            const latMin = latitude - 0.04;
-            const latMax = latitude + 0.04;
-            const lonMin = longitude - 0.04;
-            const lonMax = longitude + 0.04;
+            // Convert radius from km to degrees (approximately)
+            const radiusDegrees = radius * 0.008; // 1km ≈ 0.008 degrees
+            const latMin = latitude - radiusDegrees;
+            const latMax = latitude + radiusDegrees;
+            const lonMin = longitude - radiusDegrees;
+            const lonMax = longitude + radiusDegrees;
 
             return { latMin, latMax, lonMin, lonMax };
         }
@@ -110,19 +113,17 @@ function LocationSearch({ onClose, onSubmit }) {
     };
 
     const handleSubmit = () => {
-        // Tính toán giới hạn tìm kiếm xung quanh
         const coordinates = getSearchCoordinates(formData.latitude, formData.longitude);
 
         if (coordinates) {
-            // Cập nhật formData với các giá trị tính toán được
             const searchParams = {
                 ...formData,
                 latMin: coordinates.latMin,
                 latMax: coordinates.latMax,
                 lonMin: coordinates.lonMin,
                 lonMax: coordinates.lonMax,
+                radius: radius, // Include selected radius in search params
             };
-            // Gọi onSubmit với các tham số tìm kiếm
             onSubmit(searchParams);
             onClose();
         } else {
@@ -131,57 +132,83 @@ function LocationSearch({ onClose, onSubmit }) {
     };
 
     return (
-        <div className="location-search-container p-4 space-y-4">
-            <h3 className=" flex items-center justify-center font-semibold text-[20px] mt-4">Tìm kiếm xung quanh</h3>
-            <div className="form-group">
-                <label className="block text-gray-700">Chọn Tỉnh</label>
-                <select
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={handleCityChange}
-                >
-                    <option value="">Chọn tỉnh</option>
-                    {cities.map((city) => (
-                        <option key={city.code} value={city.code}>
-                            {city.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="form-group">
-                <label className="block text-gray-700">Chọn Quận/Huyện</label>
-                <select
-                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    onChange={handleDistrictChange}
-                >
-                    <option value="">Chọn quận/huyện</option>
-                    {districts.map((district) => (
-                        <option key={district.code} value={district.code}>
-                            {district.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <MapBox
-                latitude={formData.latitude}
-                longitude={formData.longitude}
-                onCoordinatesChange={(lat, lng) => setFormData({ ...formData, latitude: lat, longitude: lng })}
-            />
-
-            <div className="form-group space-x-4 mt-4 flex justify-center items-center">
-                <button onClick={handleSubmit} className="px-6 py-2 bg-gray-800 text-white rounded-md">
-                    <div className="flex items-center">
-                        <BiSearch className="mr-2" />
-                        Tìm kiếm
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg w-[800px] max-h-[90vh] overflow-y-auto">
+                <div className="location-search-container p-4 space-y-4">
+                    <h3 className="flex items-center justify-center font-semibold text-[20px] mt-4">Tìm kiếm xung quanh</h3>
+                    <span className="flex items-center justify-center text-gray-600 text-[15px]">Tìm kiếm phòng trọ xung quanh theo bán kính tại vị trí lựa chọn</span>
+                    <div className="form-group">
+                        <label className="block text-gray-700">Chọn Tỉnh</label>
+                        <select
+                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            onChange={handleCityChange}
+                        >
+                            <option value="">Chọn tỉnh</option>
+                            {cities.map((city) => (
+                                <option key={city.code} value={city.code}>
+                                    {city.name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                </button>
-                <button
-                    onClick={onClose}
-                    className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                >
-                    Đóng
-                </button>
+
+                    <div className="form-group">
+                        <label className="block text-gray-700">Chọn Quận/Huyện</label>
+                        <select
+                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            onChange={handleDistrictChange}
+                        >
+                            <option value="">Chọn quận/huyện</option>
+                            {districts.map((district) => (
+                                <option key={district.code} value={district.code}>
+                                    {district.name}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="form-group">
+                        <label className="block text-gray-700">Bán kính tìm kiếm</label>
+                        <div className="flex gap-2 mt-2">
+                            {[5, 10, 15].map((r) => (
+                                <button
+                                    key={r}
+                                    onClick={() => setRadius(r)}
+                                    className={`px-4 py-2 rounded-md ${
+                                        radius === r
+                                            ? 'bg-blue-500 text-white'
+                                            : 'bg-gray-200 hover:bg-gray-300'
+                                    }`}
+                                >
+                                    {r}km
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className='border-2 border-gray-300 rounded-lg relative h-[300px]'>
+                        <MapBox
+                            latitude={formData.latitude}
+                            longitude={formData.longitude}
+                            onCoordinatesChange={(lat, lng) => setFormData({ ...formData, latitude: lat, longitude: lng })}
+                        />
+                    </div>
+
+                    <div className="form-group space-x-4 mt-4 flex justify-center items-center">
+                        <button onClick={handleSubmit} className="px-6 py-2 bg-gray-800 text-white rounded-md">
+                            <div className="flex items-center">
+                                <BiSearch className="mr-2" />
+                                Tìm kiếm
+                            </div>
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
+                        >
+                            Đóng
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     );

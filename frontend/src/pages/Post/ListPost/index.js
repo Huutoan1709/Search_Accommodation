@@ -21,7 +21,11 @@ const ListPost = ({ searchParams }) => {
         setLoading(true);
         try {
             const result = await API.get(url);
-            setData(result.data.results);
+            console.log("Fetched posts:", result.data);
+            const postsWithCoordinates = result.data.results.filter(
+                post => post.room && post.room.latitude && post.room.longitude
+            );
+            setData(postsWithCoordinates);
             setNextPage(result.data.next);
             setPreviousPage(result.data.previous);
             setCount(result.data.count);
@@ -31,6 +35,7 @@ const ListPost = ({ searchParams }) => {
             setCurrentPage(parseInt(pageFromUrl, 10));
             window.scrollTo(0, 0);
         } catch (err) {
+            console.error("Error fetching posts:", err);
             setError(err.message);
             setData([]);
         } finally {

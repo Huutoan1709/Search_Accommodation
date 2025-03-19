@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import ReactMapGL, { Marker } from 'react-map-gl';
 import { FaMapMarkerAlt } from 'react-icons/fa';
+
 function MapBox({ latitude, longitude, onCoordinatesChange }) {
     const [viewport, setViewport] = useState({
-        width: '100%', // Chỉnh width
-        height: '300px', // Đảm bảo chiều cao
+        width: '100%',
+        height: '100vh',
         latitude: latitude || 21.0244246,
         longitude: longitude || 105.84117,
         zoom: 14,
     });
 
-    // Cập nhật tọa độ nếu nhận được props mới
     useEffect(() => {
         setViewport((prev) => ({
             ...prev,
@@ -32,7 +32,7 @@ function MapBox({ latitude, longitude, onCoordinatesChange }) {
     };
 
     return (
-        <div className="w-full h-[300px]">
+        <div className="w-full h-full absolute inset-0">
             <ReactMapGL
                 {...viewport}
                 onMove={(evt) => {

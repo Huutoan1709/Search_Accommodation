@@ -6,6 +6,8 @@ from datetime import datetime
 from django.utils import timezone
 from django.utils.timesince import timesince
 from django.db.models import Avg
+from django.contrib.auth import get_user_model
+import random
 
 
 class UserSerializer(ModelSerializer):
@@ -107,7 +109,7 @@ class RoomsSerializer(ModelSerializer):
 
     class Meta:
         model = Rooms
-        fields = ['id', 'price', 'ward', 'district', 'city', 'other_address', 'area', 'landlord',
+        fields = ['id', 'price', 'ward', 'district', 'city', 'other_address', 'area', 'landlord', 'latitude', 'longitude',
                   'created_at_humanized', 'room_type', 'has_post', 'is_active']
         extra_kwargs = {
             'landlord': {'read_only': True},
@@ -186,7 +188,7 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room', 'created_at_humanized', 'is_active',
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images','video', 'room', 'created_at_humanized', 'is_active',
                   'is_approved', 'is_block']
         extra_kwargs = {
             'user': {'read_only': True},
@@ -213,7 +215,6 @@ class CreatePostSerializer(ModelSerializer):
     def get_images(self, obj):
         active_images = obj.Post_Images.filter(is_active=True)
         return PostImageSerializer(active_images, many=True).data
-
     class Meta:
         model = Post
         fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room']

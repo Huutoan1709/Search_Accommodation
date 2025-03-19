@@ -8,6 +8,8 @@ import Modal from '../../components/Modal';
 import { LuRefreshCcw } from 'react-icons/lu';
 import { BiSearch } from 'react-icons/bi';
 import LocationSearch from './LocationSearch';
+import MapViewModal from '../../components/MapViewModal';
+import { FaMapMarked } from "react-icons/fa";
 
 function Search({ setSearchParams, room_type }) {
     const [isModal, setIsModal] = useState(false);
@@ -24,6 +26,7 @@ function Search({ setSearchParams, room_type }) {
         max_area: undefined,
     });
     const [selectedField, setSelectedField] = useState('');
+    const [isMapModalOpen, setIsMapModalOpen] = useState(false);
 
     useEffect(() => {
         setSelectedValues((prev) => ({
@@ -180,25 +183,25 @@ function Search({ setSearchParams, room_type }) {
                         className="font-semibold"
                     />
                 </span>
-                <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1">
+                <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
                     <SearchItem
                         iconBf={<MdLocationOn size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
-                        text={truncateText(
+                        text={
                             selectedValues.ward
                                 ? `${selectedValues.ward}, ${selectedValues.district}.`
                                 : selectedValues.district
                                 ? `${selectedValues.district}, ${selectedValues.city}`
                                 : selectedValues.city
                                 ? selectedValues.city
-                                : 'Toàn quốc',
-                        )}
+                                : 'Toàn quốc'
+                        }
                         className={
                             selectedValues.city || selectedValues.district || selectedValues.ward ? 'font-semibold' : ''
                         }
                     />
                 </span>
-                <span onClick={() => openModal('price')} className="flex-1 cursor-pointer gap-1">
+                <span onClick={() => openModal('price')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
                     <SearchItem
                         iconBf={<IoPricetagsOutline size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
@@ -206,7 +209,7 @@ function Search({ setSearchParams, room_type }) {
                         className={selectedValues.price !== 'Chọn giá' ? 'font-semibold' : ''}
                     />
                 </span>
-                <span onClick={() => openModal('area')} className="flex-1 cursor-pointer gap-1">
+                <span onClick={() => openModal('area')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
                     <SearchItem
                         iconBf={<RiCrop2Line size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
@@ -214,6 +217,7 @@ function Search({ setSearchParams, room_type }) {
                         className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
                     />
                 </span>
+                
 
                 <span
                     type="button"
@@ -225,6 +229,14 @@ function Search({ setSearchParams, room_type }) {
                 </span>
                 <span
                     type="button"
+                    onClick={() => setIsMapModalOpen(true)}
+                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text[13px] gap-2 text-white font-medium flex items-center justify-center"
+                >
+                    <FaMapMarked/>
+                    Xem trên map
+                </span>
+                <span
+                    type="button"
                     onClick={handleReset}
                     className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
                 >
@@ -232,10 +244,16 @@ function Search({ setSearchParams, room_type }) {
                     Đặt lại
                 </span>
             </div>
+            
+
             {isModal && <Modal field={selectedField} setIsModal={setIsModal} handleApply={handleApply} />}
             {isLocationSearchOpen && (
                 <LocationSearch onSubmit={handleLocationSearchSubmit} onClose={handleLocationSearchClose} />
             )}
+            <MapViewModal 
+                isOpen={isMapModalOpen}
+                onClose={() => setIsMapModalOpen(false)}
+            />
         </>
     );
 }

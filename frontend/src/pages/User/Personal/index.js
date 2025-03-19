@@ -19,16 +19,19 @@ const Personal = () => {
     const [rating, setRating] = useState(0);
     const [feedback, setFeedback] = useState('');
     const [reviews, setReviews] = useState([]);
+    const [visiblePosts, setVisiblePosts] = useState(6);
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
                 if (userId === 'current') {
                     const response = await authApi().get(endpoints.mypost);
-                    setPosts(response.data);
+                    const sortedPosts = response.data.sort((a, b) => b.id - a.id);
+                    setPosts(sortedPosts);
                 } else {
                     const response = await authApi().get(endpoints.postuser(userId));
-                    setPosts(response.data);
+                    const sortedPosts = response.data.sort((a, b) => b.id - a.id);
+                    setPosts(sortedPosts);
                 }
             } catch (error) {
                 console.error('Failed to fetch posts:', error);
@@ -220,39 +223,51 @@ const Personal = () => {
 
                     <div className="grid grid-cols-3 gap-6 mt-4">
                         {posts.length > 0 ? (
-                            posts.map((post) => (
-                                <div
-                                    key={post.id}
-                                    className="bg-white shadow-xl rounded-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-shadow duration-300"
-                                    onClick={() => navigate(`/post/${post.id}`)}
-                                >
-                                    <img
-                                        src={post?.images[0]?.url}
-                                        alt={post?.title}
-                                        className="w-full h-[180px] object-cover"
-                                    />
-                                    <div className="p-6">
-                                        <h3 className="text-xl font-semibold text-gray-800 mb-2">
-                                            {post?.title?.length > 70 ? `${post?.title.slice(0, 70)}...` : post?.title}
-                                        </h3>
-                                        <div className="flex items-center gap-4">
-                                            <p className="text-red-500 font-semibold mb-1 text-xl">
-                                                {post?.room?.price} triệu
-                                            </p>
-                                            <p className="text-red-500 font-semibold mb-1 text-xl">
-                                                {post?.room?.area}m²
+                            <>
+                                {posts.slice(0, visiblePosts).map((post) => (
+                                    <div
+                                        key={post.id}
+                                        className="bg-white shadow-xl rounded-lg overflow-hidden cursor-pointer hover:shadow-2xl transition-shadow duration-300"
+                                        onClick={() => navigate(`/post/${post.id}`)}
+                                    >
+                                        <img
+                                            src={post?.images[0]?.url}
+                                            alt={post?.title}
+                                            className="w-full h-[180px] object-cover"
+                                        />
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-semibold text-gray-800 mb-2">
+                                                {post?.title?.length > 70 ? `${post?.title.slice(0, 70)}...` : post?.title}
+                                            </h3>
+                                            <div className="flex items-center gap-4">
+                                                <p className="text-red-500 font-semibold mb-1 text-xl">
+                                                    {post?.room?.price} triệu
+                                                </p>
+                                                <p className="text-red-500 font-semibold mb-1 text-xl">
+                                                    {post?.room?.area}m²
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-1 items-center my-2">
+                                                <FaLocationDot size={13} color="red" />
+                                                <p className="text-gray-600 text-xl">{`${post?.room?.district}, ${post?.room?.city}`}</p>
+                                            </div>
+                                            <p className="text-gray-400 text-lg">
+                                                Ngày đăng: {calculateEndDate(post?.created_at)}
                                             </p>
                                         </div>
-                                        <div className="flex gap-1 items-center my-2">
-                                            <FaLocationDot size={13} color="red" />
-                                            <p className="text-gray-600 text-xl">{`${post?.room?.district}, ${post?.room?.city}`}</p>
-                                        </div>
-                                        <p className="text-gray-400 text-lg">
-                                            Ngày đăng: {calculateEndDate(post?.created_at)}
-                                        </p>
                                     </div>
-                                </div>
-                            ))
+                                ))}
+                                {posts.length > visiblePosts && (
+                                    <div className="col-span-3 flex justify-center mt-4">
+                                        <button
+                                            onClick={() => setVisiblePosts(prev => prev + 6)}
+                                            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+                                        >
+                                            Xem thêm
+                                        </button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <p>Chưa có bài đăng nào...</p>
                         )}

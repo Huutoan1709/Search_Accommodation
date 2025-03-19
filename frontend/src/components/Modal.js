@@ -211,38 +211,241 @@ function Modal({ field, setIsModal, handleApply }) {
                 )}
                 {field === 'price' && (
                     <>
-                        <input
-                            type="number"
-                            placeholder="Giá từ"
-                            value={minPrice}
-                            onChange={(e) => setMinPrice(e.target.value)}
-                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
-                        <input
-                            type="number"
-                            placeholder="Đến"
-                            value={maxPrice}
-                            onChange={(e) => setMaxPrice(e.target.value)}
-                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(0); setMaxPrice(1)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                Dưới 1 triệu
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(1); setMaxPrice(3)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                1 - 3 triệu
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(3); setMaxPrice(5)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                3 - 5 triệu
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(5); setMaxPrice(7)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                5 - 7 triệu
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(7); setMaxPrice(10)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                7 - 10 triệu
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinPrice(11); setMaxPrice()}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                Trên 10 triệu
+                            </button>
+                        </div>
+
+                        <div className="mb-8">
+                            <div className="flex justify-between mb-4">
+                                <span className="font-medium">{minPrice?.toLocaleString('vi-VN')} triệu </span>
+                                <span className="font-medium">{maxPrice?.toLocaleString('vi-VN')} triệu</span>
+                            </div>
+                            <div className="relative h-12">
+                                <div className="absolute w-full h-1 bg-gray-200 rounded-lg top-1/2 transform -translate-y-1/2"></div>
+                                <div 
+                                    className="absolute h-1 bg-green-500 rounded-lg top-1/2 transform -translate-y-1/2"
+                                    style={{
+                                        left: `${(minPrice / 30) * 100}%`,
+                                        right: `${100 - ((maxPrice / 30) * 100)}%`
+                                    }}
+                                ></div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    value={minPrice}
+                                    onChange={(e) => setMinPrice(Number(e.target.value))}
+                                    className="absolute top-0 w-full h-6 appearance-none"
+                                    style={{
+                                        WebkitAppearance: 'none',
+                                        background: 'transparent',
+                                    }}
+                                />
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="30"
+                                    value={maxPrice}
+                                    onChange={(e) => setMaxPrice(Number(e.target.value))}
+                                    className="absolute bottom-0 w-full h-6 appearance-none"
+                                    style={{
+                                        WebkitAppearance: 'none',
+                                        background: 'transparent',
+                                    }}
+                                />
+                                <style>
+                                    {`
+                                    input[type="range"]::-webkit-slider-thumb {
+                                        -webkit-appearance: none;
+                                        height: 20px;
+                                        width: 20px;
+                                        border-radius: 50%;
+                                        background: #22C55E;
+                                        cursor: pointer;
+                                        border: 2px solid white;
+                                        box-shadow: 0 0 2px rgba(0,0,0,0.2);
+                                    }
+                                    input[type="range"] {
+                                        pointer-events: auto;
+                                    }
+                                    `}
+                                </style>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6">
+                            <input
+                                type="number"
+                                placeholder="Giá từ"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(Number(e.target.value))}
+                                className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Đến"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                                className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
+                            />
+                        </div>
                     </>
                 )}
                 {field === 'area' && (
                     <>
-                        <input
-                            type="number"
-                            placeholder="Diện tích từ"
-                            value={minArea}
-                            onChange={(e) => setMinArea(e.target.value)}
-                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
-                        <input
-                            type="number"
-                            placeholder="Đến"
-                            value={maxArea}
-                            onChange={(e) => setMaxArea(e.target.value)}
-                            className="border p-2 mb-4 rounded w-full focus:outline-none focus:ring-2 focus:ring-green-500"
-                        />
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            <button
+                                type="button"
+                                onClick={() => {setMinArea(0); setMaxArea(20)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                Dưới 20m²
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinArea(20); setMaxArea(30)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                20 - 30m²
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinArea(30); setMaxArea(50)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                30 - 50m²
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinArea(50); setMaxArea(70)}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                50 - 70m²
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {setMinArea(70); setMaxArea()}}
+                                className="px-4 py-2 text-xl border rounded-full hover:bg-green-50 hover:border-green-500 transition duration-200"
+                            >
+                                Trên 70m²
+                            </button>
+                        </div>
+
+                        <div className="mb-8">
+                            <div className="flex justify-between mb-4">
+                                <span className="font-medium">{minArea} m² </span>
+                                <span className="font-medium">{maxArea} m²</span>
+                            </div>
+                            <div className="relative h-12">
+                                <div className="absolute w-full h-1 bg-gray-200 rounded-lg top-1/2 transform -translate-y-1/2"></div>
+                                <div 
+                                    className="absolute h-1 bg-green-500 rounded-lg top-1/2 transform -translate-y-1/2"
+                                    style={{
+                                        left: `${(minArea / 100) * 100}%`,
+                                        right: `${100 - ((maxArea / 100) * 100)}%`
+                                    }}
+                                ></div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={minArea}
+                                    onChange={(e) => setMinArea(Number(e.target.value))}
+                                    className="absolute top-0 w-full h-6 appearance-none"
+                                    style={{
+                                        WebkitAppearance: 'none',
+                                        background: 'transparent',
+                                    }}
+                                />
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={maxArea}
+                                    onChange={(e) => setMaxArea(Number(e.target.value))}
+                                    className="absolute bottom-0 w-full h-6 appearance-none"
+                                    style={{
+                                        WebkitAppearance: 'none',
+                                        background: 'transparent',
+                                    }}
+                                />
+                                <style>
+                                    {`
+                                    input[type="range"]::-webkit-slider-thumb {
+                                        -webkit-appearance: none;
+                                        height: 20px;
+                                        width: 20px;
+                                        border-radius: 50%;
+                                        background: #22C55E;
+                                        cursor: pointer;
+                                        border: 2px solid white;
+                                        box-shadow: 0 0 2px rgba(0,0,0,0.2);
+                                    }
+                                    input[type="range"] {
+                                        pointer-events: auto;
+                                    }
+                                    `}
+                                </style>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-6">
+                            <input
+                                type="number"
+                                placeholder="Diện tích từ"
+                                value={minArea}
+                                onChange={(e) => setMinArea(Number(e.target.value))}
+                                className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
+                            />
+                            <input
+                                type="number"
+                                placeholder="Đến"
+                                value={maxArea}
+                                onChange={(e) => setMaxArea(Number(e.target.value))}
+                                className="border p-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-200"
+                            />
+                        </div>
                     </>
                 )}
                 {!isValid && <p className="text-red-500 text-xl mb-4">Vui lòng nhập thông tin hợp lệ.</p>}

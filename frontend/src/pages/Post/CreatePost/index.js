@@ -390,8 +390,10 @@ const CreatePost = () => {
                 </div>
                 {selectedRoom && roomDetails.latitude && roomDetails.longitude && (
                     <div className="lg:col-span-1">
-                        <h2 className="text-2xl font-bold mb-4">Bản đồ</h2>
-                        <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
+                        <h2 className="text-2xl font-bold mb-4 text-red-400">Bản đồ</h2>
+                        <div className="relative h-[300px] border-2 border-gray-300 rounded-lg">
+                            <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
+                        </div>
 
                         <div className="bg-yellow-100 p-4 rounded-lg mt-4">
                             <h3 className="font-bold">Lưu ý:</h3>

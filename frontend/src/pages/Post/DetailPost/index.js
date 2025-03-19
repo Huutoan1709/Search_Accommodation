@@ -220,7 +220,7 @@ function DetailPost() {
                             <div className="w-full mt-8">
                                 <h3 className="font-semibold text-[20px] my-5">Bản đồ</h3>
                                 <div className="border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                                    <div className="flex items-center justify-between bg-gray-100 p-2">
+                                    <div className="flex items-center justify-between  p-2">
                                         <span className="text-[14px] text-gray-700">
                                             Địa chỉ: {post?.room?.other_address}, {post?.room?.ward},{' '}
                                             {post?.room?.district}, {post?.room?.city}
@@ -302,7 +302,7 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
-            <AroundPost city={post?.room?.city} district={post?.room?.district} currentPostId={post?.id} />
+            <AroundPost city={post?.room?.city} district={post?.room?.district} currentPostId={post?.id} userId={post?.user?.id}/>
 
             <BackToTop />
             <Footer />

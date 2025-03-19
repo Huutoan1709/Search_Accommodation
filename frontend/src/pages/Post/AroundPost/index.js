@@ -7,9 +7,11 @@ import { motion } from 'framer-motion';
 
 const ITEMS_PER_PAGE = 4;
 
-const AroundPost = ({ city, district, currentPostId }) => {
+const AroundPost = ({ city, district, currentPostId, userId }) => {
     const [posts, setPosts] = useState([]);
+    const [userPosts, setUserPosts] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [userPostsIndex, setUserPostsIndex] = useState(0);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -23,10 +25,23 @@ const AroundPost = ({ city, district, currentPostId }) => {
             }
         };
 
+        const fetchUserPosts = async () => {
+            try {
+                const res = await API.get(`${endpoints['post']}?user=${userId}`);
+                const filteredUserPosts = res.data.results.filter((post) => post.id !== currentPostId);
+                setUserPosts(filteredUserPosts);
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
         if (city && district) {
             fetchAroundPosts();
         }
-    }, [city, district, currentPostId]);
+        if (userId) {
+            fetchUserPosts();
+        }
+    }, [city, district, currentPostId, userId]);
 
     const nextSlide = () => {
         setCurrentIndex((prevIndex) => (prevIndex + ITEMS_PER_PAGE >= posts.length ? 0 : prevIndex + ITEMS_PER_PAGE));
@@ -38,25 +53,34 @@ const AroundPost = ({ city, district, currentPostId }) => {
         );
     };
 
+    const nextUserSlide = () => {
+        setUserPostsIndex((prevIndex) => (prevIndex + ITEMS_PER_PAGE >= userPosts.length ? 0 : prevIndex + ITEMS_PER_PAGE));
+    };
+
+    const prevUserSlide = () => {
+        setUserPostsIndex((prevIndex) =>
+            prevIndex - ITEMS_PER_PAGE < 0 ? userPosts.length - ITEMS_PER_PAGE : prevIndex - ITEMS_PER_PAGE,
+        );
+    };
+
     const handlePostClick = (postId) => {
         navigate(`/post/${postId}`);
         window.location.reload();
     };
-    return (
-        <div className="w-[1024px] m-auto mt-8 bg-white rounded-lg p-6 relative shadow-md border ">
-            <h3 className="font-semibold  text-black-500 text-2xl pb-2">Tin đăng cùng khu vực ({posts.length})</h3>
+
+    const PostList = ({ posts, currentIndex, onNext, onPrev, title }) => (
+        <div className="w-[1024px] m-auto mt-8 bg-white rounded-lg p-6 relative shadow-md border">
+            <h3 className="font-semibold text-black-500 text-2xl pb-2">{title} ({posts.length})</h3>
 
             {posts.length > 0 ? (
                 <div className="relative mt-4">
-                    {/* Nút bấm trái */}
                     <button
-                        onClick={prevSlide}
+                        onClick={onPrev}
                         className="absolute left-[-30px] top-1/2 -translate-y-1/2 bg-amber-300 shadow-md p-2 rounded-full z-10"
                     >
                         <IoIosArrowBack className="text-gray-600 text-2xl" />
                     </button>
 
-                    {/* Hiển thị 4 bài đăng */}
                     <div className="overflow-hidden relative">
                         <motion.div
                             className="flex gap-4"
@@ -66,7 +90,7 @@ const AroundPost = ({ city, district, currentPostId }) => {
                             {posts.map((post) => (
                                 <div
                                     key={post.id}
-                                    className="min-w-[24%] bg-white rounded-lg overflow-hidden cursor-pointer"
+                                    className="min-w-[24%] bg-white rounded-lg overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:scale-[1.02] hover:border"
                                     onClick={() => handlePostClick(post.id)}
                                 >
                                     <img
@@ -92,9 +116,8 @@ const AroundPost = ({ city, district, currentPostId }) => {
                         </motion.div>
                     </div>
 
-                    {/* Nút bấm phải */}
                     <button
-                        onClick={nextSlide}
+                        onClick={onNext}
                         className="absolute right-[-30px] top-1/2 -translate-y-1/2 bg-amber-300 shadow-md p-2 rounded-full z-10"
                     >
                         <IoIosArrowForward className="text-gray-600 text-2xl" />
@@ -104,6 +127,26 @@ const AroundPost = ({ city, district, currentPostId }) => {
                 <p className="text-center text-gray-500 mt-4">Chưa có bài đăng nào...</p>
             )}
         </div>
+    );
+
+    return (
+        <>
+            <PostList 
+                posts={posts} 
+                currentIndex={currentIndex}
+                onNext={nextSlide}
+                onPrev={prevSlide}
+                title="Tin đăng cùng khu vực"
+            />
+            
+            <PostList 
+                posts={userPosts}
+                currentIndex={userPostsIndex}
+                onNext={nextUserSlide}
+                onPrev={prevUserSlide}
+                title={`Tin đăng của ${userPosts[0]?.user?.first_name} ${userPosts[0]?.user?.last_name}`}
+            />
+        </>
     );
 };
 
