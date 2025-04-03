@@ -21,9 +21,8 @@ const ListPost = ({ searchParams }) => {
         setLoading(true);
         try {
             const result = await API.get(url);
-            console.log("Fetched posts:", result.data);
             const postsWithCoordinates = result.data.results.filter(
-                post => post.room && post.room.latitude && post.room.longitude
+                (post) => post.room && post.room.latitude && post.room.longitude,
             );
             setData(postsWithCoordinates);
             setNextPage(result.data.next);
@@ -35,7 +34,7 @@ const ListPost = ({ searchParams }) => {
             setCurrentPage(parseInt(pageFromUrl, 10));
             window.scrollTo(0, 0);
         } catch (err) {
-            console.error("Error fetching posts:", err);
+            console.error('Error fetching posts:', err);
             setError(err.message);
             setData([]);
         } finally {
@@ -53,40 +52,76 @@ const ListPost = ({ searchParams }) => {
             fetchData(fetchUrl);
         }
 
-        if (!searchParams || Object.keys(searchParams).length === 0) {
-            setTitle(`Danh sách bài đăng toàn quốc hiện có ${count} bài đăng.`);
-        } else {
-            let titleText = 'Danh sách bài đăng';
+        // Cập nhật title dựa trên searchParams
+        const searchParamsObj = new URLSearchParams(searchParams);
+        let titleText = 'Danh sách bài đăng';
 
-            // Check each search parameter and append to titleText
-            if (searchParams.room_type) {
-                titleText += ` cho thuê ${searchParams.room_type}`;
-            }
-            if (searchParams.ward) {
-                titleText += ` tại phường ${searchParams.ward}`;
-            }
-            if (searchParams.district) {
-                titleText += ` tại huyện ${searchParams.district}`;
-            }
-            if (searchParams.city) {
-                titleText += ` tại thành phố ${searchParams.city}`;
-            }
-            if (searchParams.min_area) {
-                titleText += ` và diện tích từ ${searchParams.min_area}m²`;
-            }
-            if (searchParams.max_area) {
-                titleText += ` đến ${searchParams.max_area}m²`;
-            }
-
-            if (searchParams.min_price) {
-                titleText += ` và giá từ ${searchParams.min_price} triệu`;
-            }
-            if (searchParams.max_price) {
-                titleText += ` đến ${searchParams.max_price} triệu`;
-            }
-
-            setTitle(titleText);
+        // Xử lý room_type
+        const roomType = searchParamsObj.get('room_type');
+        if (roomType) {
+            titleText += ` ${roomType}`;
         }
+
+        // Xử lý location
+        const ward = searchParamsObj.get('ward');
+        const district = searchParamsObj.get('district');
+        const city = searchParamsObj.get('city');
+
+        let locationText = '';
+
+        if (ward && district && city) {
+            locationText = `${ward}, ${district}, ${city}`;
+        } else if (ward && district) {
+            locationText = `${ward}, ${district}`;
+        } else if (ward && city) {
+            locationText = `${ward}, ${city}`;
+        } else if (district && city) {
+            locationText = `${district}, ${city}`;
+        } else if (ward) {
+            locationText = ward;
+        } else if (district) {
+            locationText = district;
+        } else if (city) {
+            locationText = city;
+        }
+
+        if (locationText) {
+            titleText += ` tại ${locationText}`;
+        }
+
+        // Xử lý khoảng giá
+        const minPrice = searchParamsObj.get('min_price');
+        const maxPrice = searchParamsObj.get('max_price');
+
+        if (minPrice && maxPrice) {
+            titleText += ` giá từ ${minPrice} - ${maxPrice} triệu`;
+        } else if (minPrice) {
+            titleText += ` giá từ ${minPrice} triệu`;
+        } else if (maxPrice) {
+            titleText += ` giá đến ${maxPrice} triệu`;
+        }
+
+        // Xử lý khoảng diện tích
+        const minArea = searchParamsObj.get('min_area');
+        const maxArea = searchParamsObj.get('max_area');
+
+        if (minArea && maxArea) {
+            titleText += ` diện tích ${minArea} - ${maxArea}m²`;
+        } else if (minArea) {
+            titleText += ` diện tích từ ${minArea}m²`;
+        } else if (maxArea) {
+            titleText += ` diện tích đến ${maxArea}m²`;
+        }
+
+        // Thêm số lượng kết quả
+        titleText += ` (${count} kết quả)`;
+
+        // Nếu không có điều kiện tìm kiếm
+        if (!searchParams || searchParams === '') {
+            titleText = `Danh sách bài đăng toàn quốc (${count} bài đăng)`;
+        }
+
+        setTitle(titleText);
     }, [searchParams, count]);
 
     const handlePageChange = (page) => {

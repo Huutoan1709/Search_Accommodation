@@ -41,7 +41,6 @@ const publicroutes = [
     { path: '/chung-cu', component: ChungCu },
     { path: '/can-ho-dich-vu', component: CanHoDichVu },
     { path: '/chatbot', component: ChatBot },
-    { path: '/createmodalvideo', component: CreateModalVideo },
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },

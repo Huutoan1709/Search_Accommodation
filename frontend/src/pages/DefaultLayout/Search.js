@@ -10,6 +10,7 @@ import { BiSearch } from 'react-icons/bi';
 import LocationSearch from './LocationSearch';
 import MapViewModal from '../../components/MapViewModal';
 import { FaMapMarked } from "react-icons/fa";
+import VoiceSearch from '../../components/VoiceSearch';
 
 function Search({ setSearchParams, room_type }) {
     const [isModal, setIsModal] = useState(false);
@@ -172,10 +173,76 @@ function Search({ setSearchParams, room_type }) {
         return text.length > 20 ? text.slice(0, 20) + '...' : text;
     };
 
+    const handleVoiceResult = (result) => {
+        let updatedValues = { ...selectedValues };
+
+        if (result.room_type) {
+            updatedValues.room_type = result.room_type;
+        }
+
+        if (result.location) {
+            updatedValues.city = result.location.city || '';
+            updatedValues.district = result.location.district || '';
+            updatedValues.ward = result.location.ward || '';
+        }
+
+        if (result.price) {
+            if (result.price.min !== null && result.price.max !== null) {
+                updatedValues.price = `Từ ${result.price.min} triệu - ${result.price.max} triệu`;
+                updatedValues.min_price = result.price.min;
+                updatedValues.max_price = result.price.max;
+            } else if (result.price.min !== null) {
+                updatedValues.price = `Từ ${result.price.min} triệu`;
+                updatedValues.min_price = result.price.min;
+                updatedValues.max_price = undefined;
+            } else if (result.price.max !== null) {
+                updatedValues.price = `${result.price.max} triệu trở xuống`;
+                updatedValues.min_price = undefined;
+                updatedValues.max_price = result.price.max;
+            }
+        }
+
+        if (result.area) {
+            if (result.area.min !== null && result.area.max !== null) {
+                updatedValues.area = `Từ ${result.area.min}m² - ${result.area.max}m²`;
+                updatedValues.min_area = result.area.min;
+                updatedValues.max_area = result.area.max;
+            } else if (result.area.min !== null) {
+                updatedValues.area = `Từ ${result.area.min}m²`;
+                updatedValues.min_area = result.area.min;
+                updatedValues.max_area = undefined;
+            } else if (result.area.max !== null) {
+                updatedValues.area = `${result.area.max}m² trở xuống`;
+                updatedValues.min_area = undefined;
+                updatedValues.max_area = result.area.max;
+            }
+        }
+
+        setSelectedValues(updatedValues);
+
+        const params = {
+            min_price: updatedValues.min_price || '',
+            max_price: updatedValues.max_price || '',
+            min_area: updatedValues.min_area || '',
+            max_area: updatedValues.max_area || '',
+            city: updatedValues.city || '',
+            district: updatedValues.district || '',
+            ward: updatedValues.ward || '',
+            room_type: updatedValues.room_type || room_type || '',
+        };
+
+        const queryString = Object.entries(params)
+            .filter(([_, value]) => value !== '')
+            .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+            .join('&');
+
+        setSearchParams(queryString);
+    };
+
     return (
         <>
             <div className="w-[1024px] h-[60px] p-[10px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
-                <span className="flex-1 cursor-pointer gap-1">
+                <span className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
                     <SearchItem
                         iconBf={<PiBuildingApartmentBold size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
@@ -235,14 +302,16 @@ function Search({ setSearchParams, room_type }) {
                     <FaMapMarked/>
                     Xem trên map
                 </span>
+                <VoiceSearch onVoiceResult={handleVoiceResult} />
                 <span
                     type="button"
                     onClick={handleReset}
-                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
+                    className="cursor-pointer text-center bg-red-600 hover:bg-red-700 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
                 >
                     <LuRefreshCcw />
                     Đặt lại
                 </span>
+                
             </div>
             
 

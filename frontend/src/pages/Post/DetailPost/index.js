@@ -302,7 +302,12 @@ function DetailPost() {
                     </div>
                 </div>
             </div>
-            <AroundPost city={post?.room?.city} district={post?.room?.district} currentPostId={post?.id} userId={post?.user?.id}/>
+            <AroundPost
+                city={post?.room?.city}
+                district={post?.room?.district}
+                currentPostId={post?.id}
+                userId={post?.user?.id}
+            />
 
             <BackToTop />
             <Footer />
