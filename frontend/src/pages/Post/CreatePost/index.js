@@ -6,9 +6,12 @@ import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import { FaLock, FaCalendarAlt, FaPhone, FaEnvelope } from 'react-icons/fa';
 import MapBox from '../../../components/MapBox';
-
+import generateContent from '../../../components/SmartDescriptionGenerator';
 import CreateModalVideo from '../../../components/CreateModalVideo';
+import generateTitle from '../../../components/SmartTitleGenerator';
+import { BsStars } from "react-icons/bs";
 import { set } from 'lodash';
+import CreateRoom from '../../Room/CreateRoom';
 const CreatePost = () => {
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
@@ -21,6 +24,10 @@ const CreatePost = () => {
     const [amenities, setAmenities] = useState({});
     const [showVideoModal, setShowVideoModal] = useState(false);
     const [newPostId, setNewPostId] = useState(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+    const [showCreateRoom, setShowCreateRoom] = useState(false);
+
     useEffect(() => {
         const fetchRooms = async () => {
             try {
@@ -125,6 +132,19 @@ const CreatePost = () => {
         }
     };
 
+    const handleGenerateContent = async () => {
+        try {
+            setIsGenerating(true);
+            const content = await generateContent(roomDetails, amenities);
+            setPostContent(content);
+            notifySuccess('Đã tạo nội dung thành công!');
+        } catch (error) {
+            notifyError(error.message);
+        } finally {
+            setIsGenerating(false);
+        }
+    };
+
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
@@ -132,18 +152,49 @@ const CreatePost = () => {
         const year = date.getFullYear();
         return `${day}/${month}/${year}`;
     };
-    const generateTitle = () => {
-        if (
-            roomDetails.room_type &&
-            roomDetails.other_address &&
-            roomDetails.ward &&
-            roomDetails.district &&
-            roomDetails.city
-        ) {
-            const title = `Cho thuê ${roomDetails.room_type.name} tại ${roomDetails.other_address}, ${roomDetails.ward}, ${roomDetails.district}, ${roomDetails.city} chất lượng`;
+    const handlegenerateTitle = async () => {
+        if (!roomDetails) {
+            notifyWarning('Vui lòng chọn phòng trước.');
+            return;
+        }
+    
+        try {
+            setIsGeneratingTitle(true);
+            const title = await generateTitle(roomDetails);
             setPostTitle(title);
+            notifySuccess('Đã tạo tiêu đề thành công!');
+        } catch (error) {
+            notifyError(error.message);
+        } finally {
+            setIsGeneratingTitle(false);
         }
     };
+
+    const handleImageUpload = (e) => {
+        const newImages = Array.from(e.target.files);
+        setImages(prevImages => [...prevImages, ...newImages]);
+        // Reset input để có thể chọn lại file giống nhau
+        e.target.value = '';
+    };
+
+    const handleCloseCreateRoom = async () => {
+        setShowCreateRoom(false);
+        try {
+            // Fetch lại danh sách phòng
+            const response = await authApi().get(endpoints.myrooms);
+            const availableRooms = response.data.filter((room) => !room.has_post);
+            setRooms(availableRooms);
+            
+            // Tự động chọn phòng mới nhất
+            if (availableRooms.length > 0) {
+                const newestRoom = availableRooms[availableRooms.length - 1];
+                handleRoomSelect(newestRoom.id);
+            }
+        } catch (error) {
+            console.error('Failed to fetch updated rooms:', error);
+        }
+    };
+
     return (
         <div className="container mx-auto p-6">
             <h1 className="text-4xl font-medium mb-8 text-gray-800">Tạo Bài Đăng Mới</h1>
@@ -152,18 +203,31 @@ const CreatePost = () => {
                     <form onSubmit={handlePostCreation} className="space-y-8">
                         <div className="space-y-2">
                             <label className="block text-red-400 font-semibold">Chọn phòng có sẵn</label>
-                            <select
-                                className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
-                                onChange={(e) => handleRoomSelect(e.target.value)}
-                            >
-                                <option value="">Chọn phòng</option>
-                                {rooms.map((room) => (
-                                    <option key={room.id} value={room.id}>
-                                        Căn phòng {room?.ward} - {room?.district} - {room?.city} - {room?.price}{' '}
-                                        triệu/tháng
-                                    </option>
-                                ))}
-                            </select>
+                            <div className="flex gap-4 items-center">
+                                <select
+                                    className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
+                                    onChange={(e) => handleRoomSelect(e.target.value)}
+                                    value={selectedRoom || ""}
+                                >
+                                    <option value="">Chọn phòng</option>
+                                    {rooms.map((room) => (
+                                        <option key={room.id} value={room.id}>
+                                            Căn phòng {room?.ward} - {room?.district} - {room?.city} - {room?.price}{' '}
+                                            triệu/tháng
+                                        </option>
+                                    ))}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateRoom(true)}
+                                    className="flex items-center gap-2 bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-all duration-300 whitespace-nowrap"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                    </svg>
+                                    Thêm phòng mới
+                                </button>
+                            </div>
                         </div>
 
                         {selectedRoom && (
@@ -305,84 +369,133 @@ const CreatePost = () => {
                                         <label htmlFor="upload" className="cursor-pointer flex flex-col items-center">
                                             <img src={uploadimage} alt="Upload" className="w-32 h-24 object-cover" />
                                             <span className="mt-2 font-medium text-blue-500">Thêm Ảnh</span>
+                                            <p className="text-lg text-gray-500 mt-1">
+                                                {images.length} / 10 ảnh
+                                            </p>
                                         </label>
                                         <input
                                             id="upload"
                                             type="file"
-                                            multiple
-                                            onChange={(e) => setImages(Array.from(e.target.files))}
+                                            accept="image/*"
+                                            onChange={handleImageUpload}
                                             className="hidden"
                                         />
                                     </div>
-                                    <div className="mt-4 grid grid-cols-4 gap-4">
+                                    <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                         {images.map((image, index) => (
-                                            <div key={index} className="relative">
+                                            <div key={index} className="relative group">
                                                 <img
                                                     src={URL.createObjectURL(image)}
-                                                    alt="Uploaded"
-                                                    className="w-full h-40 object-cover border border-gray-300 rounded"
+                                                    alt={`Uploaded ${index + 1}`}
+                                                    className="w-full h-40 object-cover border border-gray-300 rounded-lg transition duration-200 group-hover:opacity-75"
                                                 />
                                                 <button
                                                     onClick={() => setImages(images.filter((_, i) => i !== index))}
-                                                    className="absolute top-1 right-1 bg-red-400 text-white p-1 rounded"
+                                                    className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition duration-200 hover:bg-red-600"
                                                 >
-                                                    Xóa
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                                    </svg>
                                                 </button>
                                             </div>
                                         ))}
                                     </div>
-                                    <p className="text-gray-500 mt-2">
-                                        Bạn đã tải lên {images.length} hình ảnh. Cần ít nhất 4 hình ảnh.
-                                    </p>
+                                    <div className="mt-4">
+                                        <div className="flex items-center justify-between">
+                                            <p className={`text-xl ${images.length < 4 ? 'text-red-500' : 'text-green-500'}`}>
+                                                {images.length < 4 
+                                                    ? `Cần thêm ít nhất ${4 - images.length} ảnh nữa` 
+                                                    : 'Đã đủ số lượng ảnh tối thiểu'}
+                                            </p>
+                                            <p className="text-xl text-gray-500">
+                                                Tối đa 10 ảnh
+                                            </p>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                            <div 
+                                                className={`h-2.5 rounded-full transition-all duration-300 ${
+                                                    images.length < 4 ? 'bg-red-500' : 'bg-green-500'
+                                                }`}
+                                                style={{ width: `${Math.min((images.length / 10) * 100, 100)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-4 mt-6">
-                                    <label className="block text-red-400 font-semibold text-2xl">
-                                        Tiêu đề bài đăng
-                                    </label>
-                                    <div className="flex items-center">
-                                        <input
-                                            type="text"
-                                            value={postTitle}
-                                            onChange={(e) => setPostTitle(e.target.value)}
-                                            className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-red-400"
-                                            placeholder="Phòng trọ giá rẻ tại quận 1..."
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={generateTitle}
-                                            className="flex items-center justify-center font-base rounded-lg ml-4 bg-green-500 text-white px-4 py-2 hover:bg-green-600"
-                                        >
-                                            Tiêu đề tự động
-                                        </button>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <div className="flex-1">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <label className="block text-red-400 font-semibold text-2xl mb-2">
+                                                    Tiêu đề bài đăng(*)
+                                                </label>
+                                                <button
+                                                        type="button"
+                                                        onClick={handlegenerateTitle}
+                                                        title='Tạo tiêu đề bằng AI'
+                                                        className={`min-w-[216px] flex items-center justify-center gap-2 font-semibold rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                                                            isGeneratingTitle ? 'opacity-50 cursor-not-allowed' : ''
+                                                        }`}
+                                                        disabled={isGeneratingTitle}
+                                                    >
+                                                        <BsStars className="text-lg" size={20}/>
+                                                        {isGeneratingTitle ? 'Đang tạo...' : 'Tạo tiêu đề AI'}
+                                                    </button>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={postTitle}
+                                                    onChange={(e) => setPostTitle(e.target.value)}
+                                                    className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-red-400"
+                                                    placeholder="Phòng trọ giá rẻ tại quận 1..."
+                                                />
+                                                
+                                            </div>
+                                        </div>
                                     </div>
-
-                                    <label className="block text-red-500 font-semibold text-2xl">
-                                        Nội dung bài đăng
-                                    </label>
-                                    <CKEditor
-                                        editor={ClassicEditor}
-                                        data={postContent}
-                                        onChange={(event, editor) => {
-                                            const data = editor.getData();
-                                            setPostContent(data);
-                                        }}
-                                    />
-                                    {postContent.length < 10 && (
-                                        <p className="text-red-500">Nội dung bài đăng cần ít nhất 10 ký tự.</p>
-                                    )}
+                                
+                                    <div className="space-y-2">
+                                        <div className='flex items-center justify-between mb-6'>
+                                            <label className="block text-red-400 font-semibold text-2xl mb-2">
+                                                Nội dung bài đăng(*)
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={handleGenerateContent}
+                                                className={` min-w-[216px] flex items-center justify-center gap-2 font-semibold rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 hover:from-blue-600 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl ${
+                                                    isGenerating ? 'opacity-50 cursor-not-allowed' : ''
+                                                }`}
+                                                disabled={isGenerating}
+                                            >
+                                                <BsStars  className="text-xl" size={20}/>
+                                                {isGenerating ? 'Đang tạo nội dung...' : 'Tạo nội dung bằng AI'}
+                                            </button>
+                                        </div>
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={postContent}
+                                            onChange={(event, editor) => {
+                                                const data = editor.getData();
+                                                setPostContent(data);
+                                            }}
+                                        />
+                                    </div>
                                 </div>
 
                                 <div className="flex items-center justify-between mt-6">
+            
                                     <button
-                                        type="submit"
-                                        className={`bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ${
-                                            loading ? 'opacity-50 cursor-not-allowed' : ''
-                                        }`}
-                                        disabled={loading}
-                                    >
+                                            type="submit"
+                                            onClick={handleGenerateContent}
+                                            className={`flex items-center justify-center gap-2 w-full font-semibold rounded-lg bg-gradient-to-r from-green-500 to-teal-600 text-white px-6 py-3 hover:from-green-600 hover:to-teal-700 transition-all duration-300 shadow-lg hover:shadow-xl mb-4 ${
+                                                loading ? 'opacity-50 cursor-not-allowed' : ''
+                                            }`}
+                                            disabled={loading}
+                                        >
+                                        
                                         {loading ? 'Đang tạo bài đăng...' : 'Tạo bài đăng'}
-                                    </button>
+                                        </button>
                                 </div>
                             </div>
                         )}
@@ -411,6 +524,13 @@ const CreatePost = () => {
                     </div>
                 )}
             </div>
+            {showCreateRoom && (
+                <CreateRoom 
+                    onClose={handleCloseCreateRoom}
+                    showEdit={false}
+                />
+            )}
+            
             <CreateModalVideo isOpen={showVideoModal} onClose={() => setShowVideoModal(false)} postId={newPostId} />
         </div>
     );

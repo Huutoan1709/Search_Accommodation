@@ -3,6 +3,9 @@ import '../../../output.css';
 import Item from '../../DefaultLayout/Item';
 import API, { endpoints } from '../../../API';
 import Pagination from '../../../components/Pagination';
+import Loading from '../../../components/Loading';
+import { FaBoxOpen } from 'react-icons/fa';
+import { motion } from 'framer-motion';
 
 const ListPost = ({ searchParams }) => {
     const [data, setData] = useState([]);
@@ -132,12 +135,45 @@ const ListPost = ({ searchParams }) => {
         fetchData(fetchUrl);
     };
 
+    const EmptyState = () => (
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center justify-center min-h-[400px] p-8"
+        >
+            <FaBoxOpen className="text-gray-400 text-6xl mb-4"/>
+            <h3 className="text-2xl font-semibold text-gray-600 mb-2">
+                Không tìm thấy bài đăng nào
+            </h3>
+            <p className="text-gray-500 text-center max-w-md">
+                Hiện tại chưa có bài đăng nào phù hợp với tiêu chí tìm kiếm của bạn. 
+                Vui lòng thử lại với các tiêu chí khác.
+            </p>
+        </motion.div>
+    );
+
     if (loading) {
-        return <div>Loading...</div>;
+        return (
+            <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
+                <Loading />
+            </div>
+        );
     }
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return (
+            <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
+                <div className="flex flex-col items-center justify-center min-h-[400px]">
+                    <div className="text-red-500 text-xl mb-4">
+                        <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                    <p className="text-gray-600 text-lg">Đã có lỗi xảy ra: {error}</p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -148,31 +184,39 @@ const ListPost = ({ searchParams }) => {
 
             <div className="items">
                 {data.length > 0 ? (
-                    data.map((item) => (
-                        <Item
-                            key={item?.id}
-                            room={item?.room}
-                            title={item?.title}
-                            content={item?.content}
-                            created_at={item?.created_at}
-                            images={item?.images}
-                            user={item?.user}
-                            id={item?.id}
-                            created_at_humanized={item?.created_at_humanized}
-                        />
-                    ))
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                    >
+                        {data.map((item) => (
+                            <Item
+                                key={item?.id}
+                                room={item?.room}
+                                title={item?.title}
+                                content={item?.content}
+                                created_at={item?.created_at}
+                                images={item?.images}
+                                user={item?.user}
+                                id={item?.id}
+                                created_at_humanized={item?.created_at_humanized}
+                            />
+                        ))}
+                    </motion.div>
                 ) : (
-                    <p className="items-center justify-center">CHƯA CÓ BÀI ĐĂNG LIÊN QUAN.....</p>
+                    <EmptyState />
                 )}
             </div>
 
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                previousPage={previousPage}
-                nextPage={nextPage}
-                onPageChange={handlePageChange}
-            />
+            {data.length > 0 && (
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    previousPage={previousPage}
+                    nextPage={nextPage}
+                    onPageChange={handlePageChange}
+                />
+            )}
         </div>
     );
 };
