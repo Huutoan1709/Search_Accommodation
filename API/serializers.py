@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, Follow, PostImage, Post, Price, Rooms, RoomType, Reviews, FavoritePost, Amenities, \
-    SupportRequests, PostVideo
+    SupportRequests, PostVideo, SearchHistory, UserPreference, PostType, Payment
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 from datetime import datetime
 from django.utils import timezone
@@ -167,12 +167,18 @@ class UserPostSerializer(ModelSerializer):
         model = User
         fields = ['id', 'first_name', 'last_name', 'phone']
 
+class PostTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= PostType
+        fields = '__all__'
+    
 
 class PostSerializer(ModelSerializer):
     video = SerializerMethodField()
     images = SerializerMethodField()
     user = UserInfoSerializer()
     room = RoomsSerializer()
+    post_type = PostTypeSerializer()
     created_at_humanized = SerializerMethodField()
 
     def get_created_at_humanized(self, obj):
@@ -188,8 +194,8 @@ class PostSerializer(ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images','video', 'room', 'created_at_humanized', 'is_active',
-                  'is_approved', 'is_block']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images','video', 'room','post_type', 'created_at_humanized', 'is_active',
+                  'is_approved', 'is_block','is_paid']
         extra_kwargs = {
             'user': {'read_only': True},
         }
@@ -215,9 +221,10 @@ class CreatePostSerializer(ModelSerializer):
     def get_images(self, obj):
         active_images = obj.Post_Images.filter(is_active=True)
         return PostImageSerializer(active_images, many=True).data
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room']
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'room', 'post_type']
         extra_kwargs = {
             'user': {'read_only': True},
         }
@@ -248,6 +255,10 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = Reviews
         fields = ['id', 'customer', 'landlord', 'rating', 'comment', 'selected_criteria', 'created_at']
 
+class SearchHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SearchHistory
+        fields = '__all__'
 
 class CreateReviewSerializer(serializers.ModelSerializer):
     customer = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
@@ -269,3 +280,40 @@ class CreateReviewSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Chỉ người dùng có vai trò 'LANDLORD' mới có thể nhận đánh giá.")
 
         return data
+
+class UserPreferenceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserPreference
+        fields = '__all__'
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    post = PostSerializer()
+    post_type = PostTypeSerializer()
+    created_at = serializers.SerializerMethodField()
+    status_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'post',
+            'post_type',
+            'amount',
+            'status',
+            'status_display',
+            'payment_method',
+            'transaction_id',
+            'created_at'
+        ]
+
+    def get_created_at(self, obj):
+        return obj.created_at.strftime('%d/%m/%Y %H:%M:%S')
+
+    def get_status_display(self, obj):
+        status_map = {
+            'PENDING': 'Đang xử lý',
+            'COMPLETED': 'Thành công',
+            'FAILED': 'Thất bại'
+        }
+        return status_map.get(obj.status, obj.status)

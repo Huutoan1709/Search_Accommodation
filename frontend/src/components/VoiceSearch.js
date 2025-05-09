@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaMicrophone } from 'react-icons/fa';
+import { IoInformationCircleOutline } from 'react-icons/io5';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { notifyError, notifyWarning } from './ToastManager';
 const VoiceSearch = ({ onVoiceResult }) => {
@@ -7,6 +8,7 @@ const VoiceSearch = ({ onVoiceResult }) => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [genAI, setGenAI] = useState(null);
     const [lastRequestTime, setLastRequestTime] = useState(0);
+    const [showGuide, setShowGuide] = useState(false);
     const COOLDOWN_TIME = 5000; // 10 giây giữa các request
     const EXCLUSION_WORDS = [
         'dưới',
@@ -523,28 +525,130 @@ const VoiceSearch = ({ onVoiceResult }) => {
         }
     };
 
+    const searchGuideExamples = [
+        {
+            category: 'Loại phòng',
+            examples: ['phòng trọ', 'nhà nguyên căn', 'căn hộ dịch vụ', 'chung cư']
+        },
+        {
+            category: 'Địa điểm',
+            examples: ['quận 1', 'thành phố Hồ Chí Minh', 'phường Bến Nghé']
+        },
+        {
+            category: 'Khoảng giá',
+            examples: ['dưới 5 triệu', 'từ 3 đến 7 triệu', 'khoảng 4 triệu']
+        },
+        {
+            category: 'Diện tích',
+            examples: ['trên 30m2', 'từ 20 đến 50m2', 'khoảng 25m2']
+        }
+    ];
+
     return (
-        <span
-            type="button"
-            onClick={() => {
-                const audio = document.getElementById('startSound');
-                audio.play();
-                startListening();
-            }}
-            disabled={isProcessing || !genAI}
-            className={`cursor-pointer text-center ${
-                isListening ? 'bg-red-500' : isProcessing ? 'bg-gray-500' : !genAI ? 'bg-gray-400' : 'bg-gray-800'
-            } py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center`}
-            title={!genAI ? 'AI chưa sẵn sàng' : 'Tìm kiếm bằng giọng nói'}
-        >
-            <FaMicrophone className={`${isListening ? 'animate-pulse' : ''}`} size={15} />
-            {isListening ? 'Đang nghe...' : 'Tìm kiếm'}
-            <audio
-                id="startSound"
-                src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
-                preload="auto"
-            ></audio>
-        </span>
+        <div className="relative inline-block">
+            <div className="flex items-center gap-2">
+                <div className="relative">
+                    <span
+                        type="button"
+                        onClick={() => {
+                            const audio = document.getElementById('startSound');
+                            audio.play();
+                            startListening();
+                        }}
+                        onMouseEnter={() => setShowGuide(true)}
+                        onMouseLeave={() => setShowGuide(false)}
+                        disabled={isProcessing || !genAI}
+                        className={`cursor-pointer text-center ${
+                            isListening ? 'bg-red-500' : 
+                            isProcessing ? 'bg-gray-500' : 
+                            !genAI ? 'bg-gray-400' : 'bg-gray-800'
+                        } py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center`}
+                        title={!genAI ? 'AI chưa sẵn sàng' : 'Tìm kiếm bằng giọng nói'}
+                    >
+                        <FaMicrophone className={`${isListening ? 'animate-pulse' : ''}`} size={15} />
+                        {isListening ? 'Đang nghe...' : 'Tìm kiếm'}
+                    </span>
+
+                    {/* Guide Popup */}
+                    {showGuide && (
+                        <div className="absolute z-50 right-0 mt-2 w-[400px] bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl shadow-lg p-6 border border-gray-200">
+                            <div className="space-y-6">
+                                {/* Hướng dẫn chung */}
+                                <div>
+                                    <h3 className="text-2xl font-semibold  mb-3">
+                                        Hướng dẫn tìm kiếm bằng giọng nói
+                                    </h3>
+                                    <ul className="space-y-2">
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-blue-500 mt-1">•</span>
+                                            <span className="text-gray-700">Nói rõ và từ từ các thông tin bạn muốn tìm kiếm.</span>
+                                        </li>
+                                        
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-blue-500 mt-1">•</span>
+                                            <span className="text-gray-700">Các thông tin kết hợp có thể bao gồm: loại phòng, địa điểm, giá cả và diện tích.</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-blue-500 mt-1">•</span>
+                                            <span className="text-gray-700">Khi tìm kiếm khu vực ở cấp 
+                                                <span className='font-semibold'> Quận/Huyện/Thị xã/Thành phố thuộc tỉnh </span>
+                                                 ví dụ như Thành phố Quy nhơn thì bắt buộc phải nói có tiền tố đi kèm</span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-blue-500 mt-1">•</span>
+                                            <span className="text-gray-700">Tương tự đối với tìm kiếm cấp
+                                                <span className='font-semibold'> Phường/Xã/Thị Trấn </span> kèm tiền tố
+                                                 </span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* Danh sách ví dụ */}
+                                <div>
+                                    <h4 className="font-semibold text-gray-800 mb-2">Các ví dụ câu tìm kiếm:</h4>
+                                    <ul className="space-y-2">
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-red-500 mt-1">→</span>
+                                            <span className="text-gray-700 italic">
+                                                "Tìm phòng trọ ở quận gò vấp, giá từ 3 đến 5 triệu, diện tích trên 25m2"
+                                            </span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-red-500 mt-1">→</span>
+                                            <span className="text-gray-700 italic">
+                                                "Tìm nhà nguyên căn dưới 10 triệu ở thành phố Hồ Chí Minh"
+                                            </span>
+                                        </li>
+                                        <li className="flex items-start gap-2">
+                                            <span className="text-red-500 mt-1">→</span>
+                                            <span className="text-gray-700 italic">
+                                                "Tìm phòng trọ ở huyện Hoài Ân, giá khoảng 2 triệu"
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                {/* Lưu ý */}
+                                <div className="bg-blue-50 p-3 rounded-lg">
+                                    <p className="text-xl text-blue-800 font-medium flex items-center gap-2">
+                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                                        </svg>
+                                        Nhấn vào nút microphone và đợi tiếng "bíp" trước khi nói
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <audio
+                    id="startSound"
+                    src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+                    preload="auto"
+                ></audio>
+            </div>
+        </div>
     );
 };
 

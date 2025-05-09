@@ -6,6 +6,8 @@ import Updateinfo from '../../User/Updateinfo';
 import ManageRoom from '../../Room/ManageRoom';
 import ManagePost from '../../Post/ManagePost';
 import MyReviews from '../../User/Myreviews/MyReview';
+import ReceivedReviews from '../../User/ReceivedReviews';
+import PaymentHistory from '../../Payment/PaymentHistory';
 import { useRoutes } from 'react-router-dom';
 
 const Profile = () => {
@@ -15,6 +17,8 @@ const Profile = () => {
         { path: 'manageroom', element: <ManageRoom /> },
         { path: 'managepost', element: <ManagePost /> },
         { path: 'myreviews', element: <MyReviews /> },
+        { path: 'receivedreviews', element: <ReceivedReviews /> },
+        { path: 'paymenthistory', element: <PaymentHistory /> },
     ]);
 
     return (

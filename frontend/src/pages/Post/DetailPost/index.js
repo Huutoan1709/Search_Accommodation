@@ -25,42 +25,100 @@ import { AiFillSafetyCertificate } from 'react-icons/ai';
 import { IoIosCall } from 'react-icons/io';
 import { SlUserFollow } from 'react-icons/sl';
 import AroundPost from '../AroundPost';
+import { motion } from 'framer-motion';
+import Loading from '../../../components/Loading';
+
 function DetailPost() {
     const { postId } = useParams();
     const [post, setPost] = useState(null);
     const [amenitiesList, setAmenitiesList] = useState([]);
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchPost = async () => {
+        const fetchData = async () => {
             try {
-                let res = await API.get(endpoints['postdetail'](postId));
-                setPost(res.data);
+                setLoading(true);
+                const [postRes, amenitiesRes] = await Promise.all([
+                    API.get(endpoints['postdetail'](postId)),
+                    API.get(endpoints['amenities'])
+                ]);
+                
+                setPost(postRes.data);
+                setAmenitiesList(amenitiesRes.data);
             } catch (err) {
-                setError(err.message);
+                console.error('Error fetching post details:', err);
+                setError('Không thể tải thông tin bài đăng. Vui lòng thử lại sau.');
+            } finally {
+                setLoading(false);
             }
         };
 
-        const fetchAmenities = async () => {
-            try {
-                let res = await API.get(endpoints['amenities']); // Assuming you have an endpoint for amenities
-                setAmenitiesList(res.data);
-            } catch (err) {
-                setError(err.message);
-            }
-        };
-
-        fetchPost();
-        fetchAmenities();
+        fetchData();
     }, [postId]);
-    console.log(post);
+
+    if (loading) {
+        return (
+            <div>
+                <Header />
+                <div className="w-[1024px] m-auto mt-4">
+                    <Loading message="Đang tải thông tin bài đăng..." />
+                </div>
+                <Footer />
+            </div>
+        );
+    }
+
     if (error) {
-        return <div>Error: {error}</div>;
+        return (
+            <div>
+                <Header />
+                <div className="w-[1024px] m-auto mt-4">
+                    <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow-md">
+                        <div className="text-red-500 text-xl mb-4">
+                            <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} 
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <p className="text-gray-600 text-lg text-center px-4">{error}</p>
+                        <button 
+                            onClick={() => navigate(-1)}
+                            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
     }
 
     if (!post) {
-        return <div>Loading...</div>;
+        return (
+            <div>
+                <Header />
+                <div className="w-[1024px] m-auto mt-4">
+                    <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-lg shadow-md">
+                        <h3 className="text-2xl font-semibold text-gray-600 mb-2">
+                            Không tìm thấy bài đăng
+                        </h3>
+                        <p className="text-gray-500 text-center max-w-md mb-4">
+                            Bài đăng này không tồn tại hoặc đã bị xóa.
+                        </p>
+                        <button 
+                            onClick={() => navigate(-1)}
+                            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            Quay lại
+                        </button>
+                    </div>
+                </div>
+                <Footer />
+            </div>
+        );
     }
 
     const features = [
@@ -110,198 +168,208 @@ function DetailPost() {
     }));
 
     return (
-        <div>
+        <div className="min-h-screen bg-gray-50">
             <Header />
-            <div className="w-[1024px] flex m-auto">
-                <div className="w-full flex gap-4 mt-6">
-                    <div className="w-[70%]">
-                        <SliderCustom images={post?.images} video={post.video?.video} />
-                        <div className="rounded-md shadow-md bg-white p-4">
-                            <h2 className="text-3xl font-semibold text-red-600">{post?.title}</h2>
-                            <span className="flex items-center gap-2 my-3">
-                                <PiMapPinAreaFill className="text-red-500 mx-1" size={20} />
-                                <span className="text-[14px] ">
-                                    {post?.room.ward}, {post?.room.district}, {post?.room.city}
-                                </span>
-                            </span>
-                            <div className="h-[35px] flex items-center justify-between mt-4 border border-t-gray-350 border-b-gray-350 pr-2">
-                                <span className="flex items-center gap-1">
-                                    <MdOutlineAttachMoney size={20} className="text-green-500" />
-                                    <span className="font-semibold text-[20px] text-green-500">
-                                        {post?.room?.price} triệu/tháng
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="max-w-[1024px] mx-auto py-6"
+            >
+                <div className="flex gap-6">
+                    {/* Main Content Column */}
+                    <div className="w-[70%] space-y-6">
+                        {/* Image Slider */}
+                        <div className="rounded-xl overflow-hidden shadow-lg">
+                            <SliderCustom images={post?.images} video={post?.video?.video} />
+                        </div>
+
+                        {/* Post Details */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                            {/* Title & Location */}
+                            <div className="space-y-3">
+                                <h2 className="text-3xl font-bold text-gray-800 leading-tight">
+                                    {post?.title}
+                                </h2>
+                                <div className="flex items-center text-gray-600">
+                                    <PiMapPinAreaFill className="text-amber-500 mr-2" size={20} />
+                                    <span className="text-xl">
+                                        {post?.room?.ward}, {post?.room?.district}, {post?.room?.city}
                                     </span>
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <BiArea size={20} className="text-gray-400" />
-                                    <span>{post?.room?.area} m²</span>
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <CiStopwatch size={20} className="text-gray-500" />
-                                    <span>
-                                        {formatDistanceToNow(parseISO(post?.created_at), {
-                                            addSuffix: true,
-                                            locale: vi,
-                                        })}
-                                    </span>
-                                </span>
-                                <span className="flex items-center gap-1">
-                                    <CiHashtag size={20} className="text-gray-400" />
-                                    <span>{post?.id}</span>
-                                </span>
+                                </div>
                             </div>
 
-                            <div className="mt-8">
-                                <h3 className="font-semibold text-[24px] my-5 text-gray-800">Thông tin mô tả:</h3>
-                                <div
-                                    className="gap-3 flex flex-col bg-gray-50 p-4 rounded-lg border border-gray-200"
-                                    dangerouslySetInnerHTML={{ __html: post?.content }}
-                                ></div>
+                            {/* Key Information */}
+                            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                    <MdOutlineAttachMoney size={24} className="text-green-500" />
+                                    <div>
+                                        <p className="text-2xl font-bold text-green-600">
+                                            {post?.room?.price} triệu
+                                        </p>
+                                        <p className="text-sm text-gray-500">mỗi tháng</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <BiArea size={24} className="text-amber-500" />
+                                    <div>
+                                        <p className="text-2xl font-bold text-gray-700">
+                                            {post?.room?.area} m²
+                                        </p>
+                                        <p className="text-sm text-gray-500">diện tích</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <CiStopwatch size={24} className="text-blue-500" />
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-700">
+                                            {formatDistanceToNow(parseISO(post?.created_at), {
+                                                addSuffix: true,
+                                                locale: vi,
+                                            })}
+                                        </p>
+                                        <p className="text-sm text-gray-500">đăng tin</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="mt-8">
-                                <h3 className="font-semibold text-[24px] my-5 text-gray-800">Đặc điểm tin đăng:</h3>
+                            {/* Description */}
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-gray-800">Thông tin mô tả</h3>
+                                <div className="prose max-w-none bg-gray-50 p-6 rounded-lg"
+                                    dangerouslySetInnerHTML={{ __html: post?.content }}>
+                                </div>
+                            </div>
+
+                            {/* Features Grid */}
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-gray-800">Đặc điểm tin đăng</h3>
                                 <div className="grid grid-cols-2 gap-4">
                                     {features.map((feature, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                {feature.icon}
-                                                <span className="font-semibold text-gray-700">{feature.label}</span>
+                                        <div key={index}
+                                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                <div className="p-2 bg-white rounded-full shadow-sm">
+                                                    {feature.icon}
+                                                </div>
+                                                <span className="font-medium text-gray-700">{feature.label}</span>
                                             </div>
                                             <span className="text-gray-600">{feature.value}</span>
                                         </div>
                                     ))}
                                 </div>
-                                {amenities.length > 0 && (
-                                    <>
-                                        <h3 className="font-semibold text-[24px] my-5 text-gray-800">Nội thất:</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {amenities.map((amenity, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        {amenity.icon}
-                                                        <span className="font-semibold text-gray-700">
-                                                            {amenity.label}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                                {prices.length > 0 && (
-                                    <>
-                                        <h3 className="font-semibold text-[24px] my-5 text-gray-800">Giá dịch vụ:</h3>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {prices.map((price, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex items-center justify-between border-b py-2 hover:bg-gray-100 transition duration-200"
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        {price.icon}
-                                                        <span className="font-semibold text-gray-700">
-                                                            {price.label}
-                                                        </span>
-                                                    </div>
-                                                    <span className="text-gray-600">{price.value}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
                             </div>
 
-                            <div className="w-full mt-8">
-                                <h3 className="font-semibold text-[20px] my-5">Bản đồ</h3>
-                                <div className="border border-gray-300 rounded-lg shadow-md overflow-hidden">
-                                    <div className="flex items-center justify-between  p-2">
-                                        <span className="text-[14px] text-gray-700">
-                                            Địa chỉ: {post?.room?.other_address}, {post?.room?.ward},{' '}
-                                            {post?.room?.district}, {post?.room?.city}
-                                        </span>
+                            {/* Amenities Section */}
+                            {amenities.length > 0 && (
+                                <div className="space-y-4">
+                                    <h3 className="text-xl font-bold text-gray-800">Tiện nghi</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                        {amenities.map((amenity, index) => (
+                                            <div key={index}
+                                                className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                                                <div className="p-2 bg-white rounded-full shadow-sm">
+                                                    {amenity.icon}
+                                                </div>
+                                                <span className="font-medium text-gray-700">
+                                                    {amenity.label}
+                                                </span>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="relative h-[300px]">
-                                        <MapBox latitude={post?.room?.latitude} longitude={post?.room?.longitude} />
-                                        <div className="absolute top-2 left-2 bg-white p-3 rounded-lg shadow-lg">
-                                            <h4 className="font-semibold">{post?.room?.other_address}</h4>
-                                            <p className="text-lg text-gray-500">
+                                </div>
+                            )}
+
+                            {/* Map Section */}
+                            <div className="space-y-4">
+                                <h3 className="text-xl font-bold text-gray-800">Vị trí trên bản đồ</h3>
+                                <div className="rounded-xl overflow-hidden shadow-lg">
+                                    <div className="relative h-[400px]">
+                                        <MapBox 
+                                            latitude={post?.room?.latitude} 
+                                            longitude={post?.room?.longitude} 
+                                        />
+                                        <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-[300px]">
+                                            <h4 className="font-bold text-gray-800 mb-1">
+                                                {post?.room?.other_address}
+                                            </h4>
+                                            <p className="text-lg text-gray-600 mb-3">
                                                 {post?.room?.ward}, {post?.room?.district}, {post?.room?.city}
                                             </p>
-
                                             <a
                                                 href={`https://www.google.com/maps/dir/?api=1&destination=${post?.room?.latitude},${post?.room?.longitude}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-blue-500 text-base mt-2 hover:underline flex items-center gap-1"
+                                                className="inline-flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700"
                                             >
+                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                                </svg>
                                                 Chỉ đường
                                             </a>
                                         </div>
                                     </div>
                                 </div>
-                                <p className="mt-4 text-xl">
-                                    Bạn đang xem nội dung tin đăng: "{post?.title} - Mã tin: {post?.id}". Mọi thông tin
-                                    liên quan đến tin đăng này chỉ mang tính chất tham khảo. Nếu bạn có phản hồi với tin
-                                    đăng này (báo xấu, tin đã cho thuê, không liên lạc được,...), vui lòng thông báo để
-                                    có thể xử lý.
-                                </p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="w-[30%]">
-                        <div className=" bg-white p-3 shadow-lg rounded-lg flex flex-col items-center text-center mb-7 border border-gray-300">
-                            <img
-                                src={post?.user?.avatar || '/default-avatar.png'}
-                                alt="Landlord Avatar"
-                                className="w-[80px] h-[80px] rounded-full cursor-pointer shadow-lg mt-2"
-                                onClick={() => navigate(`/profiles/${post?.user?.id}`)}
-                            />
-                            <h3 className="mt-2 font-semibold text-[20px] flex items-center gap-1">
-                                {post?.user?.first_name} {post?.user?.last_name}
-                                <button text="Uy tín">
+                    {/* Sidebar */}
+                    <div className="w-[30%] space-y-6 ">
+                        {/* User Profile Card */}
+                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                            <div className="flex flex-col items-center">
+                                <img
+                                    src={post?.user?.avatar || '/default-avatar.png'}
+                                    alt="Avatar"
+                                    className="w-20 h-20 rounded-full object-cover border-4 border-amber-500 cursor-pointer hover:scale-105 transition-transform"
+                                    onClick={() => navigate(`/profiles/${post?.user?.id}`)}
+                                />
+                                <h3 className="mt-4 text-xl font-bold text-gray-800 flex items-center gap-2">
+                                    {post?.user?.first_name} {post?.user?.last_name}
                                     {post?.user?.reputation && (
-                                        <AiFillSafetyCertificate size={20} className="text-green-500" />
+                                        <AiFillSafetyCertificate className="text-green-500" size={20} />
                                     )}
+                                </h3>
+                            </div>
+
+                            <div className="mt-6 space-y-3 ">
+                                <a
+                                    href={`tel:${post?.user?.phone}`}
+                                    className="flex items-center justify-center gap-2 w-full py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                                >
+                                    <IoIosCall size={20} />
+                                    <span>Gọi {post?.user?.phone}</span>
+                                </a>
+
+                                <a
+                                    href={`https://zalo.me/${post?.user?.phone}`}
+                                    target="_blank"
+                                    className="flex items-center justify-center gap-2 w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                >
+                                    <img src={zalo} alt="Zalo" className="w-6 h-6" />
+                                    <span>Nhắn Zalo</span>
+                                </a>
+
+                                <button className="flex items-center justify-center gap-2 w-full py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <SlUserFollow size={20} />
+                                    <span>Theo dõi</span>
                                 </button>
-                            </h3>
-
-                            <a
-                                href={`tel:${post?.landlord?.phone}`}
-                                className="flex items-center justify-center w-full mt-4 bg-green-500 text-white py-2 rounded-lg"
-                            >
-                                <IoIosCall size={20} className="mr-1 text-white " />
-                                <span className="mr-2">Gọi {post?.user?.phone}</span>
-                            </a>
-
-                            <a
-                                href={`https://zalo.me/${post?.user?.phone}`}
-                                target="_blank"
-                                className=" flex items-center justify-center w-full mt-4  bg-gray-300 py-2 rounded-lg border border-gray-300"
-                            >
-                                <img src={zalo} alt="Zalo" className="w-8 h-8 object-cover mr-1" />
-                                <span className="mr-2">Nhắn Zalo</span>
-                            </a>
-                            <button className="w-full mt-4 flex items-center justify-center bg-gray-300 border border-gray-300 py-2 rounded-lg">
-                                <SlUserFollow size={20} className="mr-1" />
-                                <span className="mr-2">Theo dõi</span>
-                            </button>
+                            </div>
                         </div>
-                        <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
-                            <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">
+
+                        {/* New Posts Section */}
+                        <div className="bg-wgite rounded-xl shadow-lg p-6 border border-gray-200">
+                            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b border-gray-300 flex items-center gap-2">
                                 Tin mới đăng
                             </h3>
                             <NewPost />
                         </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
+
+            {/* Related Posts */}
             <AroundPost
                 city={post?.room?.city}
                 district={post?.room?.district}

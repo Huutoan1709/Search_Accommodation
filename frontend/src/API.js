@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 const HOST = 'http://127.0.0.1:8000';
 
 export const endpoints = {
@@ -45,6 +46,13 @@ export const endpoints = {
     deleteUser: (userId) => `/user/${userId}/`,
     detailuseradmin: (userId) => `/user/${userId}/`,
     updateUser: (userId) => `/user/${userId}/`,
+    searchhistory: '/search-history/',
+    recommendedrooms: '/recommendations/recommended-rooms/',
+    PhoneOTPReset: '/phone-reset-password/',
+    posttype: '/post-type/',
+    paymentcreate: '/payment/create_payment/',
+    paymentreturn: '/payment/vnpay-return/',
+    mypaymenthistory: '/payment/my-payment/',
 };
 
 export const authApi = () => {

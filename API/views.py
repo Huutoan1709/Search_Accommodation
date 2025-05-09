@@ -1,12 +1,12 @@
-from .models import User
+from .models import SearchHistory, User, UserPreference, Payment
 from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
-    SupportRequestsSerializer, WriteRoomSerializer, AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
-    CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer, PostVideoSerializer
+    SupportRequestsSerializer, WriteRoomSerializer, SearchHistorySerializer ,AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
+    CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer,PaymentSerializer ,PostVideoSerializer, PostTypeSerializer
 from rest_framework import viewsets, generics, response, status, permissions, filters
 from rest_framework.decorators import action, api_view
-from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostImage, \
-    Amenities, PasswordResetOTP, PostVideo
+from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostType, PostImage, \
+    Amenities, PasswordResetOTP, PostVideo,SearchHistory
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
 from django.core.mail import send_mail
@@ -16,11 +16,17 @@ from django.utils import timezone
 from .models import PasswordResetOTP
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.shortcuts import render
-from django.db.models import Q
+from django.shortcuts import render, redirect
+from django.db.models import Q, Count, Avg, StdDev, Max, Case, When
+from django.db import models
 import jwt
 from datetime import datetime, timedelta
-
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import NearestNeighbors
+import numpy as np
+import hashlib
+import hmac
+import urllib.parse
 
 # from django_filters.rest_framework import DjangoFilterBackend
 class UpdatePartialAPIView(generics.UpdateAPIView):
@@ -383,6 +389,14 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         # Chỉ lọc những bài đăng đã duyệt khi action là 'list'
         if self.action == 'list':
             queryset = queryset.filter(is_approved=True)
+        # Order by post type (VIP first) and then by creation date
+        queryset = queryset.annotate(
+            post_type_order=Case(
+                When(post_type__name='VIP', then=0),
+                default=1,
+                output_field=models.IntegerField(),
+            )
+        ).order_by('post_type_order', '-created_at')
 
         return queryset
 
@@ -408,32 +422,43 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
         return serializers.get(self.action, PostSerializer)
 
     def create(self, request, *args, **kwargs):
-        data = QueryDict('', mutable=True)
-        data.update(request.data)
+        # Validate dữ liệu đầu vào
+        room_id = request.data.get('room')
+        post_type_id = request.data.get('post_type')
 
-        room_id = data.get('room')
         if not room_id:
             return response.Response({'error': 'Room ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not post_type_id:
+            return response.Response({'error': 'Post Type ID is required'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
             room = Rooms.objects.get(id=room_id)
+            post_type = PostType.objects.get(id=post_type_id)
         except Rooms.DoesNotExist:
             return response.Response({'error': 'Room not found'}, status=status.HTTP_404_NOT_FOUND)
+        except PostType.DoesNotExist:
+            return response.Response({'error': 'Post Type not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Check if a post for this room already exists
-        if Post.objects.filter(room=room).exists():
-            return response.Response({'error': 'A post for this room has already been created'},
-                                     status=status.HTTP_400_BAD_REQUEST)
-
-        # Ensure the user is the landlord of the room
+        # Kiểm tra quyền
         if room.landlord.id != request.user.id:
-            return response.Response({'error': 'Only the landlord of the room can create a post about it'},
-                                     status=status.HTTP_403_FORBIDDEN)
+            return response.Response(
+                {'error': 'Only the landlord of the room can create a post about it'},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        data['user'] = request.user.id
-        serializer = self.get_serializer(data=data)
+        # Tạo post data
+        post_data = {
+            'title': request.data.get('title'),
+            'content': request.data.get('content'),
+            'user': request.user.id,
+            'room': room_id,
+            'post_type': post_type_id
+        }
+
+        serializer = self.get_serializer(data=post_data)
         if serializer.is_valid(raise_exception=True):
-            serializer.save()
+            post = serializer.save()
             return response.Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -582,6 +607,12 @@ class RoomTypeViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartia
     # pagination_class = paginators.BasePaginator
     permissions_classes = [permissions.IsAuthenticated()]
 
+class PostTypeViewset(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPIView):
+    serializer_class = serializers.PostTypeSerializer
+    queryset = PostType.objects.all()
+    permissions_classes = [permissions.IsAuthenticated()]
+
+    
 
 class SupportRequestsViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.RetrieveUpdateDestroyAPIView):
     serializer_class = SupportRequestsSerializer
@@ -707,6 +738,460 @@ class ResetPasswordViewSet(viewsets.ViewSet):
         except User.DoesNotExist:
             return response.Response({'error': 'Email không tồn tại.'}, status=status.HTTP_404_NOT_FOUND)
 
+
+from django.core.exceptions import ObjectDoesNotExist
+from rest_framework import status, viewsets
+from .models import PhoneOTP
+import random
+import string
+from datetime import timedelta
+from django.utils import timezone
+from .utils import send_sms, format_phone_number_for_twilio
+
+class PhoneResetPasswordViewSet(viewsets.ViewSet):
+    def create(self, request):
+        phone = request.data.get('phone')
+        otp = request.data.get('otp')
+        new_password = request.data.get('new_password')
+
+        # Validate phone number format first
+        if not phone:
+            return response.Response(
+                {'error': 'Số điện thoại là bắt buộc'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Try to format the phone number first
+            formatted_phone = format_phone_number_for_twilio(phone)
+            user = User.objects.get(phone=phone)
+
+            if otp:
+                # Handle OTP verification
+                otp_instance = PhoneOTP.objects.filter(
+                    user=user,
+                    otp=otp,
+                    is_used=False,
+                    expires_at__gt=timezone.now()
+                ).first()
+
+                if not otp_instance:
+                    return response.Response(
+                        {'error': 'OTP không hợp lệ hoặc đã hết hạn.'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                user.set_password(new_password)
+                user.save()
+
+                otp_instance.is_used = True
+                otp_instance.save()
+
+                return response.Response(
+                    {'message': 'Mật khẩu đã được đặt lại thành công.'},
+                    status=status.HTTP_200_OK
+                )
+            else:
+                # Generate and send new OTP
+                otp_instance = PhoneOTP.objects.create(user=user)
+                otp_instance.generate_otp()
+                
+                # Send SMS with formatted phone number
+                message = f"Mã OTP để đặt lại mật khẩu của bạn là: {otp_instance.otp}"
+                sms_sent = send_sms(formatted_phone, message)
+                
+                if not sms_sent:
+                    return response.Response(
+                        {'error': 'Không thể gửi SMS. Vui lòng thử lại sau.'},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+
+                return response.Response(
+                    {'message': 'OTP đã được gửi đến số điện thoại của bạn.'},
+                    status=status.HTTP_200_OK
+                )
+
+        except User.DoesNotExist:
+            return response.Response(
+                {'error': 'Không tìm thấy tài khoản với số điện thoại này.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return response.Response(
+                {'error': f'Lỗi: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+class SearchHistoryViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = SearchHistorySerializer
+
+    def create(self, request):
+        data = request.data.copy()
+        data['user'] = request.user.id
+        
+        serializer = SearchHistorySerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return response.Response(serializer.data, status=status.HTTP_201_CREATED)
+        return response.Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    
+class RecommendationViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+    WEIGHTS = {
+    'price': 0.3,
+    'area': 0.2,
+    'room_type': 0.3,
+    'location': 0.2
+}
+    
+    def _pad_vector(self, vector, size):
+        """Đảm bảo vector có kích thước cố định"""
+        if len(vector) < size:
+            return np.pad(vector, (0, size - len(vector)))
+        return vector[:size]
+
+    def _build_feature_vector(self, user):
+        """Xây dựng vector đặc trưng cho user"""
+        search_history = SearchHistory.objects.filter(user=user)
+        
+        if not search_history.exists():
+            return None
+
+        # Tính toán thống kê về giá
+        price_stats = search_history.aggregate(
+            avg_price=Avg('min_price'),
+            price_std=StdDev('min_price'),
+            max_price=Max('max_price')
+        )
+        
+        # Tính toán thống kê về diện tích
+        area_stats = search_history.aggregate(
+            avg_area=Avg('min_area'), 
+            area_std=StdDev('min_area'),
+            max_area=Max('max_area')
+        )
+
+        # Phân tích loại phòng
+        room_type_dist = (
+            search_history
+            .values('room_type')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+        
+        # Phân tích khu vực
+        location_dist = (
+            search_history
+            .values('city')
+            .annotate(count=Count('id'))
+            .order_by('-count')
+        )
+
+        # Vector cơ bản
+        base_features = [
+            float(price_stats['avg_price'] or 0),
+            float(price_stats['price_std'] or 0),
+            float(price_stats['max_price'] or 0),
+            float(area_stats['avg_area'] or 0),
+            float(area_stats['area_std'] or 0),
+            float(area_stats['max_area'] or 0)
+        ]
+
+        # One-hot encoding cho room type
+        room_types = RoomType.objects.all()
+        room_type_features = [0] * room_types.count()
+        for rt in room_type_dist:
+            if rt['room_type'] is not None:
+                room_type_features[rt['room_type'] - 1] = rt['count']
+
+        # One-hot encoding cho locations
+        locations = search_history.values('city').distinct()
+        location_features = [0] * locations.count()
+        for i, loc in enumerate(location_dist):
+            location_features[i] = loc['count']
+
+        # Kết hợp tất cả features
+        feature_vector = base_features + room_type_features + location_features
+        return np.array(feature_vector, dtype=float)
+
+    def _get_similar_users(self, user_vector, k=5):
+        """Tìm k users có vector đặc trưng gần giống nhất"""
+        if user_vector is None:
+            return []
+            
+        # Lấy tất cả preferences hiện có
+        all_preferences = list(UserPreference.objects.all())  # Convert QuerySet to list
+        if not all_preferences:
+            return []
+
+        # Xác định kích thước vector lớn nhất
+        max_size = max(p.vector_size for p in all_preferences)
+        max_size = max(max_size, len(user_vector))
+
+        # Chuẩn bị ma trận features
+        X = np.array([
+            self._pad_vector(p.feature_vector, max_size) 
+            for p in all_preferences
+        ])
+        
+        # Chuẩn hóa vector của user hiện tại
+        user_vector = self._pad_vector(user_vector, max_size)
+
+        # Chuẩn hóa dữ liệu
+        scaler = StandardScaler()
+        X_scaled = scaler.fit_transform(X)
+        user_vector_scaled = scaler.transform(user_vector.reshape(1, -1))
+
+        # Tìm nearest neighbors
+        nbrs = NearestNeighbors(n_neighbors=min(k, len(X)), algorithm='auto')
+        nbrs.fit(X_scaled)
+        
+        distances, indices = nbrs.kneighbors(user_vector_scaled)
+        
+        # Convert numpy.int64 to regular Python int
+        similar_users = [all_preferences[int(i)].user for i in indices[0]]
+        return similar_users
+
+    @action(methods=['GET'], detail=False, url_path='recommended-rooms')
+    def get_recommended_rooms(self, request):
+        user = request.user
+        
+        # 1. Xây dựng vector đặc trưng từ lịch sử tìm kiếm
+        user_vector = self._build_feature_vector(user)
+        if user_vector is None:
+            return self._get_default_recommendations()
+
+        # 2. Lưu vector đặc trưng
+        UserPreference.objects.update_or_create(
+            user=user,
+            defaults={
+                'feature_vector': user_vector.tolist(),
+                'vector_size': len(user_vector)
+            }
+        )
+        
+        # 3. Tìm users tương tự nhưng loại trừ user hiện tại
+        similar_users = self._get_similar_users(user_vector)
+        if user in similar_users:
+            similar_users.remove(user)
+        
+        if not similar_users:
+            return self._get_default_recommendations()
+
+        # 4. Lấy posts dựa trên hành vi tìm kiếm của user hiện tại
+        search_history = SearchHistory.objects.filter(user=user).order_by('-last_searched')
+        
+        if (search_history.exists()):
+            recent_search = search_history.first()
+            base_query = Q(is_active=True, is_approved=True, is_block=False)
+            
+            # Lọc theo khoảng giá gần đây
+            if recent_search.min_price and recent_search.max_price:
+                base_query &= Q(room__price__range=(
+                    recent_search.min_price * 0.8,  # Mở rộng range 20%
+                    recent_search.max_price * 1.2
+                ))
+                
+            # Lọc theo khoảng diện tích gần đây
+            if recent_search.min_area and recent_search.max_area:
+                base_query &= Q(room__area__range=(
+                    recent_search.min_area * 0.8,
+                    recent_search.max_area * 1.2
+                ))
+                
+            # Lọc theo loại phòng
+            if recent_search.room_type:
+                base_query &= Q(room__room_type=recent_search.room_type)
+                
+            # Lọc theo khu vực
+            if recent_search.city:
+                base_query &= Q(room__city=recent_search.city)
+
+            # 5. Kết hợp với posts được yêu thích bởi users tương tự
+            recommended_posts = (
+                Post.objects
+                .filter(base_query)
+                .filter(
+                    Q(favorited_by__user__in=similar_users) |  # Posts được yêu thích bởi users tương tự
+                    Q(user__in=similar_users)                  # Posts được đăng bởi users tương tự
+                )
+                .distinct()
+                .annotate(
+                    match_score=Case(
+                        # Tăng điểm cho posts phù hợp với tìm kiếm gần đây
+                        When(room__room_type=recent_search.room_type, then=3),
+                        When(room__city=recent_search.city, then=2),
+                        default=1,
+                        output_field=models.IntegerField(),
+                    ),
+                    favorite_count=Count('favorited_by')
+                )
+                .order_by('-match_score', '-favorite_count', '-created_at')
+            )
+        else:
+            # Nếu không có lịch sử tìm kiếm, lấy posts được yêu thích nhiều
+            recommended_posts = (
+                Post.objects
+                .filter(
+                    is_active=True,
+                    is_approved=True,
+                    is_block=False,
+                    favorited_by__user__in=similar_users
+                )
+                .distinct()
+                .annotate(favorite_count=Count('favorited_by'))
+                .order_by('-favorite_count', '-created_at')
+            )
+
+        # 6. Nếu không đủ đề xuất, bổ sung bằng posts mới
+        if not recommended_posts.exists():
+            return self._get_default_recommendations()
+
+        serializer = DetailPostSerializer(recommended_posts, many=True)
+        return response.Response(serializer.data)
+
+    # def _get_default_recommendations(self):
+    #     """Trả về các bài đăng mới nhất khi không có đề xuất phù hợp"""
+    #     default_posts = (
+    #         Post.objects
+    #         .filter(is_active=True, is_approved=True, is_block=False)
+    #         .order_by('-created_at')
+    #     )
+    #     serializer = DetailPostSerializer(default_posts, many=True)
+    #     return response.Response(serializer.data)
+
+import hmac
+import hashlib
+import urllib.parse
+class VNPayViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['post'], detail=False, url_path='create_payment')
+    def create_payment(self, request):
+        post_id = request.data.get('post_id')
+        post_type_id = request.data.get('post_type_id') 
+        amount = request.data.get('amount')
+
+        if not all([post_id, post_type_id, amount]):
+            return response.Response(
+                {"error": "Missing required parameters"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Create payment record
+            post = Post.objects.get(id=post_id)
+            post_type = PostType.objects.get(id=post_type_id)
+            
+            payment = Payment.objects.create(
+                user=request.user,
+                post=post, 
+                post_type=post_type,
+                amount=amount,
+                payment_method='VNPAY'
+            )
+
+            # Format VNPay parameters 
+            vnp_params = {
+                'vnp_Version': '2.1.0',
+                'vnp_Command': 'pay',
+                'vnp_TmnCode': settings.VNPAY_TMN_CODE,
+                'vnp_Amount': str(int(float(amount) * 100)),
+                'vnp_CurrCode': 'VND',
+                'vnp_TxnRef': str(payment.id),
+                'vnp_OrderInfo': 'Thanh toan tin dang',
+                'vnp_OrderType': 'billpayment',
+                'vnp_Locale': 'vn',
+                # URL encode the return URL properly
+                'vnp_ReturnUrl': settings.VNPAY_RETURN_URL,
+                'vnp_IpAddr': request.META.get('REMOTE_ADDR', '127.0.0.1'),
+                'vnp_CreateDate': datetime.now().strftime('%Y%m%d%H%M%S')
+        }
+
+            # Sort parameters before creating hash
+            sorted_params = dict(sorted(vnp_params.items()))
+            
+            # Create hash data string with URL encoded values
+            hash_data = '&'.join([f"{k}={urllib.parse.quote_plus(str(v))}" for k, v in sorted_params.items()])
+            
+            print("===== DEBUG HASH DATA =====")
+            print("Original hash_data:", hash_data)
+            print("VNPAY Hash Secret:", settings.VNPAY_HASH_SECRET)
+
+            # Generate secure hash
+            secure_hash = hmac.new(
+                settings.VNPAY_HASH_SECRET.encode('utf-8'),
+                hash_data.encode('utf-8'),
+                hashlib.sha512
+            ).hexdigest()
+
+            print("Generated secure hash:", secure_hash)
+            print("========================")
+
+            # Add secure hash to parameters
+            vnp_params['vnp_SecureHash'] = secure_hash
+
+            # Create final payment URL with properly encoded parameters
+            encoded_params = '&'.join([f"{k}={urllib.parse.quote_plus(str(v))}" for k, v in vnp_params.items()])
+            payment_url = f"{settings.VNPAY_PAYMENT_URL}?{encoded_params}"
+
+            return response.Response({
+                "payment_url": payment_url
+            })
+
+        except Exception as e:
+            return response.Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(methods=['get'], detail=False, url_path='vnpay-return')
+    def payment_return(self, request):
+        # Kiểm tra kết quả thanh toán từ VNPAY
+        vnp_ResponseCode = request.GET.get('vnp_ResponseCode')
+        if vnp_ResponseCode == "00":
+            # Thanh toán thành công
+            payment_id = request.GET.get('vnp_TxnRef').replace('WORD', '')
+            try:
+                payment = Payment.objects.get(id=payment_id)
+                payment.status = Payment.COMPLETED
+                payment.transaction_id = request.GET.get('vnp_TransactionNo')
+                payment.save()
+
+                # Cập nhật trạng thái đã thanh toán cho bài đăng
+                post = payment.post
+                post.is_paid = True
+                post.save()
+
+                return response.Response({"message": "success"})
+            except Payment.DoesNotExist:
+                return response.Response(
+                    {"message": "failed", "error": "Payment not found"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+        else:
+            # Thanh toán thất bại
+            return response.Response({"message": "failed"})
+
+    @action(methods=['get'], detail=False, url_path='my-payment')
+    def my_payment(self, request):
+        try:
+            # Get all payments for current user, ordered by creation date descending
+            payments = Payment.objects.filter(
+                user=request.user
+            ).order_by('-created_at')
+
+            # Serialize the payment data
+            serializer = PaymentSerializer(payments, many=True)
+
+            return response.Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return response.Response(
+                {'error': f'Có lỗi xảy ra: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 from django.utils.decorators import method_decorator
 from django.views import View

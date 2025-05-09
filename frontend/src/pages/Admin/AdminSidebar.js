@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { RiDashboardLine, RiFileListLine, RiUserLine } from 'react-icons/ri';
-import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaChevronDown } from 'react-icons/fa';
 import { BiLogOut } from 'react-icons/bi';
 import MyContext from '../../context/MyContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,13 +17,8 @@ const AdminSidebar = () => {
     const [isPostMenuOpen, setIsPostMenuOpen] = useState(false);
     const navigate = useNavigate();
 
-    const toggleUserMenu = () => {
-        setIsUserMenuOpen(!isUserMenuOpen);
-    };
-
-    const togglePostMenu = () => {
-        setIsPostMenuOpen(!isPostMenuOpen);
-    };
+    const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
+    const togglePostMenu = () => setIsPostMenuOpen(!isPostMenuOpen);
 
     const handleLogoutClick = () => {
         if (logout) logout();
@@ -31,183 +26,160 @@ const AdminSidebar = () => {
         navigate('/login');
     };
 
-    const handletoHome = () => {
-        navigate('/');
-    };
+    const handletoHome = () => navigate('/');
+
+    const MenuLink = ({ to, icon: Icon, children }) => (
+        <NavLink
+            to={to}
+            className={({ isActive }) =>
+                `p-3 rounded-lg flex items-center transition-all duration-200 ${
+                    isActive 
+                        ? 'bg-purple-500/10 text-purple-500 font-medium' 
+                        : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                }`
+            }
+        >
+            <Icon className="w-5 h-5 mr-3" />
+            <span>{children}</span>
+        </NavLink>
+    );
 
     return (
-        <div className="w-[280px] bg-gray-900 text-white min-h-screen p-5">
-            <div className="fixed">
-                {/* Sidebar Header with User Info */}
-                <div className="flex items-center mb-5 p-4 bg-[#333A48] rounded-lg justify-between">
-                    <img src={user?.avatar || 'default-avatar.png'} alt="Avatar" className="w-20 h-20 rounded-full" />
-                    <div>
-                        <h2 className="text-2xl font-semibold">
-                            {user?.first_name} {user?.last_name}
-                        </h2>
-                        <span className="text-base text-gray-400">{user?.role}</span>
-                    </div>
-                    <span onClick={handletoHome} className="cursor-pointer">
-                        <MdOutlineArrowOutward size={25} />
-                    </span>
-                </div>
-                {/* Menu */}
-                <nav>
-                    <ul className="p-4">
-                        {/* Dashboard */}
-                        <li className="mb-5">
-                            <NavLink
-                                to="/admin/overview"
-                                className={({ isActive }) =>
-                                    `p-4 rounded-lg flex items-center ${
-                                        isActive ? 'bg-[#333A48] text-white' : 'hover:bg-[#333A48] hover:text-white'
-                                    }`
-                                }
+        <div className="w-[280px] bg-[#1E1E2D] min-h-screen">
+            <div className="fixed w-[280px] h-screen overflow-y-auto scrollbar-thin scrollbar-track-[#1E1E2D] scrollbar-thumb-gray-700">
+                {/* User Profile Section */}
+                <div className="p-6 border-b border-gray-700/50">
+                    <div className="flex items-center gap-4">
+                        <div className="relative group">
+                            <img 
+                                src={user?.avatar || 'default-avatar.png'} 
+                                alt="Avatar" 
+                                className="w-16 h-16 rounded-xl object-cover ring-2 ring-purple-500 ring-offset-2 ring-offset-[#1E1E2D]" 
+                            />
+                            <div 
+                                onClick={handletoHome}
+                                className="absolute -top-2 -right-2 bg-purple-500 p-1.5 rounded-lg cursor-pointer hover:bg-purple-600 transition-colors"
                             >
-                                <RiDashboardLine className="mr-3" />
+                                <MdOutlineArrowOutward size={16} />
+                            </div>
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-semibold text-white">
+                                {user?.first_name} {user?.last_name}
+                            </h2>
+                            <span className="text-sm text-purple-400 font-medium">
+                                {user?.role}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Navigation Menu */}
+                <nav className="p-4">
+                    <ul className="space-y-2">
+                        {/* Dashboard */}
+                        <li>
+                            <MenuLink to="/admin/overview" icon={RiDashboardLine}>
                                 Tổng Quan
-                            </NavLink>
+                            </MenuLink>
                         </li>
-                        {/* User Management with Dropdown */}
+
+                        {/* User Management */}
                         {user?.is_superuser && (
-                            <li className="mb-5">
+                            <li>
                                 <button
                                     onClick={toggleUserMenu}
-                                    className="w-full flex items-center justify-between p-4 hover:bg-[#333A48] hover:text-white rounded-lg"
+                                    className="w-full p-3 rounded-lg flex items-center justify-between text-gray-300 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
                                 >
                                     <div className="flex items-center">
-                                        <RiUserLine className="mr-3" />
-                                        Quản Lý Người Dùng
+                                        <RiUserLine className="w-5 h-5 mr-3" />
+                                        <span>Quản Lý Người Dùng</span>
                                     </div>
-
-                                    <div className="ml-2">{isUserMenuOpen ? <FaChevronUp /> : <FaChevronDown />}</div>
+                                    <FaChevronDown 
+                                        className={`w-4 h-4 transition-transform duration-200 ${
+                                            isUserMenuOpen ? 'rotate-180' : ''
+                                        }`}
+                                    />
                                 </button>
                                 {isUserMenuOpen && (
-                                    <ul className="ml-14 mt-2">
-                                        <li className="mb-2">
-                                            <NavLink
-                                                to="/admin/listuser"
-                                                className={({ isActive }) =>
-                                                    `block p-2 rounded-lg ${
-                                                        isActive
-                                                            ? 'bg-[#333A48] text-white'
-                                                            : 'hover:bg-[#333A48] hover:text-white'
-                                                    }`
-                                                }
-                                            >
+                                    <ul className="mt-2 ml-4 pl-4 border-l border-gray-700/50 space-y-2">
+                                        <li>
+                                            <MenuLink to="/admin/listuser" icon={RiUserLine}>
                                                 Danh sách người dùng
-                                            </NavLink>
+                                            </MenuLink>
                                         </li>
-                                        <li className="mb-2">
-                                            <NavLink
-                                                to="/admin/user/permission"
-                                                className={({ isActive }) =>
-                                                    `block p-2 rounded-lg ${
-                                                        isActive
-                                                            ? 'bg-[#333A48] text-white'
-                                                            : 'hover:bg-[#333A48] hover:text-white'
-                                                    }`
-                                                }
-                                            >
+                                        <li>
+                                            <MenuLink to="/admin/user/permission" icon={RiUserLine}>
                                                 Phân quyền
-                                            </NavLink>
+                                            </MenuLink>
                                         </li>
                                     </ul>
                                 )}
                             </li>
                         )}
-                        {/* Post Management with Dropdown */}
-                        <li className="mb-5">
+
+                        {/* Post Management */}
+                        <li>
                             <button
                                 onClick={togglePostMenu}
-                                className="w-full flex items-center justify-between p-4 hover:bg-[#333A48] hover:text-white rounded-lg"
+                                className="w-full p-3 rounded-lg flex items-center justify-between text-gray-300 hover:bg-gray-800/50 hover:text-white transition-all duration-200"
                             >
                                 <div className="flex items-center">
-                                    <RiFileListLine className="mr-3" />
-                                    Quản Lý Bài Đăng
+                                    <RiFileListLine className="w-5 h-5 mr-3" />
+                                    <span>Quản Lý Bài Đăng</span>
                                 </div>
-                                {isPostMenuOpen ? <FaChevronUp /> : <FaChevronDown />}
+                                <FaChevronDown 
+                                    className={`w-4 h-4 transition-transform duration-200 ${
+                                        isPostMenuOpen ? 'rotate-180' : ''
+                                    }`}
+                                />
                             </button>
                             {isPostMenuOpen && (
-                                <ul className="ml-14 mt-2">
-                                    <li className="mb-2">
-                                        <NavLink
-                                            to="/admin/post"
-                                            className={({ isActive }) =>
-                                                `block p-2 rounded-lg ${
-                                                    isActive
-                                                        ? 'bg-[#333A48] text-white'
-                                                        : 'hover:bg-[#333A48] hover:text-white'
-                                                }`
-                                            }
-                                        >
+                                <ul className="mt-2 ml-4 pl-4 border-l border-gray-700/50 space-y-2">
+                                    <li>
+                                        <MenuLink to="/admin/post" icon={RiFileListLine}>
                                             Tổng Quan
-                                        </NavLink>
+                                        </MenuLink>
                                     </li>
-                                    <li className="mb-2">
-                                        <NavLink
-                                            to="/admin/approved-post"
-                                            className={({ isActive }) =>
-                                                `block p-2 rounded-lg ${
-                                                    isActive
-                                                        ? 'bg-[#333A48] text-white'
-                                                        : 'hover:bg-[#333A48] hover:text-white'
-                                                }`
-                                            }
-                                        >
+                                    <li>
+                                        <MenuLink to="/admin/approved-post" icon={RiFileListLine}>
                                             Duyệt tin đăng
-                                        </NavLink>
+                                        </MenuLink>
                                     </li>
                                 </ul>
                             )}
                         </li>
-                        <li className="mb-5">
-                            <NavLink
-                                to="/admin/roomtype"
-                                className={({ isActive }) =>
-                                    `p-4 rounded-lg flex items-center ${
-                                        isActive ? 'bg-[#333A48] text-white' : 'hover:bg-[#333A48] hover:text-white'
-                                    }`
-                                }
-                            >
-                                <IoHomeOutline className="mr-3" />
+
+                        {/* Other Menu Items */}
+                        <li>
+                            <MenuLink to="/admin/roomtype" icon={IoHomeOutline}>
                                 Quản lý loại phòng
-                            </NavLink>
+                            </MenuLink>
                         </li>
-                        <li className="mb-5">
-                            <NavLink
-                                to="/admin/supportrequest"
-                                className={({ isActive }) =>
-                                    `p-4 rounded-lg flex items-center ${
-                                        isActive ? 'bg-[#333A48] text-white' : 'hover:bg-[#333A48] hover:text-white'
-                                    }`
-                                }
-                            >
-                                <BiSupport className="mr-3" />
+                        <li>
+                            <MenuLink to="/admin/amenities" icon={IoHomeOutline}>
+                                Quản lý tiện ích
+                            </MenuLink>
+                        </li>
+                        <li>
+                            <MenuLink to="/admin/supportrequest" icon={BiSupport}>
                                 Xử lý yêu cầu hỗ trợ
-                            </NavLink>
+                            </MenuLink>
                         </li>
-                        <li className="mb-5">
-                            <NavLink
-                                to="/profile/updateinfo"
-                                className={({ isActive }) =>
-                                    `p-4 rounded-lg flex items-center ${
-                                        isActive ? 'bg-[#333A48] text-white' : 'hover:bg-[#333A48] hover:text-white'
-                                    }`
-                                }
-                            >
-                                <MdOutlineAccountCircle className="mr-3" />
+                        <li>
+                            <MenuLink to="/profile/updateinfo" icon={MdOutlineAccountCircle}>
                                 Thông tin cá nhân
-                            </NavLink>
+                            </MenuLink>
                         </li>
-                        {/* Logout */}
-                        <li className="mb-5">
+
+                        {/* Logout Button */}
+                        <li className="pt-4 mt-4 border-t border-gray-700/50">
                             <button
                                 onClick={handleLogoutClick}
-                                className="p-4 rounded-lg flex items-center hover:bg-[#333A48] hover:text-white"
+                                className="w-full p-3 rounded-lg flex items-center text-red-400 hover:bg-red-500/10 hover:text-red-500 transition-all duration-200"
                             >
-                                <BiLogOut className="mr-3" />
-                                Đăng xuất
+                                <BiLogOut className="w-5 h-5 mr-3" />
+                                <span className="font-medium">Đăng xuất</span>
                             </button>
                         </li>
                     </ul>

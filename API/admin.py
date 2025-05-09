@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Rooms, RoomType, Reviews, FavoritePost, Post, PostImage,PostVideo, SupportRequests, Price, Amenities, ReviewCriterion
+from .models import User, Rooms, RoomType, Reviews, Payment, FavoritePost,Post, PostType ,PostImage,PostVideo, SupportRequests, Price, Amenities, ReviewCriterion, SearchHistory
 from django.utils.translation import gettext_lazy as _
 from django.contrib.staticfiles.storage import staticfiles_storage
 from django.urls import path
@@ -38,7 +38,7 @@ class UserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
 
 class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'status', 'created_at')
+    list_display = ('id','title', 'user', 'status', 'created_at')
     list_filter = ( 'user', 'created_at')
     search_fields = ('title', 'user__username')
 
@@ -78,3 +78,6 @@ admin_site.register(PostVideo)
 admin_site.register(Price)
 admin_site.register(Amenities)
 admin_site.register(ReviewCriterion)
+admin_site.register(SearchHistory)
+admin_site.register(PostType)
+admin_site.register(Payment)

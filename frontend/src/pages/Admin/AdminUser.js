@@ -19,6 +19,7 @@ const AdminUser = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCreateUserModalOpen, setIsCreateUserModalOpen] = useState(false);
+    const [selectedRole, setSelectedRole] = useState('all');
 
     const fetchUsers = async (page = 1) => {
         try {
@@ -85,138 +86,191 @@ const AdminUser = () => {
             user.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             user.id?.toString().includes(searchTerm);
-        return matchSearch;
+
+        const matchRole = 
+            selectedRole === 'all' || 
+            (selectedRole === 'admin' && user.is_superuser) ||
+            (selectedRole === 'landlord' && user.role === 'LANDLORD') ||
+            (selectedRole === 'customer' && user.role === 'CUSTOMER');
+
+        return matchSearch && matchRole;
     });
 
     return (
-        <div className="px-4 py-6 relative">
-            <div className="py-4 border-b border-gray-200 flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Quản lý người dùng</h1>
-                <div className="flex space-x-2">
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm người dùng"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="border p-2 rounded"
-                    />
+        <div className="p-8 bg-gray-50 min-h-screen">
+            {/* Header Section */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">Quản lý người dùng</h1>
+                <p className="text-gray-600 mt-2">Quản lý và giám sát tất cả người dùng trong hệ thống</p>
+            </div>
+
+            {/* Search and Actions Bar */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex-1 flex gap-4">
+                        <div className="relative flex-1">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm theo tên, email, mã..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                            />
+                        </div>
+                        <select
+                            value={selectedRole}
+                            onChange={(e) => setSelectedRole(e.target.value)}
+                            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white"
+                        >
+                            <option value="all">Tất cả vai trò</option>
+                            <option value="admin">Admin</option>
+                            <option value="landlord">Chủ trọ</option>
+                            <option value="customer">Người thuê</option>
+                        </select>
+                    </div>
                     <button
                         onClick={handleOpenCreateUserModal}
-                        className="bg-[#333A48] text-white px-4 py-2 rounded-md"
+                        className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm"
                     >
-                        Thêm người dùng
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        <span>Thêm người dùng</span>
                     </button>
                 </div>
             </div>
 
-            <table className="w-full text-xl text-left text-gray-600 border border-gray-200 mt-6">
-                <thead className="bg-[#fff] text-gray-600 uppercase text-[13px] font-base items-center">
-                    <tr>
-                        <th className="p-3 border">Mã</th>
-                        <th className="p-3 border">Ảnh đại diện</th>
-                        <th className="p-3 border">Tên người dùng</th>
-                        <th className="p-3 border">Email</th>
-                        <th className="p-3 border">Trạng thái</th>
-                        <th className="p-3 border">Đánh giá</th>
-                        <th className="p-3 border">Vai trò</th>
-                        <th className="p-3 border">Tùy chọn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredUsers.length > 0 ? (
-                        filteredUsers.map((user, index) => (
-                            <tr
-                                key={user.id}
-                                className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} text-center text-[14px]`}
-                            >
-                                <td className="p-3 border">#{user?.id}</td>
-                                <td className="p-3 border">
-                                    <img
-                                        src={user.avatar}
-                                        alt={user.username}
-                                        className="w-20 h-20 object-cover rounded-full mx-auto"
-                                    />
-                                </td>
-                                <td className="p-3 border">{user?.username}</td>
-                                <td className="p-3 border">{user?.email}</td>
-                                <td className="p-3 border">
-                                    <button
-                                        className={`px-4 py-2 rounded-md font-semibold ${
-                                            user.is_active ? 'text-green-500' : 'text-red-500'
-                                        } hover:opacity-80 transition`}
-                                    >
-                                        {user.is_active ? 'Hoạt động' : 'Bị khóa'}
-                                    </button>
-                                </td>
-                                <td className="p-3 border">
-                                    <div className="flex items-center justify-center space-x-1">
-                                        <span>{user.average_rating?.toFixed(1)}</span>
-                                        <span className="text-yellow-500">★</span>
-                                    </div>
-                                </td>
-                                <td className="p-3 border font-semibold">{user.is_superuser ? 'ADMIN' : user.role}</td>
-                                <td className="p-3 border relative">
-                                    <button
-                                        onClick={() => setOpenDropdown(openDropdown === user.id ? null : user.id)}
-                                        className="flex items-center text-gray-600 hover:text-gray-900 focus:outline-none"
-                                    >
-                                        <BiDotsHorizontalRounded size={20} />
-                                    </button>
-                                    {openDropdown === user.id && (
-                                        <div className="absolute right-0 z-10 bg-white border border-gray-300 rounded shadow-lg w-[100px]">
-                                            <ul className="py-2">
-                                                <li
-                                                    onClick={() => handleViewDetails(user)}
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <BsEyeFill size={15} className="inline mr-2" />
-                                                    Chi tiết
-                                                </li>
-
-                                                {user.is_active ? (
-                                                    <li
-                                                        onClick={() => {
-                                                            handleLock(user?.id);
-                                                            setOpenDropdown(null);
-                                                        }}
-                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                    >
-                                                        <FaLock size={15} className="mr-2" />
-                                                        Khóa
-                                                    </li>
-                                                ) : (
-                                                    <li
-                                                        onClick={() => {
-                                                            handleUnlock(user?.id);
-                                                            setOpenDropdown(null);
-                                                        }}
-                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                    >
-                                                        <FaLock size={15} className="mr-2" />
-                                                        Mở
-                                                    </li>
-                                                )}
-                                            </ul>
+            {/* Users Table */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <table className="w-full">
+                    <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+                        <tr>
+                            <th className="px-6 py-4 font-medium">Mã</th>
+                            <th className="px-6 py-4 font-medium">Ảnh đại diện</th>
+                            <th className="px-6 py-4 font-medium">Tên người dùng</th>
+                            <th className="px-6 py-4 font-medium">Email</th>
+                            <th className="px-6 py-4 font-medium">Trạng thái</th>
+                            <th className="px-6 py-4 font-medium">Đánh giá</th>
+                            <th className="px-6 py-4 font-medium">Vai trò</th>
+                            <th className="px-6 py-4 font-medium">Tùy chọn</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {filteredUsers.length > 0 ? (
+                            filteredUsers.map((user) => (
+                                <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 text-gray-900 font-medium">#{user?.id}</td>
+                                    <td className="px-6 py-4">
+                                        <img
+                                            src={user.avatar}
+                                            alt={user.username}
+                                            className="w-12 h-12 rounded-full object-cover"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4 font-medium">{user?.username}</td>
+                                    <td className="px-6 py-4 text-gray-600">{user?.email}</td>
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                user.is_active
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-red-100 text-red-800'
+                                            }`}
+                                        >
+                                            {user.is_active ? 'Hoạt động' : 'Bị khóa'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-1">
+                                            <span className="font-medium">{user.average_rating?.toFixed(1)}</span>
+                                            <span className="text-yellow-400">★</span>
                                         </div>
-                                    )}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                            {user.is_superuser ? 'ADMIN' : user.role}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setOpenDropdown(openDropdown === user.id ? null : user.id)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                            >
+                                                <BiDotsHorizontalRounded size={20} />
+                                            </button>
+                                            {openDropdown === user.id && (
+                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+                                                    <ul className="py-2">
+                                                        <li
+                                                            onClick={() => handleViewDetails(user)}
+                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                                        >
+                                                            <BsEyeFill className="mr-2" />
+                                                            Chi tiết
+                                                        </li>
+                                                        {user.is_active ? (
+                                                            <li
+                                                                onClick={() => {
+                                                                    handleLock(user?.id);
+                                                                    setOpenDropdown(null);
+                                                                }}
+                                                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                                                            >
+                                                                <FaLock className="mr-2" />
+                                                                Khóa
+                                                            </li>
+                                                        ) : (
+                                                            <li
+                                                                onClick={() => {
+                                                                    handleUnlock(user?.id);
+                                                                    setOpenDropdown(null);
+                                                                }}
+                                                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer text-green-600"
+                                                            >
+                                                                <BiLockOpen className="mr-2" />
+                                                                Mở khóa
+                                                            </li>
+                                                        )}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                                    Không tìm thấy người dùng nào
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="8" className="p-3 text-center text-gray-500">
-                                Không tìm thấy người dùng nào
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Modals and Pagination */}
             <CreateUserModal isOpen={isCreateUserModalOpen} onClose={handleCloseCreateUserModal} />
             {selectedUser && (
-                <ModalUserDetails userId={selectedUser.id} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+                <ModalUserDetails 
+                    userId={selectedUser.id} 
+                    isOpen={isModalOpen} 
+                    onClose={() => setIsModalOpen(false)} 
+                />
             )}
-
-            <PaginationUser currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <div className="mt-6">
+                <PaginationUser 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={setCurrentPage} 
+                />
+            </div>
         </div>
     );
 };

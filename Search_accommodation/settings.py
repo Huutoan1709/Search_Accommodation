@@ -155,7 +155,17 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
+TWILIO_ACCOUNT_SID = 'ACbc16b89dcec68c049959fc4e19308a1d'
+TWILIO_AUTH_TOKEN = 'c76450bf2cad3c6f9ea4d4c1428c7957'
+TWILIO_PHONE_NUMBER = '+18382312114'
 #
+
+# VNPay Configuration
+VNPAY_TMN_CODE = "WGJBLJR3"  # Merchant code từ VNPay
+VNPAY_HASH_SECRET = "U3LUJWFRKPKVXYIM0R1V5OF8R6TLVCZ4" # Hash secret từ VNPay  
+VNPAY_PAYMENT_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+VNPAY_RETURN_URL = "http://localhost:3000/payment/vnpay-return"
 #
+
 # CLIENT_ID = '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0'
 # CLIENT_SECRET = 'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0'

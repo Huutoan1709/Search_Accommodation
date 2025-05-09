@@ -26,7 +26,11 @@ import MyReviews from '../pages/User/Myreviews/MyReview';
 import AdminRoomType from '../pages/Admin/AdminRoomType';
 import AdminSupportRequest from '../pages/Admin/AdminSupportRequest';
 import ChatBot from '../components/ChatBot';
-import CreateModalVideo from '../components/CreateModalVideo';
+import ReceivedReviews from '../pages/User/ReceivedReviews';
+import Phongtro from '../pages/Home/Phongtro';
+import PhoneOTPReset from '../pages/User/ResetPassword/PhoneOTPReset';
+import PaymentResult from '../pages/Post/PaymentResult';
+import PaymentHistory from '../pages/Payment/PaymentHistory';
 const publicroutes = [
     { path: '/', component: Home },
 
@@ -35,12 +39,15 @@ const publicroutes = [
     { path: '/post/:postId', component: DetailPost },
     { path: '/search', component: search },
     { path: '/reset-password', component: ResetPassword },
+    { path: '/phone-reset-password', component: PhoneOTPReset },
     { path: '/map', component: MapBox },
     { path: '/profiles/:userId', component: Personal },
+    { path: '/phong-tro', component: Phongtro },
     { path: '/nha-nguyen-can', component: NhaNguyenCan },
     { path: '/chung-cu', component: ChungCu },
     { path: '/can-ho-dich-vu', component: CanHoDichVu },
     { path: '/chatbot', component: ChatBot },
+
 ];
 const profileRoutes = [
     { path: 'createpost', component: CreatePost },
@@ -48,6 +55,8 @@ const profileRoutes = [
     { path: 'manageroom', component: ManageRoom },
     { path: 'updateinfo', component: Updateinfo },
     { path: 'myreviews', component: MyReviews },
+    { path: 'receivedreviews', component: ReceivedReviews },
+    { path: 'paymenthistory', component: PaymentHistory },
 ];
 const AdminRoutes = [
     { path: '/admin', component: AdminOverview },
@@ -64,6 +73,7 @@ const privateRoutes = [
     { path: '/favorite', component: FavoritePost },
     { path: '/supportrequest', component: SupportRequest },
     { path: '/changepassword', component: changepassword },
+    { path: '/payment/vnpay-return', component: PaymentResult },
 ];
 
 export { publicroutes, privateRoutes, profileRoutes };

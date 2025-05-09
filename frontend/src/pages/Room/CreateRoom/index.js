@@ -6,6 +6,9 @@ import MapBox from '../../../components/MapBox';
 import axios from 'axios';
 import removeAccents from 'remove-accents';
 import debounce from 'lodash.debounce';
+
+const MAPBOX_ACCESS_TOKEN = process.env.REACT_APP_MAPBOX_KEY;
+
 const CreateRoom = ({ onClose, showEdit, roomData }) => {
     const [formData, setFormData] = useState({
         price: '',
@@ -177,7 +180,8 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
 
         const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
             address,
-        )}.json?access_token=pk.eyJ1IjoiaHV1dG9hbjE3MDkiLCJhIjoiY204Y2lsZ20wMTg0ODJrb2xrM3RkbWI1MCJ9.78vKIOvNFkWeyR6IEB1W2w`;
+        )}.json?access_token=pk.eyJ1IjoiaHV1dG9hbjE3MDkiLCJhIjoiY204Y2lsZ20wMTg0ODJrb2xrM3RkbWI1MCJ9.78vKIOvNFkWeyR6IEB1W2w
+`;
 
         try {
             const response = await axios.get(geocodingUrl);
@@ -259,7 +263,8 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
         }
     };
     const fetchAddressFromCoordinates = async (latitude, longitude) => {
-        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=pk.eyJ1Ijoibmd1eWVuaHV1dG9hbjAxMCIsImEiOiJjbTFnZ29xMjEwM3BwMm5wc3I4a2QyY2RiIn0.MMx3-MfuaAGJ1W7dmejE3A`;
+        const geocodingUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=pk.eyJ1IjoiaHV1dG9hbjE3MDkiLCJhIjoiY204Y2lsZ20wMTg0ODJrb2xrM3RkbWI1MCJ9.78vKIOvNFkWeyR6IEB1W2w
+`;
 
         try {
             const response = await axios.get(geocodingUrl);
@@ -283,209 +288,203 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
         }
     }, [formData.latitude, formData.longitude]);
     return (
-        <div className="fixed inset-0 bg-gray-700 bg-opacity-50 flex justify-center items-center z-50 overflow-y-auto">
-            <div className="bg-white p-6 rounded-lg shadow-lg max-w-[1100px] w-full mt-[200px]">
-                <div className="flex items-center justify-between">
-                    <h2 className="text-3xl font-semibold mb-4">{showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}</h2>
-                    <h2
-                        className="text-[20px] mb-3 font-semibold cursor-pointer text-gray-500 hover:text-gray-800"
-                        onClick={onClose}
-                    >
-                        X
-                    </h2>
-                </div>
-                <form onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Giá (triệu/tháng)</label>
-                            <input
-                                type="number"
-                                name="price"
-                                value={formData.price}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: 10, 3"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Diện tích (m²)</label>
-                            <input
-                                type="number"
-                                name="area"
-                                value={formData.area}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Vd: 30, 50"
-                            />
-                        </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-start z-50 overflow-y-auto p-4 top-20">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-[1100px] my-8">
+                <div className="p-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between mb-6">
+                        <h2 className="text-3xl font-bold text-gray-800">
+                            {showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}
+                        </h2>
+                        <button
+                            onClick={onClose}
+                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                        >
+                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Tỉnh/Thành phố</label>
-                            <select
-                                name="city"
-                                value={formData.city}
-                                onChange={handleCityChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                            >
-                                <option value="">Chọn tỉnh/thành phố</option>
-                                {cities.map((city) => (
-                                    <option key={city.code} value={city.code}>
-                                        {city.name}
-                                    </option>
-                                ))}
-                            </select>
+
+                    {/* Form */}
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {/* Price and Area Section */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-xl font-medium text-gray-700">Giá (triệu/tháng)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        placeholder="Vd: 10, 3"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">triệu</span>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Diện tích (m²)</label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        name="area"
+                                        value={formData.area}
+                                        onChange={handleChange}
+                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        placeholder="Vd: 30, 50"
+                                    />
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">m²</span>
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Quận/Huyện</label>
-                            <select
-                                name="district"
-                                value={formData.district}
-                                onChange={handleDistrictChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                disabled={!formData.city}
-                            >
-                                <option value="">Chọn quận/huyện</option>
-                                {districts.map((district) => (
-                                    <option key={district.code} value={district.code}>
-                                        {district.name}
-                                    </option>
-                                ))}
-                            </select>
+
+                        {/* Location Section */}
+                        <div className="grid grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+                                <select
+                                    name="city"
+                                    value={formData.city}
+                                    onChange={handleCityChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                >
+                                    <option value="">Chọn tỉnh/thành phố</option>
+                                    {cities.map((city) => (
+                                        <option key={city.code} value={city.code}>{city.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Quận/Huyện</label>
+                                <select
+                                    name="district"
+                                    value={formData.district}
+                                    onChange={handleDistrictChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                    disabled={!formData.city}
+                                >
+                                    <option value="">Chọn quận/huyện</option>
+                                    {districts.map((district) => (
+                                        <option key={district.code} value={district.code}>{district.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Phường/Xã</label>
+                                <select
+                                    name="ward"
+                                    value={formData.ward}
+                                    onChange={handleWardChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                    disabled={!formData.district}
+                                >
+                                    <option value="">Chọn phường/xã</option>
+                                    {wards.map((ward) => (
+                                        <option key={ward.code} value={ward.code}>{ward.name}</option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Phường/Xã</label>
-                            <select
-                                name="ward"
-                                value={formData.ward}
-                                onChange={handleWardChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                disabled={!formData.district}
-                            >
-                                <option value="">Chọn phường/xã</option>
-                                {wards.map((ward) => (
-                                    <option key={ward.code} value={ward.code}>
-                                        {ward.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <div>
-                            <label htmlFor="other_address" className="text-gray-600 font-semibold">
-                                Số nhà, tên đường
-                            </label>
+
+                        {/* Street Address */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">Số nhà, tên đường</label>
                             <input
                                 type="text"
                                 name="other_address"
-                                id="other_address"
                                 value={formData.other_address}
                                 onChange={handleChange}
-                                className="w-full p-2 mt-1 border rounded"
-                                placeholder="Số nhà, tên đường"
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                placeholder="Nhập số nhà, tên đường"
                             />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Kinh độ</label>
-                            <input
-                                type="text"
-                                name="longitude"
-                                value={formData.longitude}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Tự động lấy hoặc chỉnh sửa"
-                            />
+                        {/* Room Type & Amenities */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Loại phòng</label>
+                                <select
+                                    name="room_type"
+                                    value={formData.room_type}
+                                    onChange={handleChange}
+                                    disabled={showEdit}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                >
+                                    <option value="">Chọn loại phòng</option>
+                                    {roomTypes.map((type) => (
+                                        <option key={type.id} value={type.id}>{type.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Nội thất</label>
+                                <div className="grid grid-cols-2 gap-4 p-3 border border-gray-300 rounded-lg bg-gray-50">
+                                    {amenitiesList.map((amenity) => (
+                                        <label key={amenity.id} className="flex items-center gap-2">
+                                            <input
+                                                type="checkbox"
+                                                name="amenities"
+                                                value={amenity.id}
+                                                checked={formData.amenities.includes(amenity.id)}
+                                                onChange={handleChange}
+                                                className="rounded border-gray-300 text-amber-500 focus:ring-amber-500"
+                                            />
+                                            <span className="text-sm text-gray-700">{amenity.name}</span>
+                                        </label>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                        <div>
-                            <label className="block text-gray-600 font-semibold">Vĩ độ</label>
-                            <input
-                                type="text"
-                                name="latitude"
-                                value={formData.latitude}
-                                onChange={handleChange}
-                                className="border border-gray-300 p-2 rounded w-full"
-                                placeholder="Tự động lấy hoặc chỉnh sửa"
-                            />
+
+                        {/* Map */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-700">Vị trí trên bản đồ</label>
+                            <div className="relative h-[300px] rounded-lg overflow-hidden border border-gray-300">
+                                <MapBox
+                                    latitude={formData.latitude}
+                                    longitude={formData.longitude}
+                                    onCoordinatesChange={(newLatitude, newLongitude) => {
+                                        setFormData((prevData) => ({
+                                            ...prevData,
+                                            latitude: newLatitude,
+                                            longitude: newLongitude,
+                                        }));
+                                    }}
+                                />
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <label className="block text-gray-600 font-semibold">Loại phòng</label>
-                        <select
-                            name="room_type"
-                            value={formData.room_type}
-                            onChange={handleChange}
-                            disabled={showEdit}
-                            className="border border-gray-300 p-2 rounded w-full"
-                        >
-                            <option value="" className="text-gray-600 font-semibold">
-                                Chọn loại phòng
-                            </option>
-                            {roomTypes.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                    {type.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-gray-600 font-semibold">Nội thất</label>
-                        <div className="grid grid-cols-2 gap-4">
-                            {amenitiesList.slice(0, 10).map((amenity) => (
-                                <label key={amenity.id} className="block">
-                                    <input
-                                        type="checkbox"
-                                        name="amenities"
-                                        value={amenity.id}
-                                        checked={formData.amenities.includes(amenity.id)}
-                                        onChange={handleChange}
-                                    />
-                                    {amenity.name}
-                                </label>
-                            ))}
-                        </div>
-                    </div>
-                    <div className=" w-full h-[300px] relative">
-                        <MapBox
-                            latitude={formData.latitude}
-                            longitude={formData.longitude}
-                            onCoordinatesChange={(newLatitude, newLongitude) => {
-                                setFormData((prevData) => ({
-                                    ...prevData,
-                                    latitude: newLatitude,
-                                    longitude: newLongitude,
-                                }));
-                            }}
-                        />
-                    </div>
-                    <div className="flex justify-between mt-4">
-                        <div className="flex items-center gap-3">
+
+                        {/* Action Buttons */}
+                        <div className="flex justify-end gap-4 pt-4">
                             <button
                                 type="button"
                                 onClick={debouncedHandleGeocode}
-                                className="bg-green-500 text-white px-4 py-2 rounded-md font-base"
+                                className="px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
                             >
                                 Xem trên map
                             </button>
                             <button
                                 type="submit"
-                                className="bg-red-500 text-white px-4 py-2 rounded-md font-base"
                                 disabled={loading}
+                                className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:bg-gray-300"
                             >
-                                {loading
-                                    ? showEdit
-                                        ? 'Đang cập nhật...'
-                                        : 'Đang tạo...'
-                                    : showEdit
-                                    ? 'Cập nhật'
-                                    : 'Tạo phòng'}
+                                {loading ? (
+                                    <span className="flex items-center gap-2">
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        {showEdit ? 'Đang cập nhật...' : 'Đang tạo...'}
+                                    </span>
+                                ) : (
+                                    showEdit ? 'Cập nhật' : 'Tạo phòng'
+                                )}
                             </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </div>
         </div>
     );

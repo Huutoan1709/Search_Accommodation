@@ -57,8 +57,14 @@ const Header = () => {
     const handleReviewClick = () => {
         navigate('/profile/myreviews');
     };
+    const handlereceivedReviewClick = () => {
+        navigate('/profile/receivedreviews');
+    };
     const handleUserPageClick = () => {
         navigate('/profiles/current/');
+    };
+    const handlePhongTroClick = () => {
+        navigate('/phong-tro');
     };
     const handleNhaNguyenCanClick = () => {
         navigate('/nha-nguyen-can');
@@ -83,6 +89,9 @@ const Header = () => {
             <nav className="header-nav">
                 <span className={`cursor-pointer ${isActive('/')}`} onClick={handleHomeClick}>
                     Trang Chủ
+                </span>
+                <span className={`cursor-pointer ${isActive('/phong-tro')}`} onClick={handlePhongTroClick}>
+                    Phòng Trọ
                 </span>
                 <span className={`cursor-pointer ${isActive('/nha-nguyen-can')}`} onClick={handleNhaNguyenCanClick}>
                     Nhà nguyên căn
@@ -123,6 +132,10 @@ const Header = () => {
                                         <span onClick={handleManagePostClick}>Quản lý tin đăng</span>
                                     </div>
                                     <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
+                                        <GoCodeReview size={20} className="text-yellow-500" />
+                                        <span onClick={handlereceivedReviewClick}>Xem đánh giá</span>
+                                    </div>
+                                    <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
                                         <ImProfile size={20} className="text-emerald-600 " />
                                         <span onClick={handleUserPageClick}>Trang cá nhân</span>
                                     </div>
@@ -139,7 +152,7 @@ const Header = () => {
                                 <span onClick={handleFavoritePostClick}>Tin yêu thích</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">
-                                <CgProfile size={20} className="text-yellow-500 " />
+                                <CgProfile size={20} className="text-teal-400" />
                                 <span onClick={hadleUpdateProfileClick}>Thông tin cá nhân</span>
                             </div>
                             <div className="flex items-center cursor-pointer border-b border-gray-300 border-dashed">

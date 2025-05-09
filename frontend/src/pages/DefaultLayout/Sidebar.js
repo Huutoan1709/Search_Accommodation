@@ -145,7 +145,7 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
                 </div>
             </div>
 
-            <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
+            <div className="w-full bg-white  mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
                 <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Tin mới đăng</h3>
                 <NewPost />
             </div>

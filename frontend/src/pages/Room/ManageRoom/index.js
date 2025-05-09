@@ -9,6 +9,7 @@ import EditRoom from '../EditRoom';
 import { AiOutlineFileExcel } from 'react-icons/ai';
 import { notifyError, notifySuccess } from '../../../components/ToastManager';
 import PaginationUser from '../../../components/PaginationUser';
+
 const ManageRoom = () => {
     const [rooms, setRooms] = useState([]);
     const [initialRooms, setInitialRooms] = useState([]);
@@ -132,137 +133,188 @@ const ManageRoom = () => {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Rooms');
         XLSX.writeFile(workbook, 'rooms_data.xlsx');
     };
-    return (
-        <div className="px-4 py-6 relative">
-            <div className="py-4 border-b border-gray-200 flex items-center justify-between z-30">
-                <h1 className="text-3xl font-medium">Quản lý phòng</h1>
-                <div className="gap-3 flex">
-                    <select
-                        className="outline-none border border-gray-300 p-2 rounded-md"
-                        onChange={handlePriceFilterChange}
-                        value={priceFilter}
-                    >
-                        <option value="">Lọc theo giá</option>
-                        <option value="asc">Giá tăng dần</option>
-                        <option value="desc">Giá giảm dần</option>
-                    </select>
-                    <select
-                        className="outline-none border border-gray-300 p-2 rounded-md"
-                        onChange={handleStatusFilterChange}
-                        value={statusFilter}
-                    >
-                        <option value="">Lọc theo ngày</option>
-                        <option value="asc">Mới nhất</option>
-                        <option value="desc">Cũ nhất</option>
-                    </select>
 
-                    <button
-                        className="flex items-center bg-green-500 text-white px-4 py-2 rounded-md"
-                        onClick={exportToExcel}
-                    >
-                        <AiOutlineFileExcel size={20} /> Xuất Excel
-                    </button>
-                    <button
-                        className="flex items-center bg-red-500 text-white px-4 py-2 rounded-md"
-                        onClick={handleShowCreateRoom}
-                    >
-                        <GrFormAdd size={20} /> Thêm phòng
-                    </button>
+    return (
+        <div className="px-6 py-8 min-h-screen bg-gray-50">
+            {/* Header Section */}
+            <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="text-amber-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                            </svg>
+                        </span>
+                        <span>Quản lý phòng</span>
+                        <span className="text-xl font-normal text-gray-500">({rooms.length} phòng)</span>
+                    </h1>
+
+                    <div className="flex flex-col md:flex-row gap-3">
+                        <select
+                            className="w-full md:w-48 py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            onChange={handlePriceFilterChange}
+                            value={priceFilter}
+                        >
+                            <option value="">Lọc theo giá</option>
+                            <option value="asc">Giá tăng dần</option>
+                            <option value="desc">Giá giảm dần</option>
+                        </select>
+
+                        <select
+                            className="w-full md:w-48 py-2 px-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                            onChange={handleStatusFilterChange}
+                            value={statusFilter}
+                        >
+                            <option value="">Lọc theo ngày</option>
+                            <option value="asc">Mới nhất</option>
+                            <option value="desc">Cũ nhất</option>
+                        </select>
+
+                        <button
+                            className="flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
+                            onClick={exportToExcel}
+                        >
+                            <AiOutlineFileExcel size={20} />
+                            <span>Xuất Excel</span>
+                        </button>
+
+                        <button
+                            className="flex items-center justify-center gap-2 bg-amber-500 text-white px-4 py-2 rounded-lg hover:bg-amber-600 transition-colors"
+                            onClick={handleShowCreateRoom}
+                        >
+                            <GrFormAdd size={20} className="filter invert" />
+                            <span>Thêm phòng</span>
+                        </button>
+                    </div>
                 </div>
             </div>
-            {successMessage && <div className="bg-green-500 text-white p-4 rounded mb-4">{successMessage}</div>}
-            <table className="w-full table-auto border-collapse border border-gray-200 mt-4">
-                <thead>
-                    <tr className="bg-blue-500 text-white">
-                        <th className="p-2 border">Mã Phòng</th>
-                        <th className="p-2 border">Loại Phòng</th>
-                        <th className="p-2 border">Giá (triệu/tháng)</th>
-                        <th className="p-2 border">Diện tích (m²)</th>
-                        <th className="p-2 border">Địa chỉ</th>
-                        <th className="p-2 border">Ngày đăng</th>
-                        <th className="p-2 border">Tình trạng</th>
-                        <th className="p-2 border">Tùy chọn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentRooms.length > 0 ? (
-                        currentRooms.map((room) => (
-                            <tr key={room.id} className="text-center odd:bg-gray-100 even:bg-white">
-                                <td className="p-3 border">#{room?.id}</td>
-                                <td className="p-3 border">{room?.room_type?.name}</td>
-                                <td className="p-3 border">{room?.price}</td>
-                                <td className="p-3 border">{room?.area}</td>
-                                <td className="p-3 border">
-                                    {`${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`.length >
-                                    50
-                                        ? `${`${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`.slice(
-                                              0,
-                                              50,
-                                          )}...`
-                                        : `${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`}
-                                </td>
-                                <td className="p-3 border">{formatDate(room?.created_at)}</td>
-                                <td className="p-3 border">
-                                    <span
-                                        className={
-                                            room?.has_post ? 'text-green-500 font-bold' : 'text-red-500 font-bold'
-                                        }
-                                    >
-                                        {room?.has_post ? 'Đã đăng' : 'Chưa đăng'}
-                                    </span>
-                                </td>
-                                <td className="p-3 border">
-                                    <button
-                                        className="bg-green-500 text-white px-4 py-2 rounded mr-2"
-                                        onClick={() => handleShowEditRoom(room.id)}
-                                    >
-                                        <RiEditFill size={15} />
-                                    </button>
-                                    <button
-                                        className="bg-red-500 text-white px-4 py-2 rounded"
-                                        onClick={() => handleDeleteRoom(room.id)}
-                                    >
-                                        <MdDelete size={15} />
-                                    </button>
-                                </td>
+
+            {/* Table Section */}
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Mã Phòng</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Loại Phòng</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Giá/tháng</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Diện tích</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Địa chỉ</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Ngày đăng</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Trạng thái</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Tùy chọn</th>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="8" className="p-4 text-center">
-                                Chưa có phòng nào...
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-            <PaginationUser
-                currentPage={currentPage}
-                totalPages={Math.ceil(totalRooms / roomsPerPage)}
-                onPageChange={setCurrentPage}
-            />
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {currentRooms.length > 0 ? (
+                                currentRooms.map((room) => (
+                                    <tr key={room.id} className="hover:bg-gray-50 transition-colors duration-200">
+                                        <td className="px-6 py-4 text-xl text-gray-600">
+                                            #{room?.id}
+                                        </td>
+                                        <td className="px-6 py-4 text-xl text-gray-900">
+                                            {room?.room_type?.name}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className="text-xl font-medium text-green-600">
+                                                {room?.price} triệu
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-xl text-gray-900">
+                                            {room?.area} m²
+                                        </td>
+                                        <td className="px-6 py-4 max-w-xs">
+                                            <div className="text-xl text-gray-600 truncate hover:text-clip">
+                                                {`${room?.other_address}, ${room?.ward}, ${room?.district}, ${room?.city}`}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-xl text-gray-600">
+                                            {formatDate(room?.created_at)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <span className={`px-4 py-2 rounded-full text-base font-medium ${
+                                                room?.has_post ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}>
+                                                {room?.has_post ? 'Đã đăng' : 'Chưa đăng'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 space-x-2">
+                                            <button
+                                                onClick={() => handleShowEditRoom(room.id)}
+                                                className="text-amber-600 hover:text-amber-900 transition-colors duration-200 p-2 hover:bg-amber-50 rounded-full"
+                                                title="Sửa"
+                                            >
+                                                <RiEditFill size={24} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteRoom(room.id)}
+                                                className="text-red-600 hover:text-red-900 transition-colors duration-200 p-2 hover:bg-red-50 rounded-full"
+                                                title="Xóa"
+                                            >
+                                                <MdDelete size={24} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="8" className="px-6 py-4 text-center text-gray-500 text-xl">
+                                        Không tìm thấy phòng nào...
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {/* Pagination */}
+            <div className="mt-6">
+                <PaginationUser
+                    currentPage={currentPage}
+                    totalPages={Math.ceil(totalRooms / roomsPerPage)}
+                    onPageChange={setCurrentPage}
+                />
+            </div>
+
+            {/* Modals */}
             {showCreateRoom && (
                 <>
-                    <div className="fixed inset-0 bg-gray-500 opacity-50 z-40"></div>
+                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"></div>
                     <div className="fixed inset-0 flex items-center justify-center z-50">
-                        <div className="bg-white p-8 rounded-lg shadow-lg relative">
-                            <CreateRoom onClose={handleCloseCreateRoom} />
-                            <button className="absolute top-2 right-2 text-gray-600" onClick={handleCloseCreateRoom}>
-                                X
-                            </button>
+                        <div className="bg-white rounded-xl shadow-xl max-w-4xl max-h-[90vh] overflow-y-auto relative">
+                            <div className="p-6">
+                                <CreateRoom onClose={handleCloseCreateRoom} />
+                                <button 
+                                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+                                    onClick={handleCloseCreateRoom}
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </>
             )}
+
             {showEdit && (
                 <>
-                    <div className="fixed inset-0 bg-gray-500 opacity-50 z-40"></div>
+                    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"></div>
                     <div className="fixed inset-0 flex items-center justify-center z-50">
-                        <div className="bg-white p-8 rounded-lg shadow-lg relative">
-                            <EditRoom roomId={currentRoomId} onClose={handleCloseShowEdit} />
-                            <button className="absolute top-2 right-2 text-gray-600" onClick={handleCloseShowEdit}>
-                                X
-                            </button>
+                        <div className="bg-white rounded-xl shadow-xl max-w-4xl max-h-[90vh] overflow-y-auto relative">
+                            <div className="p-6">
+                                <EditRoom roomId={currentRoomId} onClose={handleCloseShowEdit} />
+                                <button 
+                                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors"
+                                    onClick={handleCloseShowEdit}
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </>

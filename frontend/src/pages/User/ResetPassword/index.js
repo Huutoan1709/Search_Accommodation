@@ -131,6 +131,15 @@ const ResetPassword = () => {
                             {isOtpSent ? 'Đặt lại mật khẩu' : 'Gửi OTP'}
                         </button>
                     </form>
+                    <div className="mt-4 text-center">
+
+                    <p className="mt-6 text-lg text-center">
+                        Đặt lại mật khẩu bằng?{' '}
+                        <a href="/phone-reset-password" className="text-red-600 hover:text-yellow-500">
+                            SMS
+                        </a>
+                    </p>
+                    </div>
                     <p className="mt-6 text-lg text-center">
                         Bạn đã có tài khoản?{' '}
                         <a href="/login" className="text-red-600 hover:text-yellow-500">

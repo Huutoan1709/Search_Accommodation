@@ -11,6 +11,8 @@ import { BiHeart, BiSupport } from 'react-icons/bi';
 import { GoCodeReview } from 'react-icons/go';
 import { GrNavigate } from 'react-icons/gr';
 import { notifySuccess } from '../../components/ToastManager';
+import { MdRateReview } from 'react-icons/md';
+
 const SidebarUser = () => {
     const location = useLocation();
     const activeSection = location.pathname.split('/')[2];
@@ -40,29 +42,35 @@ const SidebarUser = () => {
     };
 
     return (
-        <div className="w-[256px] flex-none p-6 shadow-lg">
-            <div className="fixed">
-                <div className="flex flex-col gap-4">
+        <div className="w-[280px] flex-none bg-white shadow-lg border-r border-gray-100">
+            <div className="fixed w-[280px] h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                {/* User Profile Section */}
+                <div className="p-6 border-b border-gray-100">
                     <div className="flex gap-4 items-center">
-                        <img
-                            src={user?.avatar || 'default-avatar.png'}
-                            alt="avatar"
-                            className="w-20 h-20 object-cover rounded-full border-2 border-white"
-                        />
+                        <div className="relative group">
+                            <img
+                                src={user?.avatar || 'default-avatar.png'}
+                                alt="avatar"
+                                className="w-20 h-20 object-cover rounded-full ring-2 ring-amber-500 ring-offset-2 transition-all duration-300"
+                            />
+                            <div className="absolute inset-0 rounded-full bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <span className="text-white text-sm">Xem hồ sơ</span>
+                            </div>
+                        </div>
                         <div className="flex flex-col justify-center">
-                            <span className="font-semibold text-[18px]">
+                            <span className="font-semibold text-3xl text-gray-800">
                                 {user?.first_name || 'Tên'} {user?.last_name || ''}
                             </span>
-                            <small className="text-[14px]">{user?.phone || 'Số điện thoại'}</small>
+                            <span className="text-2xl text-gray-500">{user?.phone || 'Số điện thoại'}</span>
+                            <span className="text-xl text-amber-600 mt-1">ID: {user?.id || 'N/A'}</span>
                         </div>
                     </div>
-                    <span className="font-medium p-2">
-                        Mã thành viên: <span className="font-bold">{user?.id || 'N/A'}</span>
-                    </span>
                 </div>
-                <div className="mt-4 flex flex-col gap-2">
+
+                {/* Navigation Menu */}
+                <nav className="p-4 space-y-2 text-2xl">
                     {user?.role === 'LANDLORD' && (
-                        <>
+                        <div className="space-y-2">
                             {[
                                 {
                                     icon: <MdFormatListBulletedAdd size={20} />,
@@ -79,110 +87,134 @@ const SidebarUser = () => {
                                     label: 'Quản lý phòng',
                                     section: 'manageroom',
                                 },
+                                {
+                                    icon: <MdRateReview size={20} />,
+                                    label: 'Đánh giá nhận được',
+                                    section: 'receivedreviews',
+                                },
+                                {  
+                                    icon: <BiHeart size={20} />,
+                                    label: 'Lịch sử giao dịch',
+                                    section: 'paymenthistory',
+                                }
                             ].map((item) => (
                                 <div
                                     key={item.section}
-                                    className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                                        activeSection === item.section ? 'active' : ''
-                                    }`}
                                     onClick={() => navigateToSection(item.section)}
-                                >
-                                    {item.icon}
-                                    <span
-                                        className={`w-full ml-3 ${
-                                            activeSection === item.section ? 'font-bold' : 'font-normal'
+                                    className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                        ${activeSection === item.section 
+                                            ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                            : 'text-gray-600 hover:bg-gray-50'
                                         }`}
-                                    >
-                                        {item.label}
-                                    </span>
+                                >
+                                    <span className="flex items-center justify-center w-6 h-6">{item.icon}</span>
+                                    <span className="ml-3">{item.label}</span>
                                 </div>
                             ))}
+
                             <div
-                                className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                                    activeSection === 'current' ? 'active' : ''
-                                }`}
                                 onClick={handleUserPageClick}
-                            >
-                                <ImProfile size={20} className="font-normal" />
-                                <span
-                                    className={`w-full ml-3 ${
-                                        activeSection === 'current' ? 'font-bold' : 'font-normal'
+                                className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                    ${activeSection === 'current' 
+                                        ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
-                                >
-                                    Trang cá nhân
-                                </span>
-                            </div>
-                        </>
-                    )}
-                    <div
-                        className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                            activeSection === 'updateinfo' ? 'active' : ''
-                        }`}
-                        onClick={() => navigateToSection('updateinfo')}
-                    >
-                        <FaRegEdit size={20} className="font-normal" />
-                        <span className={`w-full ml-3 ${activeSection === 'updateinfo' ? 'font-bold' : 'font-normal'}`}>
-                            Sửa thông tin cá nhân
-                        </span>
-                    </div>
-                    {user?.role === 'CUSTOMER' && (
-                        <div
-                            className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                                activeSection === 'myreviews' ? 'active' : ''
-                            }`}
-                            onClick={() => navigateToSection('myreviews')}
-                        >
-                            <GoCodeReview size={20} className="font-normal" />
-                            <span
-                                className={`w-full ml-3 ${activeSection === 'myreviews' ? 'font-bold' : 'font-normal'}`}
                             >
-                                Quản lý đánh giá
-                            </span>
+                                <span className="flex items-center justify-center w-6 h-6">
+                                    <ImProfile size={20} />
+                                </span>
+                                <span className="ml-3">Trang cá nhân</span>
+                            </div>
                         </div>
                     )}
-                    <div
-                        className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                            activeSection === 'favorite' ? 'active' : ''
-                        }`}
-                        onClick={handleFavoritePostClick}
-                    >
-                        <BiHeart size={20} className="font-normal" />
-                        <span className={`w-full ml-3 ${activeSection === 'favorite' ? 'font-bold' : 'font-normal'}`}>
-                            Tin yêu thích
-                        </span>
-                    </div>
-                    <div
-                        className={`flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer ${
-                            activeSection === 'supportrequest' ? 'active' : ''
-                        }`}
-                        onClick={handleToRequest}
-                    >
-                        <BiSupport size={20} className="font-normal" />
-                        <span
-                            className={`w-full ml-3 ${
-                                activeSection === 'supportrequest' ? 'font-bold' : 'font-normal'
-                            }`}
+
+                    {/* Common Navigation Items */}
+                    <div className="space-y-2">
+                        <div
+                            onClick={() => navigateToSection('updateinfo')}
+                            className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                ${activeSection === 'updateinfo' 
+                                    ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
                         >
-                            Hỗ trợ
-                        </span>
+                            <span className="flex items-center justify-center w-6 h-6">
+                                <FaRegEdit size={20} />
+                            </span>
+                            <span className="ml-3">Sửa thông tin cá nhân</span>
+                        </div>
+
+                        {/* Customer specific items */}
+                        {user?.role === 'CUSTOMER' && (
+                            <div
+                                onClick={() => navigateToSection('myreviews')}
+                                className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                    ${activeSection === 'myreviews' 
+                                        ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                        : 'text-gray-600 hover:bg-gray-50'
+                                    }`}
+                            >
+                                <span className="flex items-center justify-center w-6 h-6">
+                                    <GoCodeReview size={20} />
+                                </span>
+                                <span className="ml-3">Quản lý đánh giá</span>
+                            </div>
+                        )}
+
+                        {/* Common Features */}
+                        <div
+                            onClick={handleFavoritePostClick}
+                            className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                ${activeSection === 'favorite' 
+                                    ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <span className="flex items-center justify-center w-6 h-6">
+                                <BiHeart size={20} />
+                            </span>
+                            <span className="ml-3">Tin yêu thích</span>
+                        </div>
+
+                        <div
+                            onClick={handleToRequest}
+                            className={`flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200
+                                ${activeSection === 'supportrequest' 
+                                    ? 'bg-amber-50 text-amber-600 font-medium shadow-sm' 
+                                    : 'text-gray-600 hover:bg-gray-50'
+                                }`}
+                        >
+                            <span className="flex items-center justify-center w-6 h-6">
+                                <BiSupport size={20} />
+                            </span>
+                            <span className="ml-3">Hỗ trợ</span>
+                        </div>
                     </div>
+
+                    {/* Admin Navigation */}
                     {user?.role === 'WEBMASTER' && (
                         <div
-                            className="flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer"
                             onClick={() => navigate('/admin/overview')}
+                            className="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 text-gray-600 hover:bg-gray-50"
                         >
-                            <GrNavigate size={20} className="font-normal" />
-                            <span className="w-full ml-3">Đến trang quản trị</span>
+                            <span className="flex items-center justify-center w-6 h-6">
+                                <GrNavigate size={20} />
+                            </span>
+                            <span className="ml-3">Đến trang quản trị</span>
                         </div>
                     )}
+
+                    {/* Logout Button */}
                     <div
-                        className="flex items-center hover:bg-slate-200 p-2 border-b border-gray-300 border-dashed cursor-pointer"
                         onClick={handleLogoutClick}
+                        className="flex items-center px-4 py-3 rounded-lg cursor-pointer transition-all duration-200 text-red-600 hover:bg-red-50 mt-8"
                     >
-                        <CiLogout size={20} className="font-normal" />
-                        <span className="w-full font-normal ml-3">Đăng xuất</span>
+                        <span className="flex items-center justify-center w-6 h-6">
+                            <CiLogout size={20} />
+                        </span>
+                        <span className="ml-3">Đăng xuất</span>
                     </div>
-                </div>
+                </nav>
             </div>
         </div>
     );

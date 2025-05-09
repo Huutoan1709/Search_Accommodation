@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './HomeStyle.scss';
 import '../../output.css';
@@ -14,17 +14,48 @@ import danang from '../../assets/danang.jpg';
 import Search from '../DefaultLayout/Search';
 import BackToTop from '../../components/BackToTop';
 import ChatBot from '../../components/ChatBot';
+import Loading from '../../components/Loading';
+import { motion } from 'framer-motion';
+import RecommendedRooms from '../../components/RecommendedRooms';
+import MyContext from '../../context/MyContext';
 
-const Home = ({ room_type = 'Phòng trọ' }) => {
+const Home = ({ room_type = '' }) => {
     const [searchParams, setSearchParams] = useState({ room_type });
-    console.log('Current Room Type: ', room_type);
+    const [loading, setLoading] = useState(true);
+    const [isScrolled, setIsScrolled] = useState(false);
+    const { user } = useContext(MyContext);
+
     useEffect(() => {
-        if (!searchParams.room_type) {
-            setSearchParams((prevParams) => ({
-                ...prevParams,
-                room_type: room_type,
-            }));
-        }
+        const handleScroll = () => {
+            const scrollPosition = window.scrollY;
+            // Remove the headerHeight check since we'll use a fixed value
+            setIsScrolled(scrollPosition > 200);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    useEffect(() => {
+        const initializePage = async () => {
+            try {
+                setLoading(true);
+                if (!searchParams.room_type) {
+                    setSearchParams((prevParams) => ({
+                        ...prevParams,
+                        room_type: room_type,
+                    }));
+                }
+                // Simulate loading time for better UX
+                await new Promise(resolve => setTimeout(resolve, 800));
+            } catch (error) {
+                console.error('Error initializing page:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        initializePage();
     }, [room_type]);
 
     const handleSearch = (params) => {
@@ -37,10 +68,33 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
         const params = { city, room_type: searchParams.room_type };
         handleSearch(params);
     };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-gray-50">
+                <Header />
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="w-[1024px] mx-auto mt-8"
+                >
+                    <Loading message="Đang tải trang chủ..." />
+                </motion.div>
+                <Footer />
+            </div>
+        );
+    }
+
     return (
+        <motion.div 
+            className="relative"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
             <div className='relative'>
                 <Header />
-                <div className="w-[1024px] m-auto">
+                <div className="w-[1024px] m-auto mt-5"> {/* Add fixed padding-top */}
                     <div className="p-2">
                         <h1 className="mt-4 mb-0 text-[24px] font-bold text-center">
                             Kênh thông tin tìm kiếm Phòng Trọ uy tín chất lượng
@@ -50,9 +104,25 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
                             100.000+ bài đăng và 1.000.000 lượt xem mỗi tháng
                         </p>
                     </div>
-                    <div className="sticky top-20 z-50 w-full">
-                        <Search setSearchParams={setSearchParams} room_type={room_type} />
+                    <div className={`
+                        transition-all duration-300 ease-in-out
+                        ${isScrolled ? 
+                            'fixed left-0 right-0 z-40 bg-white shadow-lg py-3 top-[60px]' : 
+                            'w-full'
+                        }
+                    `}>
+                        <div className={`
+                            max-w-[1024px] mx-auto
+                            ${isScrolled ? 'px-1' : ''}
+                        `}>
+                            <Search 
+                                setSearchParams={setSearchParams} 
+                                room_type={room_type} 
+                            />
+                        </div>
                     </div>
+                    <div className={`${isScrolled ? 'h-[60px]' : ''}`} />
+                    
                     <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
                     <div className="my-10 flex gap-4 p-2">
                         <div
@@ -117,15 +187,23 @@ const Home = ({ room_type = 'Phòng trọ' }) => {
                         <div className="w-[70%] ">
                             <ListPost searchParams={searchParams} room_type={searchParams.room_type} />
                         </div>
+                        
                         <div className="w-[30%] flex flex-col gap-4 justify-start items-center ">
                             <Sidebar setSearchParams={setSearchParams} room_type={room_type} searchParams={searchParams} />
                         </div>
                     </div>
+                    <div className='w-full flex justify-center items-center'>
+                        {/* Chỉ hiển thị khi có user */}
+                        {user && <RecommendedRooms />}
+                    </div>
+
                 </div>
+                
                 <ChatBot />
                 <BackToTop />
                 <Footer />
             </div>
+        </motion.div>
     );
 };
 

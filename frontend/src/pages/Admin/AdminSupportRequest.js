@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../API';
 import PaginationUser from '../../components/PaginationUser';
-import { MdDelete } from 'react-icons/md';
+import { MdDelete, MdSearch } from 'react-icons/md';
 import { notifySuccess } from '../../components/ToastManager';
 import { BiEdit } from 'react-icons/bi';
 
@@ -68,97 +68,115 @@ const AdminSupportRequest = () => {
     });
 
     return (
-        <div className="px-4 py-6 relative">
-            <div className="py-4 border-b border-gray-200 flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Quản lý yêu cầu hỗ trợ</h1>
-                <div className="flex space-x-2">
+        <div className="p-8 bg-gray-50 min-h-screen">
+            {/* Header Section */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">Quản lý yêu cầu hỗ trợ</h1>
+                <p className="text-gray-600 mt-2">Xem và xử lý các yêu cầu hỗ trợ từ người dùng</p>
+            </div>
+
+            {/* Search Bar */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div className="relative">
+                    <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
                     <input
                         type="text"
-                        placeholder="Tìm kiếm yêu cầu hỗ trợ"
+                        placeholder="Tìm kiếm theo mã, email hoặc chủ đề..."
                         value={searchTerm}
                         onChange={handleSearchChange}
-                        className="border p-2 rounded"
+                        className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                     />
                 </div>
             </div>
 
-            <table className="w-full text-lg text-left text-gray-600 border border-gray-200 mt-6">
-                <thead className="bg-[#fff] text-gray-600 uppercase text-[14px] font-medium">
-                    <tr>
-                        <th className="p-4 border">Mã</th>
-                        <th className="p-4 border">Người dùng</th>
-                        <th className="p-4 border">Số điện thoại</th>
-                        <th className="p-4 border">Email</th>
-                        <th className="p-4 border">Chủ đề</th>
-                        <th className="p-4 border">Trạng thái</th>
-                        <th className="p-4 border">Ngày tạo</th>
-                        <th className="p-4 border">Tùy chọn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredRequests.length > 0 ? (
-                        filteredRequests.map((request, index) => (
-                            <tr
-                                key={request.id}
-                                className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} text-center text-[14px]`}
-                            >
-                                <td className="p-4 border text-xl">#{request?.id}</td>
-                                <td className="p-4 border text-xl">
-                                    <div className="flex items-center justify-center space-x-2">
-                                        <img
-                                            src={request?.user?.avatar}
-                                            alt={request.user.username}
-                                            className="w-20 h-20 rounded-full"
-                                        />
-                                        <span>{request.user.username}</span>
-                                    </div>
-                                </td>
-                                <td className="p-4 border text-green-400 font-semibold text-xl">
-                                    {request.user.phone || 'Không có'}
-                                </td>
-                                <td className="p-4 border text-xl">{request?.user?.email}</td>
-                                <td className="p-4 border text-xl">{request?.subject}</td>
-                                <td className="p-4 border text-xl">
-                                    {request.is_handle ? (
-                                        <span className="text-green-500  text-xl font-semibold border border-green-500 rounded-md p-3">
-                                            Đã xử lý
-                                        </span>
-                                    ) : (
-                                        <span className="text-red-500 font-semibold border border-red-500 rounded-md p-3">
-                                            Chờ xử lý
-                                        </span>
-                                    )}
-                                </td>
-                                <td className="p-4 border text-xl">
-                                    {new Date(request.created_at).toLocaleDateString()}
-                                </td>
-                                <td className="p-4 border text-xl">
-                                    <button
-                                        onClick={() => handleApproval(request.id)}
-                                        className="text-green-500 hover:text-green-700"
-                                    >
-                                        <BiEdit size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => handleDelete(request.id)}
-                                        className="text-red-500 hover:text-red-700 transition ml-4"
-                                    >
-                                        <MdDelete size={20} />
-                                    </button>
+            {/* Support Requests Table */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <table className="w-full">
+                    <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+                        <tr>
+                            <th className="px-6 py-4 font-medium">Mã</th>
+                            <th className="px-6 py-4 font-medium">Người dùng</th>
+                            <th className="px-6 py-4 font-medium">Số điện thoại</th>
+                            <th className="px-6 py-4 font-medium">Email</th>
+                            <th className="px-6 py-4 font-medium">Chủ đề</th>
+                            <th className="px-6 py-4 font-medium">Trạng thái</th>
+                            <th className="px-6 py-4 font-medium">Ngày tạo</th>
+                            <th className="px-6 py-4 font-medium">Tùy chọn</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {filteredRequests.length > 0 ? (
+                            filteredRequests.map((request) => (
+                                <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                                    <td className="px-6 py-4 text-gray-900 font-medium">#{request?.id}</td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={request?.user?.avatar}
+                                                alt={request.user.username}
+                                                className="w-10 h-10 rounded-full object-cover"
+                                            />
+                                            <span className="font-medium">{request.user.username}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-green-600 font-medium">
+                                        {request.user.phone || 'Không có'}
+                                    </td>
+                                    <td className="px-6 py-4">{request?.user?.email}</td>
+                                    <td className="px-6 py-4">{request?.subject}</td>
+                                    <td className="px-6 py-4">
+                                        {request.is_handle ? (
+                                            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                                                Đã xử lý
+                                            </span>
+                                        ) : (
+                                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                                Chờ xử lý
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-600">
+                                        {new Date(request.created_at).toLocaleDateString('vi-VN')}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <button
+                                                onClick={() => handleApproval(request.id)}
+                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                                                title="Đánh dấu đã xử lý"
+                                            >
+                                                <BiEdit size={20} />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(request.id)}
+                                                className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                                                title="Xóa yêu cầu"
+                                            >
+                                                <MdDelete size={20} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
+                                    Không tìm thấy yêu cầu hỗ trợ nào
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="8" className="p-4 text-center text-gray-500">
-                                Không tìm thấy yêu cầu hỗ trợ nào
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
-            <PaginationUser currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            {/* Pagination */}
+            <div className="mt-6">
+                <PaginationUser 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={setCurrentPage} 
+                />
+            </div>
         </div>
     );
 };

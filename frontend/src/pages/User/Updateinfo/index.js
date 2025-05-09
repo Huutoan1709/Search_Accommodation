@@ -78,154 +78,155 @@ const UpdateInfo = () => {
         navigate('/changepassword');
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
-
     return (
-        <div className="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-8 mt-10 border border-gray-300">
-            <h2 className="text-2xl font-bold mb-6 text-center">Quản lý tài khoản</h2>
-            <form onSubmit={handleSubmit} className="space-y-8">
-                <div className="flex justify-center relative">
-                    <div className="w-40 h-40 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden relative">
-                        {previewImage ? (
-                            <img src={previewImage} alt="Avatar Preview" className="h-full w-full object-cover" />
-                        ) : user.avatar && !(user.avatar instanceof File) ? (
-                            <img src={user.avatar} alt="Avatar" className="h-full w-full object-cover" />
-                        ) : (
-                            <span className="text-gray-400">No Image</span>
-                        )}
-
-                        <label className="absolute bottom-0 right-12 mr-2 bg-gray-700 p-2 rounded-full cursor-pointer hover:bg-gray-800">
-                            <FaCamera className="text-white text-xl" />
-                            <input
-                                type="file"
-                                name="avatar"
-                                accept="image/*"
-                                onChange={handleFileChange}
-                                className="hidden"
-                            />
-                        </label>
-                    </div>
+        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-6">
+                    <h2 className="text-3xl font-bold text-white text-center">
+                        Quản lý tài khoản
+                    </h2>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Họ</label>
-                        <input
-                            type="text"
-                            name="first_name"
-                            value={user.first_name}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
+                {loading ? (
+                    <div className="flex items-center justify-center h-96">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500"></div>
                     </div>
+                ) : (
+                    <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                        {/* Avatar Section */}
+                        <div className="flex justify-center">
+                            <div className="relative group">
+                                <div className="w-40 h-40 rounded-full overflow-hidden ring-4 ring-amber-500 ring-offset-4">
+                                    {previewImage ? (
+                                        <img src={previewImage} alt="Avatar Preview" className="h-full w-full object-cover" />
+                                    ) : user.avatar && !(user.avatar instanceof File) ? (
+                                        <img src={user.avatar} alt="Avatar" className="h-full w-full object-cover" />
+                                    ) : (
+                                        <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+                                            <span className="text-gray-400 text-lg">No Image</span>
+                                        </div>
+                                    )}
+                                </div>
+                                <label className="absolute bottom-0 right-0 bg-amber-500 p-3 rounded-full cursor-pointer hover:bg-amber-600 transition-colors shadow-lg group-hover:scale-110">
+                                    <FaCamera className="text-white text-xl" />
+                                    <input
+                                        type="file"
+                                        name="avatar"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
+                        </div>
 
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Tên</label>
-                        <input
-                            type="text"
-                            name="last_name"
-                            value={user.last_name}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
+                        {/* Personal Information */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Họ</label>
+                                <input
+                                    type="text"
+                                    name="first_name"
+                                    value={user.first_name}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                                />
+                            </div>
 
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Số điện thoại</label>
-                        <input
-                            type="text"
-                            name="phone"
-                            value={user.phone}
-                            onChange={handleInputChange}
-                            disabled
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Tên</label>
+                                <input
+                                    type="text"
+                                    name="last_name"
+                                    value={user.last_name}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                                />
+                            </div>
 
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            value={user.email}
-                            onChange={handleInputChange}
-                            disabled
-                            className="mt-1 block w-full bg-gray-100 border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Số điện thoại</label>
+                                <input
+                                    type="text"
+                                    name="phone"
+                                    value={user.phone}
+                                    disabled
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed"
+                                />
+                            </div>
 
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Giới tính</label>
-                        <select
-                            name="gender"
-                            value={user.gender || ''}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        >
-                            <option value="" disabled>
-                                Chọn giới tính
-                            </option>
-                            <option value="male">Nam</option>
-                            <option value="female">Nữ</option>
-                            <option value="other">Khác</option>
-                        </select>
-                    </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={user.email}
+                                    disabled
+                                    className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-500 cursor-not-allowed"
+                                />
+                            </div>
 
-                    <div className="col-span-2">
-                        <label className="block text-2xl font-medium text-gray-700">Địa chỉ</label>
-                        <input
-                            type="text"
-                            name="address"
-                            value={user.address || ''}
-                            onChange={handleInputChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
-                </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Giới tính</label>
+                                <select
+                                    name="gender"
+                                    value={user.gender || ''}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                                >
+                                    <option value="" disabled>Chọn giới tính</option>
+                                    <option value="male">Nam</option>
+                                    <option value="female">Nữ</option>
+                                    <option value="other">Khác</option>
+                                </select>
+                            </div>
 
-                {/* Followers Section */}
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Người theo dõi</label>
-                        <input
-                            type="text"
-                            value={user.follower_count}
-                            disabled
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-700">Địa chỉ</label>
+                                <input
+                                    type="text"
+                                    name="address"
+                                    value={user.address || ''}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-colors"
+                                />
+                            </div>
+                        </div>
 
-                    <div>
-                        <label className="block text-2xl font-medium text-gray-700">Đang theo dõi</label>
-                        <input
-                            type="text"
-                            value={user.following_count}
-                            disabled
-                            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-3"
-                        />
-                    </div>
-                </div>
+                        {/* Social Stats */}
+                        <div className="grid grid-cols-2 gap-6">
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <label className="text-sm font-medium text-gray-700 block mb-1">Người theo dõi</label>
+                                <div className="text-2xl font-semibold text-amber-600">{user.follower_count}</div>
+                            </div>
 
-                {/* Change Password and Submit Buttons */}
-                <div className="flex justify-between items-center">
-                    <button
-                        type="button"
-                        onClick={handleChangePassword}
-                        className="py-2 px-6 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    >
-                        Đổi mật khẩu
-                    </button>
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <label className="text-sm font-medium text-gray-700 block mb-1">Đang theo dõi</label>
+                                <div className="text-2xl font-semibold text-amber-600">{user.following_count}</div>
+                            </div>
+                        </div>
 
-                    <button
-                        type="submit"
-                        className="py-2 px-6 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                        Lưu thay đổi
-                    </button>
-                </div>
-            </form>
+                        {/* Action Buttons */}
+                        <div className="flex justify-between items-center pt-6">
+                            <button
+                                type="button"
+                                onClick={handleChangePassword}
+                                className="px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            >
+                                Đổi mật khẩu
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500"
+                            >
+                                Lưu thay đổi
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
         </div>
     );
 };

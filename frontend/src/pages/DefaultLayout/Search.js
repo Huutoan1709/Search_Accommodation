@@ -11,6 +11,7 @@ import LocationSearch from './LocationSearch';
 import MapViewModal from '../../components/MapViewModal';
 import { FaMapMarked } from "react-icons/fa";
 import VoiceSearch from '../../components/VoiceSearch';
+import { authApi, endpoints } from '../../API';
 
 function Search({ setSearchParams, room_type }) {
     const [isModal, setIsModal] = useState(false);
@@ -25,6 +26,7 @@ function Search({ setSearchParams, room_type }) {
         max_price: undefined,
         min_area: undefined,
         max_area: undefined,
+        room_type: room_type || 'Loại phòng',
     });
     const [selectedField, setSelectedField] = useState('');
     const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -101,6 +103,9 @@ function Search({ setSearchParams, room_type }) {
 
         setSearchParams(queryString);
         console.log('Search Parameters:', queryString);
+
+        // Lưu lịch sử tìm kiếm
+        saveSearchHistory(params);
     };
 
     const handleReset = () => {
@@ -239,15 +244,46 @@ function Search({ setSearchParams, room_type }) {
         setSearchParams(queryString);
     };
 
+    const saveSearchHistory = async (searchParams) => {
+        const accessToken = localStorage.getItem('access-token');
+        if (!accessToken) return;
+        
+        try {
+            // Make sure this endpoint matches your Django URL configuration
+            await authApi().post(endpoints['searchhistory'], {
+                room_tyrchpe: searchParams.room_type || '',
+                min_price: searchParams.min_price || null,
+                max_price: searchParams.max_price || null,
+                min_area: searchParams.min_area || null,
+                max_area: searchParams.max_area || null,
+                city: searchParams.city || '',
+                district: searchParams.district || '',
+                ward: searchParams.ward || ''
+            });
+        } catch (error) {
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                // that falls out of the range of 2xx
+                console.error('Search history save failed:', error.response.data);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('No response received:', error.request);
+            } else {
+                // Something happened in setting up the request that triggered an Error
+                console.error('Error setting up request:', error.message);
+            }
+        }
+    };
+
     return (
         <>
-            <div className="w-[1024px] h-[60px] p-[10px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
+            <div className="w-[1024px] h-[70px] p-[8px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
                 <span className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
                     <SearchItem
                         iconBf={<PiBuildingApartmentBold size={15} />}
                         iconAf={<MdNavigateNext size={15} />}
-                        text={selectedValues.room_type}
-                        className="font-semibold"
+                        text={selectedValues.room_type || 'Loại phòng'}
+                        className={selectedValues.room_type !== 'Loại phòng' ? 'font-semibold' : ''}
                     />
                 </span>
                 <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
@@ -309,7 +345,7 @@ function Search({ setSearchParams, room_type }) {
                     className="cursor-pointer text-center bg-red-600 hover:bg-red-700 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
                 >
                     <LuRefreshCcw />
-                    Đặt lại
+                    Reset
                 </span>
                 
             </div>

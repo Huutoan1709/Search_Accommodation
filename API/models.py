@@ -84,11 +84,53 @@ class Post(BaseModel):
     is_block = models.BooleanField(default=False)
     user = models.ForeignKey('User', related_name='User_Post', on_delete=models.CASCADE)
     room = models.ForeignKey('Rooms', related_name='Room_Post', on_delete=models.CASCADE)
-
+    is_paid = models.BooleanField(default=False)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    post_type = models.ForeignKey('PostType', on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return f'{self.title} + {self.room}'
 
+class PostType(BaseModel):
+    NORMAL = 'NORMAL'
+    VIP = 'VIP'
+    TYPE_CHOICES = [
+        (NORMAL, 'Normal'),
+        (VIP, 'VIP')
+    ]
+    name = models.CharField(max_length=50, choices=TYPE_CHOICES, unique=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration = models.IntegerField(help_text="Thời hạn đăng bài (ngày)")
+    description = models.TextField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.name} - {self.price}đ"
+
+
+
+class Payment(BaseModel):
+    PENDING = 'PENDING'
+    COMPLETED = 'COMPLETED'
+    FAILED = 'FAILED'
+    
+    STATUS_CHOICES = [
+        (PENDING, 'Pending'),
+        (COMPLETED, 'Completed'), 
+        (FAILED, 'Failed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    post_type = models.ForeignKey(PostType, on_delete=models.CASCADE, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=PENDING)
+    payment_method = models.CharField(max_length=50)
+    transaction_id = models.CharField(max_length=255, null=True, blank=True)
+    payment_url = models.CharField(max_length=500, null=True, blank=True)
+
+    def __str__(self):
+        return f"Payment {self.id} - {self.status}"
+    
+    
 class Amenities(BaseModel):
     name = models.CharField(max_length=50)
     description = models.TextField(blank=True)
@@ -202,3 +244,71 @@ class PasswordResetOTP(models.Model):
     def __str__(self):
         return f"OTP for {self.user.email}"
 
+
+class PhoneOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    is_used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        if not self.expires_at:
+            self.expires_at = timezone.now() + timezone.timedelta(minutes=5)
+        super().save(*args, **kwargs)
+
+    def generate_otp(self):
+        self.otp = ''.join(random.choices(string.digits, k=6))
+        self.expires_at = timezone.now() + timezone.timedelta(minutes=5)
+        self.save()
+
+        
+class Notification(models.Model):
+    NOTIFICATION_TYPES = [
+        ('POST_APPROVED', 'Bài đăng được duyệt'),
+        ('NEW_REVIEW', 'Đánh giá mới'),
+        ('NEW_FOLLOWER', 'Người theo dõi mới'),
+        ('NEW_MESSAGE', 'Tin nhắn mới')
+    ]
+
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_notifications', null=True)
+    notification_type = models.CharField(max_length=50, choices=NOTIFICATION_TYPES)
+    title = models.CharField(max_length=255)
+    message = models.TextField()
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    data = models.JSONField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class SearchHistory(BaseModel):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    room_type = models.ForeignKey('RoomType', null=True, on_delete=models.SET_NULL)
+    min_price = models.FloatField(null=True, db_index=True)
+    max_price = models.FloatField(null=True, db_index=True)
+    min_area = models.FloatField(null=True, db_index=True)
+    max_area = models.FloatField(null=True, db_index=True)
+    city = models.CharField(max_length=255, blank=True, db_index=True)
+    district = models.CharField(max_length=255, blank=True)
+    ward = models.CharField(max_length=255, blank=True)
+    search_count = models.IntegerField(default=1)
+    last_searched = models.DateTimeField(auto_now=True)
+    class Meta:
+        ordering = ['-search_count', '-last_searched']
+        indexes = [
+            models.Index(fields=['user', '-last_searched']),
+            models.Index(fields=['room_type', 'city']),
+        ]
+
+
+class UserPreference(BaseModel):
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+    feature_vector = models.JSONField()
+    vector_size = models.IntegerField(default=0)  # Thêm field này
+    last_updated = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-last_updated']

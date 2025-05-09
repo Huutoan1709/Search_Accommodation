@@ -34,7 +34,7 @@ const NewPost = () => {
         return (
             <div
                 key={post.id}
-                className="w-full flex items-center gap-1 py-2 border-b border-gray-300 cursor-pointer"
+                className="w-full flex items-center gap-1 py-2 border-b border-gray-300 cursor-pointer bg-white hover:bg-gray-100 transition duration-200 ease-in-out"
                 onClick={handlePostClick}
             >
                 <img
@@ -43,11 +43,11 @@ const NewPost = () => {
                     className="w-[65px] h-[65px] object-cover rounded-md"
                 />
                 <div className="w-full pl-2">
-                    <h4 className="text-blue-500 text-[14px] mb-2">
+                    <h4 className="text-blue-500 text-[12px] mb-2">
                         {post?.title.length > 40 ? `${post?.title.slice(0, 40)}...` : post?.title}
                     </h4>
                     <div className="flex items-center justify-between">
-                        <span className="text-green-500 font-medium text-[12x]">{post?.room?.price} triệu</span>
+                        <span className="text-green-500 font-medium text-[12px]">{post?.room?.price} triệu</span>
                         <div className="flex gap-1 items-center">
                             <CiStopwatch size={15} className="text-gray-500" />
                             <span className="text-[10px]">

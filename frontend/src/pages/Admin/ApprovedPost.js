@@ -5,6 +5,14 @@ import { RiEditFill } from 'react-icons/ri';
 import { BiSearch, BiDotsHorizontalRounded } from 'react-icons/bi';
 import { notifySuccess } from '../../components/ToastManager';
 import AdminDetailPost from './AdminDetailPost';
+
+// Add getStatus helper function at the top of the component
+const getStatus = (isApproved, isPaid) => {
+    if (!isPaid) return 'Chưa thanh toán';
+    if (!isApproved) return 'Chờ duyệt';
+    return 'Đã duyệt';
+};
+
 const ApprovedPost = ({ post }) => {
     const [posts, setPosts] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -74,6 +82,28 @@ const ApprovedPost = ({ post }) => {
         }
     };
 
+    const handleBulkDelete = async () => {
+        if (selectedPosts.size === 0) {
+            alert('Vui lòng chọn ít nhất một bài đăng để xóa.');
+            return;
+        }
+
+        const confirmDelete = window.confirm(`Bạn có chắc chắn muốn xóa ${selectedPosts.size} bài đăng đã chọn không?`);
+
+        if (confirmDelete) {
+            try {
+                for (const postId of selectedPosts) {
+                    await authApi().delete(endpoints.deletepost(postId));
+                }
+                notifySuccess('Đã xóa tất cả bài đăng đã chọn');
+                fetchApprovedPosts();
+                setSelectedPosts(new Set());
+            } catch (error) {
+                console.error('Failed to delete posts:', error);
+            }
+        }
+    };
+
     const truncateTitle = (title, maxLength) => {
         return title.length > maxLength ? `${title.slice(0, maxLength)}...` : title;
     };
@@ -105,153 +135,211 @@ const ApprovedPost = ({ post }) => {
         setSelectedPost(null);
     };
     return (
-        <div className="px-4 py-6 relative">
-            <div className="py-4 border-b border-gray-200 flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Quản lý bài đăng</h1>
-                <div className="flex space-x-4">
-                    <div className="relative">
-                        <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
-                            <BiSearch size={20} />
-                        </span>
-                        <input
-                            type="text"
-                            className="pl-10 border border-gray-300 p-2 rounded-md outline-none w-full"
-                            placeholder="Tìm kiếm theo tên, ID, địa chỉ, loại phòng..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
+        <div className="p-8 bg-gray-50 min-h-screen">
+            {/* Header Section */}
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-800">Quản lý bài đăng chờ duyệt</h1>
+                <p className="text-gray-600 mt-2">Quản lý và duyệt các bài đăng trong hệ thống</p>
+            </div>
+
+            {/* Search and Actions Bar */}
+            <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div className="flex-1">
+                        <div className="relative">
+                            <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                                <BiSearch size={20} />
+                            </span>
+                            <input
+                                type="text"
+                                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                placeholder="Tìm kiếm theo tên, ID, địa chỉ..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                        </div>
                     </div>
-                    <button
-                        onClick={handleBulkApprove}
-                        className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600"
-                    >
-                        Duyệt hàng loạt
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={handleBulkDelete}
+                            className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+                            disabled={selectedPosts.size === 0}
+                        >
+                            <span>Xóa đã chọn</span>
+                            <span className="bg-red-400 px-2 py-1 rounded-full text-sm">
+                                {selectedPosts.size}
+                            </span>
+                        </button>
+                        <button
+                            onClick={handleBulkApprove}
+                            className="px-6 py-3 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors flex items-center gap-2 shadow-sm"
+                            disabled={selectedPosts.size === 0}
+                        >
+                            <span>Duyệt đã chọn</span>
+                            <span className="bg-green-400 px-2 py-1 rounded-full text-sm">
+                                {selectedPosts.size}
+                            </span>
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <table className="w-full text-xl text-left text-gray-600 border border-gray-200 mt-6">
-                <thead className="bg-gray-100 text-gray-600 uppercase text-[13px] font-semibold">
-                    <tr>
-                        <th className="p-2 border">
-                            <input
-                                type="checkbox"
-                                onChange={(e) => {
-                                    if (e.target.checked) {
-                                        setSelectedPosts(new Set(posts.map((post) => post.id)));
-                                    } else {
-                                        setSelectedPosts(new Set());
-                                    }
-                                }}
-                                checked={selectedPosts.size === posts.length}
-                            />
-                        </th>
-                        <th className="p-3 border">Mã Tin</th>
-                        <th className="p-3 border">Loại phòng</th>
-                        <th className="p-3 border">Hình Ảnh</th>
-                        <th className="p-3 border">Tiêu đề</th>
-                        <th className="p-3 border">Người đăng</th>
-                        <th className="p-3 border">Giá(triệu)</th>
-                        <th className="p-3 border">Diện tích(m2)</th>
-                        <th className="p-3 border">Ngày đăng</th>
-                        <th className="p-3 border">Trạng thái</th>
-                        <th className="p-3 border">Tùy chọn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {filteredPosts.length > 0 ? (
-                        filteredPosts.map((post, index) => (
-                            <tr key={post.id} className={`${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'} text-center`}>
-                                <td className="p-2 border">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedPosts.has(post.id)}
-                                        onChange={() => togglePostSelection(post.id)}
-                                    />
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    #{post.id}
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    {post?.room?.room_type?.name}
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    <img
-                                        src={post.images[0]?.url}
-                                        alt={post.user?.username}
-                                        className="w-16 h-16 object-cover rounded-md mx-auto"
-                                    />
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    {truncateTitle(post?.title, 50)}
-                                </td>
-
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    <div className="flex items-center justify-center space-x-2">
-                                        <img
-                                            src={post.user?.avatar}
-                                            alt={post.user?.username}
-                                            className="w-10 h-10 object-cover rounded-full"
+            {/* Posts Table */}
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                <table className="w-full text-left">
+                    <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+                        <tr>
+                            <th className="px-6 py-4">
+                                <input
+                                    type="checkbox"
+                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    onChange={(e) => {
+                                        if (e.target.checked) {
+                                            setSelectedPosts(new Set(posts.map((post) => post.id)));
+                                        } else {
+                                            setSelectedPosts(new Set());
+                                        }
+                                    }}
+                                    checked={selectedPosts.size === posts.length}
+                                />
+                            </th>
+                            <th className="px-6 py-4">Mã Tin</th>
+                            <th className="px-6 py-4">Loại phòng</th>
+                            <th className="px-6 py-4">Hình ảnh</th>
+                            <th className="px-6 py-4">Tiêu đề</th>
+                            <th className="px-6 py-4">Người đăng</th>
+                            <th className="px-6 py-4">Giá(triệu)</th>
+                            <th className="px-6 py-4">Diện tích(m²)</th>
+                            <th className="px-6 py-4">Ngày đăng</th>
+                            <th className="px-6 py-4">Loại tin</th>
+                            <th className="px-6 py-4">Trạng thái</th>
+                            <th className="px-6 py-4">Tùy chọn</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                        {filteredPosts.length > 0 ? (
+                            filteredPosts.map((post) => (
+                                <tr 
+                                    key={post.id} 
+                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                >
+                                    <td className="px-6 py-4">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            checked={selectedPosts.has(post.id)}
+                                            onChange={() => togglePostSelection(post.id)}
                                         />
-                                        <span>{post.user?.username}</span>
-                                    </div>
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    {post.room?.price}
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    {post.room?.area}
-                                </td>
-                                <td className="p-2 border cursor-pointer" onClick={() => handlePostClick(post)}>
-                                    {new Date(post.created_at).toLocaleDateString()}
-                                </td>
-                                <td className="p-2 border">
-                                    {post.is_approved === false ? (
-                                        <button
-                                            onClick={() => handleApproved(post.id)}
-                                            className="bg-yellow-400 text-black p-2 rounded hover:bg-yellow-500"
-                                        >
-                                            Chờ duyệt
-                                        </button>
-                                    ) : (
-                                        <span className="font-semibold text-green-600">Đã duyệt</span>
-                                    )}
-                                </td>
-                                <td className="p-2 border relative">
-                                    <button
-                                        onClick={() => setOpenDropdown(openDropdown === post.id ? null : post.id)}
-                                        className="flex items-center text-gray-600 hover:text-gray-900 focus:outline-none"
-                                    >
-                                        <BiDotsHorizontalRounded size={20} />
-                                    </button>
-                                    {openDropdown === post.id && (
-                                        <div className="absolute right-0 z-10 bg-white border border-gray-300 rounded shadow-lg w-[100px]">
-                                            <ul className="py-2">
-                                                <li
-                                                    onClick={() => {
-                                                        handleDelete(post.id);
-                                                        setOpenDropdown(null);
-                                                    }}
-                                                    className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                >
-                                                    <MdDelete size={15} className="inline mr-2" />
-                                                    Xóa
-                                                </li>
-                                            </ul>
+                                    </td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>
+                                        #{post.id}
+                                    </td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>
+                                        {post?.room?.room_type?.name}
+                                    </td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>
+                                        <img
+                                            src={post.images[0]?.url}
+                                            alt=""
+                                            className="w-16 h-16 rounded-lg object-cover"
+                                        />
+                                    </td>
+                                    <td className="px-6 py-4 max-w-xs" onClick={() => handlePostClick(post)}>
+                                        <p className="truncate">{post.title}</p>
+                                    </td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={post.user?.avatar}
+                                                alt=""
+                                                className="w-8 h-8 rounded-full object-cover"
+                                            />
+                                            <span>{post.user?.username}</span>
                                         </div>
-                                    )}
+                                    </td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>{post.room?.price}</td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>{post.room?.area}</td>
+                                    <td className="px-6 py-4" onClick={() => handlePostClick(post)}>
+                                        {new Date(post.created_at).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className={`px-3 py-1 rounded-full text-sm font-medium inline-flex items-center w-fit
+                                            ${post.post_type?.name === 'VIP' 
+                                                ? 'bg-amber-100 text-amber-800 border border-amber-500' 
+                                                : 'bg-gray-100 text-gray-800'
+                                            }`}>
+                                            {post.post_type?.name || 'Thường'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        {!post.is_paid ? (
+                                            // Not paid - show red status badge
+                                            <span className="px-3 py-1 rounded-full text-sm font-medium inline-flex items-center w-fit bg-red-100 text-red-800">
+                                                {getStatus(post.is_approved, post.is_paid)}
+                                            </span>
+                                        ) : !post.is_approved ? (
+                                            // Paid but not approved - show clickable yellow badge
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleApproved(post.id);
+                                                }}
+                                                className="px-3 py-1 rounded-full text-sm font-medium inline-flex items-center w-fit 
+                                                          bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-colors"
+                                                title="Click để duyệt bài"
+                                            >
+                                                <span className="flex items-center gap-1">
+                                                    {getStatus(post.is_approved, post.is_paid)}
+                                                    <RiEditFill size={16} />
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            // Approved - show green status badge
+                                            <span className="px-3 py-1 rounded-full text-sm font-medium inline-flex items-center w-fit bg-green-100 text-green-800">
+                                                {getStatus(post.is_approved, post.is_paid)}
+                                            </span>
+                                        )}
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="relative">
+                                            <button
+                                                onClick={() => setOpenDropdown(openDropdown === post.id ? null : post.id)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                            >
+                                                <BiDotsHorizontalRounded size={20} />
+                                            </button>
+                                            {openDropdown === post.id && (
+                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
+                                                    <ul className="py-2">
+                                                        <li
+                                                            onClick={() => {
+                                                                handleDelete(post.id);
+                                                                setOpenDropdown(null);
+                                                            }}
+                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
+                                                        >
+                                                            <MdDelete size={20} className="mr-2" />
+                                                            Xóa
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="12" className="px-6 py-8 text-center text-gray-500">
+                                    Không tìm thấy bài đăng nào
                                 </td>
                             </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="10" className="p-3 text-center text-gray-500">
-                                Không tìm thấy bài đăng nào
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Detail Modal */}
             {selectedPost && <AdminDetailPost post={selectedPost} onClose={closeDetailPost} />}
         </div>
     );

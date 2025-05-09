@@ -101,136 +101,183 @@ const MyReviews = () => {
     );
 
     return (
-        <div className="px-4 py-6 relative">
-            <div className="py-4 border-b border-gray-200 flex items-center justify-between">
-                <h1 className="text-3xl font-medium">Đánh giá của tôi</h1>
-                <div className="flex gap-4">
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm đánh giá..."
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="border border-gray-300 p-2 rounded-md h-full min-w-[200px] focus:ring focus:ring-blue-300"
-                    />
-                    <select
-                        value={filterRating}
-                        onChange={handleFilterRatingChange}
-                        className="border border-gray-300 p-2 rounded-md focus:ring focus:ring-blue-300"
-                    >
-                        <option value="">Tất cả đánh giá</option>
-                        {[1, 2, 3, 4, 5].map((stars) => (
-                            <option key={stars} value={stars}>
-                                {stars} sao
-                            </option>
-                        ))}
-                    </select>
+        <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+                {/* Header Section */}
+                <div className="bg-gradient-to-r from-amber-500 to-amber-600 px-8 py-6">
+                    <h2 className="text-3xl font-bold text-white text-center flex items-center justify-center gap-2">
+                        <AiFillStar className="text-white" size={32} />
+                        Đánh giá của tôi
+                    </h2>
                 </div>
-            </div>
-            <table className="w-full table-auto border-collapse border border-gray-200 mt-4">
-                <thead>
-                    <tr className="bg-blue-500 text-white">
-                        <th className="p-3 border">Mã Đánh Giá</th>
-                        <th className="p-3 border">Nội dung</th>
-                        <th className="p-3 border">Đánh giá</th>
-                        <th className="p-3 border">Ngày tạo</th>
-                        <th className="p-3 border">Đánh giá cho</th>
-                        <th className="p-3 border">Tùy chọn</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {currentReviews.length > 0 ? (
-                        currentReviews.map((review) => (
-                            <tr key={review.id} className="text-center odd:bg-gray-100 even:bg-white">
-                                <td className="p-3 border">#{review.id}</td>
-                                <td className="p-3 border">{review.comment}</td>
-                                <td className="p-3 border">{renderStars(review.rating)}</td>
-                                <td className="p-3 border">{formatDate(review.created_at)}</td>
-                                <td className="p-3 border">
-                                    <div className="flex items-center justify-center gap-2">
-                                        <img
-                                            src={review.landlord.avatar}
-                                            alt={review.landlord.first_name}
-                                            className="w-16 h-16 object-cover rounded-full"
-                                        />
-                                        <div>
-                                            <p>
-                                                {review.landlord.first_name} {review.landlord.last_name}
-                                            </p>
-                                            <p className="text-gray-500">{review.landlord.phone}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="p-3 border">
-                                    <button
-                                        className="bg-yellow-500 text-white px-3 py-2 rounded hover:bg-yellow-600"
-                                        onClick={() => handleEditReview(review)}
-                                        title="Chỉnh sửa"
-                                    >
-                                        <MdEdit size={15} />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="6" className="p-4 text-center">
-                                Chưa có đánh giá nào...
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-            <PaginationUser currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
 
-            {/* Modal chỉnh sửa đánh giá */}
-            {editingReview && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-                    <div className="bg-white p-6 rounded-xl shadow-2xl w-[500px] max-w-full">
-                        <h2 className="text-2xl font-semibold text-gray-800 mb-4 text-center">Chỉnh sửa đánh giá</h2>
-
-                        {/* Chọn số sao */}
-                        <div className="flex justify-center gap-2 mb-4">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                                <button
-                                    key={star}
-                                    className={`text-3xl transition-colors duration-200 ${
-                                        editedRating >= star ? 'text-yellow-400' : 'text-gray-300'
-                                    }`}
-                                    onClick={() => setEditedRating(star)}
-                                >
-                                    ★
-                                </button>
+                {/* Search and Filter Section */}
+                <div className="p-6 border-b border-gray-200 bg-white">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Tìm kiếm đánh giá..."
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                className="w-full md:w-80 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent pl-10"
+                            />
+                            <svg className="w-5 h-5 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <select
+                            value={filterRating}
+                            onChange={handleFilterRatingChange}
+                            className="w-full md:w-48 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                        >
+                            <option value="">Tất cả đánh giá</option>
+                            {[5, 4, 3, 2, 1].map((stars) => (
+                                <option key={stars} value={stars}>
+                                    {stars} sao
+                                </option>
                             ))}
-                        </div>
-                        <p className="text-center text-gray-500 mb-4">{editedRating}/5 sao</p>
-
-                        {/* Nhập nội dung đánh giá */}
-                        <textarea
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 transition-all mb-4"
-                            rows="4"
-                            placeholder="Mô tả trải nghiệm của bạn"
-                            value={editedComment}
-                            onChange={(e) => setEditedComment(e.target.value)}
-                        />
-
-                        {/* Nút lưu và hủy */}
-                        <div className="flex justify-end gap-3">
-                            <button
-                                className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-all"
-                                onClick={() => setEditingReview(null)}
-                            >
-                                Hủy
-                            </button>
-                            <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all"
-                                onClick={handleSaveReview}
-                            >
-                                Lưu
-                            </button>
-                        </div>
+                        </select>
                     </div>
                 </div>
-            )}
+
+                {/* Reviews Table */}
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="bg-gray-50 border-b border-gray-200">
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Mã Đánh Giá</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Nội dung</th>
+                                <th className="px-6 py-4 text-center text-xl font-medium text-gray-500">Đánh giá</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Ngày tạo</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Đánh giá cho</th>
+                                <th className="px-6 py-4 text-center text-xl font-medium text-gray-500">Tùy chọn</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {currentReviews.length > 0 ? (
+                                currentReviews.map((review) => (
+                                    <tr key={review.id} className="hover:bg-gray-50 transition-colors duration-200">
+                                        <td className="px-6 py-4 text-xl text-gray-900">#{review.id}</td>
+                                        <td className="px-6 py-4 text-xl text-gray-500 max-w-xs truncate">
+                                            {review.comment}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex justify-center text-amber-400">
+                                                {Array.from({ length: 5 }, (_, index) => (
+                                                    <AiFillStar 
+                                                        key={index} 
+                                                        className={index < review.rating ? 'text-amber-400' : 'text-gray-200'}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-xl text-gray-500">
+                                            {formatDate(review.created_at)}
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center gap-3">
+                                                <img
+                                                    src={review.landlord.avatar}
+                                                    alt={review.landlord.first_name}
+                                                    className="w-10 h-10 rounded-full object-cover"
+                                                />
+                                                <div>
+                                                    <p className="text-xl font-medium text-gray-900">
+                                                        {review.landlord.first_name} {review.landlord.last_name}
+                                                    </p>
+                                                    <p className="text-xl text-gray-500">{review.landlord.phone}</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <button
+                                                onClick={() => handleEditReview(review)}
+                                                className="text-amber-600 hover:text-amber-900 transition-colors duration-200 p-2 hover:bg-amber-50 rounded-full"
+                                                title="Chỉnh sửa"
+                                            >
+                                                <MdEdit size={20} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                        Chưa có đánh giá nào...
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Pagination */}
+                <div className="p-6">
+                    <PaginationUser
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
+
+                {/* Edit Review Modal */}
+                {editingReview && (
+                    <>
+                        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-40"></div>
+                        <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                            <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+                                <div className="p-6">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+                                        Chỉnh sửa đánh giá
+                                    </h2>
+
+                                    {/* Rating Stars */}
+                                    <div className="flex justify-center gap-2 mb-4">
+                                        {[1, 2, 3, 4, 5].map((star) => (
+                                            <button
+                                                key={star}
+                                                className={`text-3xl transition-colors duration-200 ${
+                                                    editedRating >= star ? 'text-amber-400' : 'text-gray-300'
+                                                }`}
+                                                onClick={() => setEditedRating(star)}
+                                            >
+                                                ★
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <p className="text-center text-gray-500 mb-4">{editedRating}/5 sao</p>
+
+                                    {/* Review Content */}
+                                    <textarea
+                                        className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none mb-6"
+                                        rows="4"
+                                        placeholder="Mô tả trải nghiệm của bạn"
+                                        value={editedComment}
+                                        onChange={(e) => setEditedComment(e.target.value)}
+                                    />
+
+                                    {/* Action Buttons */}
+                                    <div className="flex justify-end gap-4">
+                                        <button
+                                            className="px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                                            onClick={() => setEditingReview(null)}
+                                        >
+                                            Hủy
+                                        </button>
+                                        <button
+                                            className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors"
+                                            onClick={handleSaveReview}
+                                        >
+                                            Lưu thay đổi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </div>
         </div>
     );
 };

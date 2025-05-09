@@ -27,7 +27,18 @@ const ListPost = ({ searchParams }) => {
             const postsWithCoordinates = result.data.results.filter(
                 (post) => post.room && post.room.latitude && post.room.longitude,
             );
-            setData(postsWithCoordinates);
+
+            // Sort posts: VIP first, then by creation date
+            const sortedPosts = postsWithCoordinates.sort((a, b) => {
+                // First compare by post type (VIP takes precedence)
+                if (a.post_type?.name === 'VIP' && b.post_type?.name !== 'VIP') return -1;
+                if (a.post_type?.name !== 'VIP' && b.post_type?.name === 'VIP') return 1;
+                
+                // If post types are the same, sort by creation date (newest first)
+                return new Date(b.created_at) - new Date(a.created_at);
+            });
+
+            setData(sortedPosts);
             setNextPage(result.data.next);
             setPreviousPage(result.data.previous);
             setCount(result.data.count);
@@ -200,6 +211,7 @@ const ListPost = ({ searchParams }) => {
                                 user={item?.user}
                                 id={item?.id}
                                 created_at_humanized={item?.created_at_humanized}
+                                post_type={item?.post_type}
                             />
                         ))}
                     </motion.div>
