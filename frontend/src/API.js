@@ -53,6 +53,7 @@ export const endpoints = {
     paymentcreate: '/payment/create_payment/',
     paymentreturn: '/payment/vnpay-return/',
     mypaymenthistory: '/payment/my-payment/',
+    google_login: '/auth/google-login/',
 };
 
 export const authApi = () => {

@@ -66,54 +66,65 @@ function Login() {
     };
 
     const handleGoogleLoginSuccess = async (response) => {
-        const googleToken = response.credential;
-        console.log('Google Token:', googleToken);
-
         try {
-            // 1. Giải mã token JWT (id_token) để lấy thông tin người dùng
-            const decodedToken = jwtDecode(googleToken);
-            console.log('Decoded Google User Info:', decodedToken);
+            console.log('Google Response:', response); // Log response từ Google
 
-            // 2. Lưu thông tin người dùng từ Google
-            const googleUserInfo = {
+            // Decode Google token
+            const decodedToken = jwtDecode(response.credential);
+            console.log('Decoded Token:', decodedToken); // Log decoded token
+            
+            // Prepare data for backend
+            const googleData = {
+                email: decodedToken.email,
                 first_name: decodedToken.given_name,
                 last_name: decodedToken.family_name,
-                email: decodedToken.email,
                 avatar: decodedToken.picture,
+                client_id: '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0',
             };
+            console.log('Data being sent to backend:', googleData); // Log data gửi đến backend
 
-            // 3. Chuyển token Google tới backend để xác thực
-            const formData = new FormData();
-            formData.append('token', googleToken);
-            formData.append('client_id', '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0');
-            formData.append(
-                'client_secret',
-                'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0',
-            );
-            formData.append('grant_type', 'convert_token');
-            formData.append('backend', 'google-oauth2');
+            // Call your backend API
+            console.log('Calling backend endpoint:', endpoints['google_login']); // Log endpoint
+            const loginResponse = await API.post(endpoints['google_login'], googleData);
+            console.log('Backend Response:', loginResponse); // Log response từ backend
 
-            const response = await API.post(endpoints['login'], formData);
-
-            if (response.status === 200) {
-                const userData = response.data;
-
-                // Lưu thông tin người dùng từ Google và từ backend
-                const user = {
-                    ...userData,
-                    ...googleUserInfo,
-                };
-
+            if (loginResponse.status === 200) {
+                const userData = loginResponse.data;
+                console.log('User Data received:', userData); // Log user data nhận được
+                
+                // Store tokens
                 localStorage.setItem('access-token', userData.access_token);
-                localStorage.setItem('user', JSON.stringify(user)); // Lưu thông tin người dùng trong localStorage
+                localStorage.setItem('refresh-token', userData.refresh_token);
+                
+                // Store user info
+                const user = userData.user;
+                console.log('User info being stored:', user); // Log user info trước khi lưu
+                localStorage.setItem('user', JSON.stringify(user));
 
                 notifySuccess('Đăng nhập thành công với Google');
                 login(user);
-                navigate('/');
+
+                // Log navigation
+                console.log('User role:', user.role);
+                console.log('Is staff:', user.is_staff);
+                
+                // Redirect based on role
+                if (user.is_staff || user.role === 'WEBMASTER') {
+                    console.log('Redirecting to admin');
+                    navigate('/admin/overview');
+                } else {
+                    console.log('Redirecting to home');
+                    navigate('/');
+                }
             }
         } catch (error) {
-            notifyWarning('Đăng nhập bằng Google thất bại');
-            console.error('Google login failed:', error);
+            console.error('Google login failed - Full error:', error);
+            console.error('Error response:', error.response); // Log chi tiết response lỗi
+            console.error('Error message:', error.message);
+            console.error('Error stack:', error.stack);
+            // Show more detailed error message
+            const errorMessage = error.response?.data?.error || error.message || 'Đăng nhập bằng Google thất bại';
+            notifyWarning(errorMessage);
         }
     };
 

@@ -5,6 +5,7 @@ import { RiEditFill } from 'react-icons/ri';
 import { BiSearch, BiDotsHorizontalRounded } from 'react-icons/bi';
 import { notifySuccess } from '../../components/ToastManager';
 import AdminDetailPost from './AdminDetailPost';
+import PaginationUser from '../../components/PaginationUser';
 
 // Add getStatus helper function at the top of the component
 const getStatus = (isApproved, isPaid) => {
@@ -19,6 +20,8 @@ const ApprovedPost = ({ post }) => {
     const [openDropdown, setOpenDropdown] = useState(null);
     const [selectedPosts, setSelectedPosts] = useState(new Set());
     const [selectedPost, setSelectedPost] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const postsPerPage = 10;
 
     const fetchApprovedPosts = async () => {
         try {
@@ -134,6 +137,18 @@ const ApprovedPost = ({ post }) => {
     const closeDetailPost = () => {
         setSelectedPost(null);
     };
+
+    const indexOfLastPost = currentPage * postsPerPage;
+    const indexOfFirstPost = indexOfLastPost - postsPerPage;
+    const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        // Scroll to top when page changes
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
             {/* Header Section */}
@@ -217,8 +232,8 @@ const ApprovedPost = ({ post }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredPosts.length > 0 ? (
-                            filteredPosts.map((post) => (
+                        {currentPosts.length > 0 ? (
+                            currentPosts.map((post) => (
                                 <tr 
                                     key={post.id} 
                                     className="hover:bg-gray-50 transition-colors cursor-pointer"
@@ -338,6 +353,13 @@ const ApprovedPost = ({ post }) => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            <PaginationUser
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
 
             {/* Detail Modal */}
             {selectedPost && <AdminDetailPost post={selectedPost} onClose={closeDetailPost} />}

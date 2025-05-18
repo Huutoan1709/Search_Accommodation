@@ -27,6 +27,12 @@ import numpy as np
 import hashlib
 import hmac
 import urllib.parse
+from oauth2_provider.models import Application, AccessToken, RefreshToken
+from django.utils import timezone
+import datetime
+from oauthlib.common import generate_token
+import random
+import string
 
 # from django_filters.rest_framework import DjangoFilterBackend
 class UpdatePartialAPIView(generics.UpdateAPIView):
@@ -119,7 +125,7 @@ class UserViewSet(viewsets.ViewSet, generics.ListCreateAPIView, generics.Retriev
 
     @action(methods=['get'], url_path='posts', detail=True)
     def get_post(self, request, pk):
-        user = self.get_object()  # Lấy đối tượng người dùng
+        user = self.get_object() 
 
         posts = Post.objects.filter(user=user, is_active=True)
 
@@ -1193,14 +1199,108 @@ class VNPayViewSet(viewsets.ViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-from django.utils.decorators import method_decorator
-from django.views import View
-from oauth2_provider.views import TokenView
-from rest_framework.decorators import api_view
-from django.http import JsonResponse
+from rest_framework.decorators import action
+from rest_framework.viewsets import ViewSet
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth import get_user_model
+import random, string
 
+class AuthViewSet(ViewSet):
+    
+    @action(methods=['post'], detail=False, url_path='google-login')
+    def google_login(self, request):
+        try:
+            # Validate required fields
+            email = request.data.get('email')
+            if not email:
+                return Response(
+                    {'error': 'Email is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-@api_view(['POST'])
-def convert_token_view(request):
-    token_view = TokenView.as_view()
-    return token_view(request)
+            first_name = request.data.get('first_name', '')
+            last_name = request.data.get('last_name', '')
+            client_id = request.data.get('client_id')
+
+            if not client_id:
+                return Response(
+                    {'error': 'Client ID is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            User = get_user_model()
+
+            try:
+                # Tìm user hiện có - giữ nguyên avatar hiện tại
+                user = User.objects.get(email=email)
+                # Chỉ cập nhật thông tin cơ bản
+                user.first_name = first_name
+                user.last_name = last_name
+                user.save()
+
+            except User.DoesNotExist:
+                # Tạo user mới với avatar mặc định
+                username = f"google_{email.split('@')[0]}_{random.randint(1000,9999)}"
+                user = User.objects.create_user(
+                    username=username,
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    password=None
+                )
+                user.save()
+            # Generate OAuth2 tokens
+            try:
+                app = Application.objects.get(client_id=client_id)
+            except Application.DoesNotExist:
+                return Response(
+                    {'error': 'Invalid client ID'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Remove existing tokens for this user
+            AccessToken.objects.filter(user=user).delete()
+            RefreshToken.objects.filter(user=user).delete()
+
+            # Generate new tokens
+            access_token = generate_token()
+            refresh_token = generate_token()
+            expires = timezone.now() + datetime.timedelta(days=1)
+
+            # Create OAuth2 tokens
+            AccessToken.objects.create(
+                user=user,
+                application=app,
+                token=access_token,
+                expires=expires
+            )
+
+            RefreshToken.objects.create(
+                user=user,
+                application=app,
+                token=refresh_token
+            )
+
+            return Response({
+                'access_token': access_token,
+                'refresh_token': refresh_token,
+                'expires_in': 86400,
+                'token_type': 'Bearer',
+                'user': {
+                    'id': user.id,
+                    'email': user.email,
+                    'username': user.username,
+                    'first_name': user.first_name,
+                    'last_name': user.last_name,
+                    'avatar': user.avatar.url if hasattr(user.avatar, 'url') else user.avatar,
+                    'is_staff': user.is_staff,
+                    'role': user.role
+                }
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print("Google login error:", str(e))
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_400_BAD_REQUEST)

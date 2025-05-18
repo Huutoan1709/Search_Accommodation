@@ -18,6 +18,7 @@ import Loading from '../../components/Loading';
 import { motion } from 'framer-motion';
 import RecommendedRooms from '../../components/RecommendedRooms';
 import MyContext from '../../context/MyContext';
+import { FaHome, FaUsers, FaCheckCircle, FaStar } from 'react-icons/fa';
 
 const Home = ({ room_type = '' }) => {
     const [searchParams, setSearchParams] = useState({ room_type });
@@ -94,16 +95,18 @@ const Home = ({ room_type = '' }) => {
         >
             <div className='relative'>
                 <Header />
-                <div className="w-[1024px] m-auto mt-5"> {/* Add fixed padding-top */}
-                    <div className="p-2">
-                        <h1 className="mt-4 mb-0 text-[24px] font-bold text-center">
-                            Kênh thông tin tìm kiếm Phòng Trọ uy tín chất lượng
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 mb-8">
+                    <div className="w-[1024px] mx-auto text-center">
+                        <h1 className="text-4xl font-bold mb-4">
+                            Kênh thông tin Phòng Trọ số 1 Việt Nam
                         </h1>
-                        <p className="text-gray-600 text-[14px]">
-                            Websites đăng tin cho thuê phòng trọ, nhà nguyên căn, căn hộ dịch vụ, căn hộ mini hiệu quả với
-                            100.000+ bài đăng và 1.000.000 lượt xem mỗi tháng
+                        <p className="text-xl opacity-90">
+                            Tìm phòng trọ nhanh chóng, thuận tiện và hoàn toàn miễn phí
                         </p>
                     </div>
+                </div>
+                <div className="w-[1024px] m-auto mt-5"> {/* Add fixed padding-top */}
+                    
                     <div className={`
                         transition-all duration-300 ease-in-out
                         ${isScrolled ? 
@@ -123,6 +126,39 @@ const Home = ({ room_type = '' }) => {
                     </div>
                     <div className={`${isScrolled ? 'h-[60px]' : ''}`} />
                     
+                    <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
+                        <div className="grid grid-cols-4 gap-8">
+                            <div className="text-center">
+                                <div className="flex justify-center">
+                                    <FaHome className="text-4xl text-blue-500 mb-3" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-800">1000+</h3>
+                                <p className="text-gray-600">Phòng cho thuê</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="flex justify-center">
+                                    <FaUsers className="text-4xl text-green-500 mb-3" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-800">500+</h3>
+                                <p className="text-gray-600">Người dùng tin cậy</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="flex justify-center">
+                                    <FaCheckCircle className="text-4xl text-yellow-500 mb-3" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-800">98%</h3>
+                                <p className="text-gray-600">Khách hàng hài lòng</p>
+                            </div>
+                            <div className="text-center">
+                                <div className="flex justify-center">
+                                    <FaStar className="text-4xl text-red-500 mb-3" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-gray-800">4.8/5</h3>
+                                <p className="text-gray-600">Đánh giá trung bình</p>
+                            </div>
+                        </div>
+                    </div>
+
                     <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
                     <div className="my-10 flex gap-4 p-2">
                         <div
@@ -199,6 +235,41 @@ const Home = ({ room_type = '' }) => {
 
                 </div>
                 
+                <div className="bg-gray-50 py-16">
+                    <div className="w-[1024px] mx-auto">
+                        <h2 className="text-3xl font-bold text-center mb-12">Tại sao chọn chúng tôi?</h2>
+                        <div className="grid grid-cols-3 gap-8">
+                            <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                                <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                                    <FaHome className="text-2xl text-blue-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Đa dạng lựa chọn</h3>
+                                <p className="text-gray-600">
+                                    Hàng nghìn phòng trọ được cập nhật hằng ngày, đa dạng mức giá, diện tích.
+                                </p>
+                            </div>
+                            <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                                <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                                    <FaCheckCircle className="text-2xl text-green-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Thông tin tin cậy</h3>
+                                <p className="text-gray-600">
+                                    Thông tin được kiểm duyệt kỹ càng, đảm bảo tin đăng chính xác và đáng tin cậy.
+                                </p>
+                            </div>
+                            <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
+                                <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
+                                    <FaStar className="text-2xl text-yellow-600" />
+                                </div>
+                                <h3 className="text-xl font-semibold mb-2">Dịch vụ tốt nhất</h3>
+                                <p className="text-gray-600">
+                                    Hỗ trợ 24/7, tư vấn nhiệt tình, giúp bạn tìm được phòng ưng ý nhanh chóng.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <ChatBot />
                 <BackToTop />
                 <Footer />
