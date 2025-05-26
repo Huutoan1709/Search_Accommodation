@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Logomotel from '../../assets/Logomotel.png';
 import MyContext from '../../context/MyContext';
@@ -13,17 +13,34 @@ import { BiSupport } from 'react-icons/bi';
 import { CgProfile } from 'react-icons/cg';
 import { GoCodeReview } from 'react-icons/go';
 import { notifySuccess } from '../../components/ToastManager';
+import { authApi, endpoints } from '../../API';
 
 const Header = () => {
     const { user, logout, fetchUser } = useContext(MyContext);
     const navigate = useNavigate();
     const location = useLocation();
+    const [favoriteCount, setFavoriteCount] = useState(0);
 
     useEffect(() => {
         if (user) {
             fetchUser();
         }
     }, [fetchUser]);
+
+    useEffect(() => {
+        const getFavoriteCount = async () => {
+            if (user) {
+                try {
+                    const res = await authApi().get(endpoints['myfavorite']);
+                    setFavoriteCount(res.data.length);
+                } catch (error) {
+                    console.error("Error fetching favorite count:", error);
+                }
+            }
+        };
+
+        getFavoriteCount();
+    }, [user]);
 
     const handleHomeClick = () => {
         navigate('/');
@@ -82,7 +99,7 @@ const Header = () => {
 
     return (
         <header className="header">
-            <div className="header-logo flex items-center gap-2 cursor-pointer" onClick={handleHomeClick}>
+                 <div className="header-logo flex items-center gap-2 cursor-pointer" onClick={handleHomeClick}>
                 <img src={Logomotel} alt="Logo" className="w-12 h-12 object-cover rounded-md shadow-lg" />
                 <span className="font-bold text-2xl tracking-wide text-gray-800">TOA_ACCOMMODATION</span>
             </div>
@@ -106,10 +123,25 @@ const Header = () => {
                     Hỗ Trợ
                 </span>
             </nav>
-            <div className="header-icons mx-2">
-                <button className="border-r-2" onClick={handleFavoritePostClick}>
-                    <FaHeart />
+            <div className=" flex gap-8 items-center">
+            <div className="relative inline-block">
+                <button 
+                    onClick={handleFavoritePostClick}
+                    className="p-2.5 rounded-full hover:bg-red-50 text-gray-500 hover:text-red-500 
+                    transition-all duration-300 ease-in-out transform hover:scale-110 
+                    focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50"
+                >
+                    <FaHeart className="w-8 h-8" />
+                    {favoriteCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-2xl 
+                        font-medium px-2 py-1 rounded-full min-w-[20px] h-[20px] flex items-center 
+                        justify-center transform scale-100 animate-bounce
+                        shadow-lg shadow-red-200 border border-white">
+                            {favoriteCount}
+                        </span>
+                    )}
                 </button>
+            </div>
                 {user ? (
                     <div className="user-dropdown">
                         <div className="user-info">
@@ -167,18 +199,43 @@ const Header = () => {
                         </div>
                     </div>
                 ) : (
-                    <>
-                        <button className="post-button" onClick={handleLoginClick}>
-                            Đăng nhập
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={handleLoginClick}
+                            className="px-6 py-5 text-red-500 font-semibold rounded-lg
+                            hover:bg-red-50 active:bg-red-100
+                            transform hover:scale-105 active:scale-95
+                            transition-all duration-200
+                            border-2 border-red-500
+                            flex items-center gap-2"
+                        >
+                            <span>Đăng nhập</span>
                         </button>
-                        <button className="post-button" onClick={handleRegisterClick}>
-                            Đăng ký
+                        <button 
+                            onClick={handleRegisterClick}
+                            className="px-6 py-5 bg-red-500 text-white font-semibold rounded-lg
+                            hover:bg-red-600 active:bg-red-700
+                            transform hover:scale-105 active:scale-95
+                            transition-all duration-200
+                            shadow-md hover:shadow-lg
+                            flex items-center gap-2"
+                        >
+                            <span>Đăng ký</span>
                         </button>
-                    </>
+                    </div>
                 )}
                 {user?.role === 'LANDLORD' && (
-                    <button className="post-buttons" onClick={handlecreateClick}>
-                        Đăng tin
+                    <button 
+                        onClick={handlecreateClick}
+                        className="px-6 py-5 bg-red-500 text-white font-semibold rounded-lg
+                        hover:bg-red-600 active:bg-red-700
+                        transform hover:scale-105 active:scale-95
+                        transition-all duration-200
+                        shadow-md hover:shadow-lg
+                        flex items-center gap-2"
+                    >
+                        <PiNotePencilBold className="w-5 h-5" />
+                        <span>Đăng tin</span>
                     </button>
                 )}
             </div>

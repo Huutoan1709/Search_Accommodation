@@ -6,6 +6,7 @@ import { BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
 import API, { authApi, endpoints } from '../../API';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
+import { vi } from 'date-fns/locale'; // For Vietnamese language support
 
 Chart.register(ArcElement, BarElement, CategoryScale, LinearScale, Tooltip, Legend, LineElement, PointElement);
 
@@ -18,10 +19,10 @@ const AdminOverview = () => {
     const [postStatistics, setPostStatistics] = useState({ locked: 0, active: 0, hidden: 0 });
     const [topLandlords, setTopLandlords] = useState([]);
     const [cityPostCounts, setCityPostCounts] = useState({});
-    
+    const [allPosts, setAllPosts] = useState([]); // New state
+
     // New states
     const [monthlyStats, setMonthlyStats] = useState([]);
-    const [selectedPeriod, setSelectedPeriod] = useState('year');
     const [loading, setLoading] = useState(true);
     const [percentageChanges, setPercentageChanges] = useState({
         users: 0,
@@ -32,8 +33,8 @@ const AdminOverview = () => {
 
     // Date handling
     const currentDate = new Date();
-    const [startDate, setStartDate] = useState(new Date(currentDate.getFullYear(), 0, 1));
-    const [endDate, setEndDate] = useState(currentDate);
+    const [startDate, setStartDate] = useState(new Date(new Date().setMonth(new Date().getMonth() - 1))); // Default to last month
+    const [endDate, setEndDate] = useState(new Date());
 
     // Existing useEffect
     useEffect(() => {
@@ -53,7 +54,7 @@ const AdminOverview = () => {
             }
         };
         loadData();
-    }, [startDate, endDate, selectedPeriod]);
+    }, [startDate, endDate]);
     const fetchCounts = async () => {
         try {
             let allUsers = [];
@@ -81,31 +82,20 @@ const AdminOverview = () => {
             setCustomerCount(totalCustomers);
             setLandlordCount(totalLandlords);
 
-            // Get current month and year
-            const now = new Date();
-            const currentMonth = now.getMonth();
-            const currentYear = now.getFullYear();
+            // Filter users within selected date range
+            const usersInRange = activeUsers.filter(user => {
+                const createdDate = new Date(user.date_joined);
+                return createdDate >= startDate && createdDate <= endDate;
+            });
+
+            // Calculate previous period for comparison
+            const daysDiff = (endDate - startDate) / (1000 * 60 * 60 * 24);
+            const previousStartDate = new Date(startDate.getTime() - (daysDiff * 24 * 60 * 60 * 1000));
             
-            // Filter users by month
-            const thisMonthUsers = activeUsers.filter(user => {
+            const previousPeriodUsers = activeUsers.filter(user => {
                 const createdDate = new Date(user.date_joined);
-                return createdDate.getMonth() === currentMonth && 
-                       createdDate.getFullYear() === currentYear;
+                return createdDate >= previousStartDate && createdDate < startDate;
             });
-
-            const lastMonthUsers = activeUsers.filter(user => {
-                const createdDate = new Date(user.date_joined);
-                return createdDate.getMonth() === (currentMonth - 1) && 
-                       createdDate.getFullYear() === currentYear;
-            });
-
-            // Calculate current month counts by role
-            const currentMonthCustomers = thisMonthUsers.filter(user => user.role === 'CUSTOMER').length;
-            const currentMonthLandlords = thisMonthUsers.filter(user => user.role === 'LANDLORD').length;
-
-            // Calculate last month counts by role  
-            const lastMonthCustomers = lastMonthUsers.filter(user => user.role === 'CUSTOMER').length;
-            const lastMonthLandlords = lastMonthUsers.filter(user => user.role === 'LANDLORD').length;
 
             // Calculate growth rates
             const calculateGrowth = (current, previous) => {
@@ -115,9 +105,15 @@ const AdminOverview = () => {
 
             // Update percentage changes
             setPercentageChanges({
-                users: calculateGrowth(thisMonthUsers.length, lastMonthUsers.length),
-                customers: calculateGrowth(currentMonthCustomers, lastMonthCustomers),
-                landlords: calculateGrowth(currentMonthLandlords, lastMonthLandlords),
+                users: calculateGrowth(usersInRange.length, previousPeriodUsers.length),
+                customers: calculateGrowth(
+                    usersInRange.filter(u => u.role === 'CUSTOMER').length,
+                    previousPeriodUsers.filter(u => u.role === 'CUSTOMER').length
+                ),
+                landlords: calculateGrowth(
+                    usersInRange.filter(u => u.role === 'LANDLORD').length,
+                    previousPeriodUsers.filter(u => u.role === 'LANDLORD').length
+                ),
             });
 
             // Debug logs
@@ -138,33 +134,35 @@ const AdminOverview = () => {
 
     const fetchPostStatistics = async () => {
         try {
-            let allPosts = [];
+            let posts = [];
             let nextUrl = `${endpoints.post}?all=true`;
 
             // Fetch all pages of posts
             while (nextUrl) {
                 const response = await authApi().get(nextUrl);
                 const postData = response.data;
-                allPosts = [...allPosts, ...postData.results];
+                posts = [...posts, ...postData.results];
                 nextUrl = postData.next ? new URL(postData.next).pathname + new URL(postData.next).search : null;
             }
 
-            // Set total post count
-            setPostCount(allPosts.length);
+            // Set allPosts state
+            setAllPosts(posts);
 
-            // Get current month and year
+            // Set total post count
+            setPostCount(posts.length);
+
+            // Rest of your existing code using posts instead of allPosts
             const now = new Date();
             const currentMonth = now.getMonth();
             const currentYear = now.getFullYear();
 
-            // Filter posts by month
-            const thisMonthPosts = allPosts.filter(post => {
+            const thisMonthPosts = posts.filter(post => {
                 const createdDate = new Date(post.created_at);
                 return createdDate.getMonth() === currentMonth && 
                        createdDate.getFullYear() === currentYear;
             });
 
-            const lastMonthPosts = allPosts.filter(post => {
+            const lastMonthPosts = posts.filter(post => {
                 const createdDate = new Date(post.created_at);
                 return createdDate.getMonth() === (currentMonth - 1) && 
                        createdDate.getFullYear() === currentYear;
@@ -190,7 +188,7 @@ const AdminOverview = () => {
             let hidden = 0;
             const cityCounts = {};
 
-            allPosts.forEach((post) => {
+            posts.forEach((post) => {
                 const city = post.room?.city || 'Khác';
                 if (!cityCounts[city]) {
                     cityCounts[city] = 0;
@@ -215,7 +213,7 @@ const AdminOverview = () => {
 
             // Debug logs
             console.log('Post Statistics:', {
-                total: allPosts.length,
+                total: posts.length,
                 thisMonth: thisMonthPosts.length,
                 lastMonth: lastMonthPosts.length,
                 growth: postGrowth
@@ -276,6 +274,39 @@ const AdminOverview = () => {
             console.error('Error fetching monthly stats:', error);
         }
     };
+
+    // Generate date labels for the line chart
+    const generateDateLabels = () => {
+        const dates = [];
+        let currentDate = new Date(startDate);
+        
+        while (currentDate <= endDate) {
+            dates.push(new Date(currentDate));
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        return dates;
+    };
+
+    const monthlyStatsData = {
+        labels: generateDateLabels().map(date => 
+            date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' })
+        ),
+        datasets: [{
+            label: 'Số lượng tin đăng',
+            data: generateDateLabels().map(date => {
+                return allPosts.filter(post => {
+                    const postDate = new Date(post.created_at);
+                    return postDate.toDateString() === date.toDateString();
+                }).length;
+            }),
+            fill: true,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.4
+        }]
+    };
+
     const renderStars = (rating) => {
         return (
             <div className="flex text-amber-400">
@@ -286,7 +317,7 @@ const AdminOverview = () => {
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8-2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                     </svg>
                 ))}
             </div>
@@ -330,20 +361,6 @@ const AdminOverview = () => {
                 borderWidth: 1,
             },
         ],
-    };
-    // Monthly Posts Line Chart Data
-    const monthlyStatsData = {
-        labels: ['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8', 'T9', 'T10', 'T11', 'T12'],
-        datasets: [
-            {
-                label: 'Số lượng tin đăng theo tháng',
-                data: monthlyStats,
-                fill: true,
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.4
-            }
-        ]
     };
 
     // First, add this chart options configuration after your monthlyStatsData definition
@@ -426,16 +443,34 @@ const AdminOverview = () => {
                 <>
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-bold text-gray-800">Tổng quan thống kê</h1>
-                        <div className="flex gap-4">
-                            <select 
-                                value={selectedPeriod}
-                                onChange={(e) => setSelectedPeriod(e.target.value)}
-                                className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                            >
-                                <option value="year">Năm nay</option>
-                                <option value="month">Tháng này</option>
-                                <option value="week">Tuần này</option>
-                            </select>
+                        <div className="flex items-center gap-4 bg-white p-2 rounded-lg shadow">
+                            <div className="flex items-center space-x-2">
+                                <span className="text-gray-600">Từ:</span>
+                                <DatePicker
+                                    selected={startDate}
+                                    onChange={(date) => setStartDate(date)}
+                                    selectsStart
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    locale={vi}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                />
+                            </div>
+                            <div className="flex items-center space-x-2">
+                                <span className="text-gray-600">Đến:</span>
+                                <DatePicker
+                                    selected={endDate}
+                                    onChange={(date) => setEndDate(date)}
+                                    selectsEnd
+                                    startDate={startDate}
+                                    endDate={endDate}
+                                    minDate={startDate}
+                                    locale={vi}
+                                    dateFormat="dd/MM/yyyy"
+                                    className="bg-gray-50 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                />
+                            </div>
                         </div>
                     </div>
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { authApi, endpoints } from '../../API';
-import { MdDelete } from 'react-icons/md';
+import { MdDelete, MdLock } from 'react-icons/md';
 import { FaLock } from 'react-icons/fa';
 import { notifySuccess } from '../../components/ToastManager';
 import PaginationUser from '../../components/PaginationUser';
@@ -39,10 +39,10 @@ const AdminUser = () => {
     }, [currentPage]);
 
     const handleLock = async (userId) => {
-        const confirmLock = window.confirm('Bạn có chắc chắn muốn khóa người dùng này không?');
+        const confirmLock = window.confirm('Bạn có chắc chắn muốn khóa người dùng này không? Hành động này không thể hoàn tác.');
         if (confirmLock) {
             try {
-                await authApi().patch(endpoints.updateUser(userId), { is_active: false });
+                await authApi().patch(endpoints.updateUser(userId), { is_block: true });
                 notifySuccess('Khóa người dùng thành công');
                 fetchUsers(currentPage);
             } catch (error) {
@@ -50,15 +50,29 @@ const AdminUser = () => {
             }
         }
     };
+
     const handleUnlock = async (userId) => {
         const confirmUnlock = window.confirm('Bạn có chắc chắn muốn mở khóa người dùng này không?');
         if (confirmUnlock) {
             try {
-                await authApi().patch(endpoints.updateUser(userId), { is_active: true });
+                await authApi().patch(endpoints.updateUser(userId), { is_block: false });
                 notifySuccess('Mở khóa người dùng thành công');
                 fetchUsers(currentPage);
             } catch (error) {
                 console.error('Failed to unlock user:', error);
+            }
+        }
+    };
+
+    const handleDelete = async (userId) => {
+        const confirmDelete = window.confirm('Bạn có chắc chắn muốn xóa người dùng này? Hành động này không thể hoàn tác.');
+        if (confirmDelete) {
+            try {
+                await authApi().delete(endpoints.deleteUser(userId));
+                notifySuccess('Xóa người dùng thành công');
+                fetchUsers(currentPage);
+            } catch (error) {
+                console.error('Failed to delete user:', error);
             }
         }
     };
@@ -177,12 +191,12 @@ const AdminUser = () => {
                                     <td className="px-6 py-4">
                                         <span
                                             className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                                user.is_active
-                                                    ? 'bg-green-100 text-green-800'
-                                                    : 'bg-red-100 text-red-800'
+                                                user.is_block
+                                                    ? 'bg-red-100 text-red-800'
+                                                    : 'bg-green-100 text-green-800'
                                             }`}
                                         >
-                                            {user.is_active ? 'Hoạt động' : 'Bị khóa'}
+                                            {user.is_block ? 'Bị khóa' : 'Hoạt động'}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
@@ -197,49 +211,30 @@ const AdminUser = () => {
                                         </span>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="relative">
+                                        <div className="flex items-center gap-2">
                                             <button
-                                                onClick={() => setOpenDropdown(openDropdown === user.id ? null : user.id)}
-                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                                onClick={() => handleViewDetails(user)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-blue-600"
+                                                title="Xem chi tiết"
                                             >
-                                                <BiDotsHorizontalRounded size={20} />
+                                                <BsEyeFill size={20} />
                                             </button>
-                                            {openDropdown === user.id && (
-                                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10">
-                                                    <ul className="py-2">
-                                                        <li
-                                                            onClick={() => handleViewDetails(user)}
-                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <BsEyeFill className="mr-2" />
-                                                            Chi tiết
-                                                        </li>
-                                                        {user.is_active ? (
-                                                            <li
-                                                                onClick={() => {
-                                                                    handleLock(user?.id);
-                                                                    setOpenDropdown(null);
-                                                                }}
-                                                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-600"
-                                                            >
-                                                                <FaLock className="mr-2" />
-                                                                Khóa
-                                                            </li>
-                                                        ) : (
-                                                            <li
-                                                                onClick={() => {
-                                                                    handleUnlock(user?.id);
-                                                                    setOpenDropdown(null);
-                                                                }}
-                                                                className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer text-green-600"
-                                                            >
-                                                                <BiLockOpen className="mr-2" />
-                                                                Mở khóa
-                                                            </li>
-                                                        )}
-                                                    </ul>
-                                                </div>
+                                            {!user.is_block && (
+                                                <button
+                                                    onClick={() => handleLock(user?.id)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-red-600"
+                                                    title="Khóa tài khoản"
+                                                >
+                                                    <MdLock size={20} />
+                                                </button>
                                             )}
+                                            <button
+                                                onClick={() => handleDelete(user?.id)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-red-600"
+                                                title="Xóa tài khoản"
+                                            >
+                                                <MdDelete size={20} />
+                                            </button>
                                         </div>
                                     </td>
                                 </tr>

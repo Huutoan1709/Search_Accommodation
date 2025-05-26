@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import API, { authApi, endpoints } from '../../API';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
-import { BiSearch, BiSolidHide, BiDotsHorizontalRounded, BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
+import { BiSearch, BiSolidHide, BiTrendingUp, BiTrendingDown } from 'react-icons/bi';
 import { notifySuccess } from '../../components/ToastManager';
 import { FaLock } from 'react-icons/fa';
 import PaginationUser from '../../components/PaginationUser';
@@ -43,9 +43,10 @@ const AdminPost = () => {
     const [filterStatus, setFilterStatus] = useState('');
     const [sortField, setSortField] = useState('');
     const [sortOrder, setSortOrder] = useState('asc');
-    const [openDropdown, setOpenDropdown] = useState(null);
+
     const [currentPage, setCurrentPage] = useState(1);
-    const postsPerPage = 2;
+    const [totalPages, setTotalPages] = useState(1);
+    const [pageSize] = useState(10);
     const [selectedPost, setSelectedPost] = useState(null);
     const [postCounts, setPostCounts] = useState({
         roomType1: 0,
@@ -191,11 +192,14 @@ const AdminPost = () => {
         return matchesStatus && matchSearch;
     });
 
-    const totalPosts = filteredPosts.length;
-    const totalPages = Math.ceil(totalPosts / postsPerPage);
-    const indexOfLastPost = currentPage * postsPerPage;
-    const indexOfFirstPost = indexOfLastPost - postsPerPage;
-    const currentPosts = filteredPosts.slice(indexOfFirstPost, indexOfLastPost);
+    const paginatedPosts = filteredPosts.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
+
+    useEffect(() => {
+        setTotalPages(Math.ceil(filteredPosts.length / pageSize));
+    }, [filteredPosts, pageSize]);
 
     const sortedPosts = filteredPosts.sort((a, b) => {
         let comparison = 0;
@@ -422,142 +426,118 @@ const AdminPost = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {sortedPosts.map((post) => (
-                            <tr 
-                                key={post.id} 
-                                className="hover:bg-gray-50 transition-colors cursor-pointer"
-                                onClick={() => handlePostClick(post)}
-                            >
-                                <td className="px-6 py-4">{post.id}</td>
-                                <td className="px-6 py-4">{post?.room?.room_type?.name}</td>
-                                <td className="px-6 py-4">
-                                    <img
-                                        src={post.images[0]?.url}
-                                        alt=""
-                                        className="w-16 h-16 rounded-lg object-cover"
-                                    />
-                                </td>
-                                <td className="px-6 py-4 max-w-xs">
-                                    <p className="truncate">{post.title}</p>
-                                </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-3">
+                        {paginatedPosts.length > 0 ? (
+                            paginatedPosts.map((post) => (
+                                <tr 
+                                    key={post.id} 
+                                    className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                    onClick={() => handlePostClick(post)}
+                                >
+                                    <td className="px-6 py-4">{post.id}</td>
+                                    <td className="px-6 py-4">{post?.room?.room_type?.name}</td>
+                                    <td className="px-6 py-4">
                                         <img
-                                            src={post.user?.avatar}
+                                            src={post.images[0]?.url}
                                             alt=""
-                                            className="w-8 h-8 rounded-full"
+                                            className="w-16 h-16 rounded-lg object-cover"
                                         />
-                                        <span>{post.user?.last_name}</span>
-                                    </div>
-                                </td>
-                                <td className="px-6 py-4 text-gray-600">
-                                    {formatDate(post.created_at)}
-                                </td>
-                                
-                                <td className="px-6 py-4">{post.room?.price}</td>
-                                <td className="px-6 py-4">{post.room?.area}</td>
-                                <td className="px-6 py-4">
-                                    <span
-                                        className={`px-3 py-1 rounded-full text-xl font-medium ${
-                                            post.is_block
-                                                ? 'bg-red-100 text-red-800'
-                                                : post.is_active
-                                                ? 'bg-green-100 text-green-800'
-                                                : 'bg-yellow-100 text-yellow-800'
-                                        }`}
-                                    >
-                                        {post.is_block ? 'Đã khóa' : post.is_active ? 'Hoạt động' : 'Đã ẩn'}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
-                                    <div className="relative">
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setOpenDropdown(openDropdown === post.id ? null : post.id);
-                                            }}
-                                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                                    </td>
+                                    <td className="px-6 py-4 max-w-xs">
+                                        <p className="truncate">{post.title}</p>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <div className="flex items-center gap-3">
+                                            <img
+                                                src={post.user?.avatar}
+                                                alt=""
+                                                className="w-8 h-8 rounded-full"
+                                            />
+                                            <span>{post.user?.last_name}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-6 py-4 text-gray-600">
+                                        {formatDate(post.created_at)}
+                                    </td>
+                                    
+                                    <td className="px-6 py-4">{post.room?.price}</td>
+                                    <td className="px-6 py-4">{post.room?.area}</td>
+                                    <td className="px-6 py-4">
+                                        <span
+                                            className={`px-3 py-1 rounded-full text-xl font-medium ${
+                                                post.is_block
+                                                    ? 'bg-red-100 text-red-800'
+                                                    : post.is_active
+                                                    ? 'bg-green-100 text-green-800'
+                                                    : 'bg-yellow-100 text-yellow-800'
+                                            }`}
                                         >
-                                            <BiDotsHorizontalRounded size={20} />
-                                        </button>
-                                        {/* Dropdown Menu */}
-                                        {openDropdown === post.id && (
-                                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-10 py-2">
-                                                <ul className="py-2">
-                                                    {post.is_active ? (
-                                                        <li
-                                                            onClick={() => {
-                                                                handleHide(post.id);
-                                                                setOpenDropdown(null);
-                                                            }}
-                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <BiSolidHide size={15} className="mr-2" />
-                                                            Ẩn
-                                                        </li>
-                                                    ) : (
-                                                        <li
-                                                            onClick={() => {
-                                                                handleUnhide(post.id);
-                                                                setOpenDropdown(null);
-                                                            }}
-                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <BiSolidHide size={15} className="mr-2" />
-                                                            Hiện
-                                                        </li>
-                                                    )}
-                                                    {post.is_block ? (
-                                                        <li
-                                                            onClick={() => {
-                                                                handleUnlock(post.id);
-                                                                setOpenDropdown(null);
-                                                            }}
-                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <FaLock size={15} className="mr-2" />
-                                                            Mở
-                                                        </li>
-                                                    ) : (
-                                                        <li
-                                                            onClick={() => {
-                                                                handleLock(post.id);
-                                                                setOpenDropdown(null);
-                                                            }}
-                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                        >
-                                                            <FaLock size={15} className="mr-2" />
-                                                            Khóa
-                                                        </li>
-                                                    )}
-                                                    <li
-                                                        onClick={() => {
-                                                            handleDelete(post.id);
-                                                            setOpenDropdown(null);
-                                                        }}
-                                                        className="flex items-center px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                                    >
-                                                        <MdDelete size={15} className="mr-2" />
-                                                        Xóa
-                                                    </li>
-                                                    
-                                                </ul>
-                                            </div>
-                                        )}
-                                    </div>
+                                            {post.is_block ? 'Đã khóa' : post.is_active ? 'Hoạt động' : 'Đã ẩn'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                                        <div className="flex items-center gap-2">
+                                            {post.is_active ? (
+                                                <button
+                                                    onClick={() => handleHide(post.id)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-yellow-600"
+                                                    title="Ẩn bài đăng"
+                                                >
+                                                    <BiSolidHide size={20} />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleUnhide(post.id)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-green-600"
+                                                    title="Hiện bài đăng"
+                                                >
+                                                    <BiSolidHide size={20} />
+                                                </button>
+                                            )}
+                                            {post.is_block ? (
+                                                <button
+                                                    onClick={() => handleUnlock(post.id)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-green-600"
+                                                    title="Mở khóa bài đăng"
+                                                >
+                                                    <FaLock size={20} />
+                                                </button>
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleLock(post.id)}
+                                                    className="p-2 hover:bg-gray-100 rounded-full transition-colors text-red-600"
+                                                    title="Khóa bài đăng"
+                                                >
+                                                    <FaLock size={20} />
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={() => handleDelete(post.id)}
+                                                className="p-2 hover:bg-gray-100 rounded-full transition-colors text-red-600"
+                                                title="Xóa bài đăng"
+                                            >
+                                                <MdDelete size={20} />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan="10" className="px-6 py-8 text-center text-gray-500">
+                                    Không tìm thấy bài đăng nào
                                 </td>
                             </tr>
-                        ))}
+                        )}
                     </tbody>
                 </table>
             </div>
 
             {/* Pagination */}
             <div className="mt-6">
-                <PaginationUser
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
+                <PaginationUser 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={setCurrentPage} 
                 />
             </div>
 

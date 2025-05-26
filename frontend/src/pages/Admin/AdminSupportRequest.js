@@ -11,8 +11,10 @@ const AdminSupportRequest = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize] = useState(10);
     const [searchTerm, setSearchTerm] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
 
     const fetchSupportRequests = async (page = 1) => {
+        setIsLoading(true);
         try {
             const response = await authApi().get(endpoints.supportrequest, {
                 params: { page, size: pageSize },
@@ -22,6 +24,8 @@ const AdminSupportRequest = () => {
         } catch (error) {
             console.error('Failed to fetch support requests:', error);
             setSupportRequests([]);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -60,12 +64,74 @@ const AdminSupportRequest = () => {
     };
 
     const filteredRequests = supportRequests.filter((request) => {
+        if (!request || !request.user) return false;
+
         const matchSearch =
             request.subject?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            request.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            request.user?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             request.id?.toString().includes(searchTerm);
         return matchSearch;
     });
+
+    const RequestRow = ({ request }) => {
+        if (!request || !request.user) return null;
+
+        return (
+            <tr key={request.id} className="hover:bg-gray-50 transition-colors">
+                <td className="px-6 py-4 text-gray-900 font-medium">#{request?.id}</td>
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <img
+                            src={request.user.avatar || '/default-avatar.png'}
+                            alt={request.user.username || 'User'}
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                                e.target.src = '/default-avatar.png';
+                            }}
+                        />
+                        <span className="font-medium">{request.user.username || 'Unknown User'}</span>
+                    </div>
+                </td>
+                <td className="px-6 py-4 text-green-600 font-medium">
+                    {request.user.phone || 'Không có'}
+                </td>
+                <td className="px-6 py-4">{request.user.email || 'Không có'}</td>
+                <td className="px-6 py-4">{request.subject || 'Không có tiêu đề'}</td>
+                <td className="px-6 py-4">
+                    {request.is_handle ? (
+                        <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
+                            Đã xử lý
+                        </span>
+                    ) : (
+                        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                            Chờ xử lý
+                        </span>
+                    )}
+                </td>
+                <td className="px-6 py-4 text-gray-600">
+                    {request.created_at ? new Date(request.created_at).toLocaleDateString('vi-VN') : 'N/A'}
+                </td>
+                <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => handleApproval(request.id)}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                            title="Đánh dấu đã xử lý"
+                        >
+                            <BiEdit size={20} />
+                        </button>
+                        <button
+                            onClick={() => handleDelete(request.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                            title="Xóa yêu cầu"
+                        >
+                            <MdDelete size={20} />
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        );
+    };
 
     return (
         <div className="p-8 bg-gray-50 min-h-screen">
@@ -105,58 +171,17 @@ const AdminSupportRequest = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200">
-                        {filteredRequests.length > 0 ? (
+                        {isLoading ? (
+                            <tr>
+                                <td colSpan="8" className="px-6 py-8 text-center">
+                                    <div className="flex justify-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : filteredRequests.length > 0 ? (
                             filteredRequests.map((request) => (
-                                <tr key={request.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4 text-gray-900 font-medium">#{request?.id}</td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <img
-                                                src={request?.user?.avatar}
-                                                alt={request.user.username}
-                                                className="w-10 h-10 rounded-full object-cover"
-                                            />
-                                            <span className="font-medium">{request.user.username}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4 text-green-600 font-medium">
-                                        {request.user.phone || 'Không có'}
-                                    </td>
-                                    <td className="px-6 py-4">{request?.user?.email}</td>
-                                    <td className="px-6 py-4">{request?.subject}</td>
-                                    <td className="px-6 py-4">
-                                        {request.is_handle ? (
-                                            <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium">
-                                                Đã xử lý
-                                            </span>
-                                        ) : (
-                                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                                                Chờ xử lý
-                                            </span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4 text-gray-600">
-                                        {new Date(request.created_at).toLocaleDateString('vi-VN')}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <button
-                                                onClick={() => handleApproval(request.id)}
-                                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                                                title="Đánh dấu đã xử lý"
-                                            >
-                                                <BiEdit size={20} />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDelete(request.id)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                                title="Xóa yêu cầu"
-                                            >
-                                                <MdDelete size={20} />
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                                <RequestRow key={request.id} request={request} />
                             ))
                         ) : (
                             <tr>

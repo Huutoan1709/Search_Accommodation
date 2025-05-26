@@ -71,7 +71,7 @@ class UserInfoSerializer(UserSerializer):
 
     class Meta(UserSerializer.Meta):
         fields = UserSerializer.Meta.fields + ['id', 'gender', 'date_joined', 'last_login', 'email', 'phone', 'address',
-                                               'follower_count', 'following_count', 'password']
+                                               'follower_count', 'following_count', 'password' , 'is_block']
         extra_kwargs = {
             'password':
                 {'write_only': True},
@@ -180,6 +180,7 @@ class PostSerializer(ModelSerializer):
     room = RoomsSerializer()
     post_type = PostTypeSerializer()
     created_at_humanized = SerializerMethodField()
+    is_expired = serializers.SerializerMethodField()
 
     def get_created_at_humanized(self, obj):
         return timesince(obj.created_at) + ' trước'
@@ -192,13 +193,14 @@ class PostSerializer(ModelSerializer):
         active_images = obj.Post_Images.filter(is_active=True)
         return PostImageSerializer(active_images, many=True).data
 
+    def get_is_expired(self, obj):
+        return obj.check_expired
+
     class Meta:
         model = Post
-        fields = ['id', 'title', 'content', 'user', 'created_at', 'images','video', 'room','post_type', 'created_at_humanized', 'is_active',
-                  'is_approved', 'is_block','is_paid']
-        extra_kwargs = {
-            'user': {'read_only': True},
-        }
+        fields = ['id', 'title', 'content', 'user', 'created_at', 'images', 'video', 'room', 
+                 'post_type', 'created_at_humanized', 'is_active', 'is_approved', 
+                 'is_block', 'is_paid', 'expires_at', 'is_expired']
 
 
 class DetailPostSerializer(PostSerializer):

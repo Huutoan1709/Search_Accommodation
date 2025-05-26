@@ -3,12 +3,14 @@ import { authApi, endpoints } from '../../../API';
 import UpdatePost from '../UpdatePost';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
-import { BiSolidHide, BiShow } from 'react-icons/bi';
+import { BiSolidHide, BiShow, BiTime } from 'react-icons/bi';
 import { notifySuccess, notifyWarning, notifyError } from '../../../components/ToastManager';
 import PaginationUser from '../../../components/PaginationUser';
 import PostDetailModal from './PostDetailModal';
 import { removeVietnameseTones } from '../../../utils/stringUtils';
 import { useNavigate } from 'react-router-dom';
+import ExpiredPostsModal from '../../../components/ExpiredPostsModal';
+import { MdWarning } from 'react-icons/md';
 
 const ManagePost = () => {
     const [posts, setPosts] = useState([]);
@@ -20,6 +22,8 @@ const ManagePost = () => {
     const [isUpdateOpen, setIsUpdateOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [showExpiredModal, setShowExpiredModal] = useState(false);
+    const [expiredPosts, setExpiredPosts] = useState([]);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -27,6 +31,16 @@ const ManagePost = () => {
             try {
                 const response = await authApi().get(endpoints.mypost);
                 setPosts(response.data);
+                
+                // Lọc ra các bài đăng đã hết hạn
+                const expired = response.data.filter(post => 
+                    post.is_paid && new Date(post.expires_at) < new Date()
+                );
+                
+                if (expired.length > 0) {
+                    setExpiredPosts(expired);
+                    setShowExpiredModal(true);
+                }
             } catch (error) {
                 console.error('Failed to fetch posts:', error);
             }
@@ -34,31 +48,35 @@ const ManagePost = () => {
         fetchPosts();
     }, []);
 
-    const getStatus = (isActive, isApproved, isBlock, isPaid) => {
-        if (!isPaid) return '';  // Return empty string instead of "Chưa thanh toán"
+    const getStatus = (isActive, isApproved, isBlock, isPaid, isExpired) => {
+        // Kiểm tra thanh toán trước
+        if (!isPaid) return 'Chưa thanh toán';
+
+        // Kiểm tra các trạng thái theo thứ tự ưu tiên
         if (isBlock) return 'Đã khóa';
-        if (isActive && !isApproved) return 'Chờ duyệt'; 
+        if (isExpired) return 'Hết hạn';
         if (!isActive) return 'Đã ẩn';
-        if (isActive && isApproved) return 'Hoạt động';
-        return '';
+        if (!isApproved) return 'Chờ duyệt';
+        if (isActive && isApproved && !isBlock) return 'Hoạt động';
+        
+        return ''; // Trường hợp mặc định
     };
 
     const formatDate = (dateString) => {
+        if (!dateString) return 'Chưa có';
+        
         const date = new Date(dateString);
         const day = String(date.getDate()).padStart(2, '0');
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
-        return `${day}/${month}/${year}`;
-    };
-
-    const calculateEndDate = (startDate) => {
-        const start = new Date(startDate);
-        start.setMonth(start.getMonth() + 1);
-        return formatDate(start);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
     };
 
     const filteredPosts = posts.filter((post) => {
-        const status = getStatus(post?.is_active, post?.is_approved, post?.is_block, post?.is_paid);
+        const status = getStatus(post?.is_active, post?.is_approved, post?.is_block, post?.is_paid, post?.is_expired);
         const matchesStatus = filterStatus === '' || status === filterStatus;
         const matchesPostType = filterPostType === '' || post?.post_type?.name === filterPostType;
         const searchTermNormalized = removeVietnameseTones(searchTerm);
@@ -133,6 +151,26 @@ const ManagePost = () => {
         }
     };
 
+    // Thêm hàm xử lý gia hạn
+    const handleRenewal = async (postId, postType) => {
+        try {
+            const response = await authApi().post(endpoints.paymentcreate, {
+                post_id: postId,
+                post_type_id: postType.id,
+                amount: postType.price,
+                is_renewal: true // Thêm flag để backend biết đây là gia hạn
+            });
+            
+            if (response.data.payment_url) {
+                window.location.href = response.data.payment_url;
+            } else {
+                notifyError('Không thể tạo URL thanh toán gia hạn');
+            }
+        } catch (error) {
+            notifyError('Có lỗi xảy ra khi tạo yêu cầu gia hạn');
+        }
+    };
+
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
     };
@@ -178,6 +216,16 @@ const ManagePost = () => {
                         </span>
                         <span className='text-2xl'>Quản lý tin đăng</span>
                         <span className="text-2xl font-normal text-gray-500">({totalPosts} tin)</span>
+                        {expiredPosts.length > 0 && (
+                            <button
+                                onClick={() => setShowExpiredModal(true)}
+                                className="ml-4 p-2 bg-red-100 text-red-600 rounded-full hover:bg-red-200 transition-colors duration-200 flex items-center gap-2"
+                                title="Xem tin đăng hết hạn"
+                            >
+                                <MdWarning className="text-xl" />
+                                <span className="text-sm font-medium">{expiredPosts.length} tin hết hạn</span>
+                            </button>
+                        )}
                     </h1>
 
                     <div className="flex flex-col md:flex-row gap-3">
@@ -204,6 +252,8 @@ const ManagePost = () => {
                             <option value="Chờ duyệt">Chờ duyệt</option>
                             <option value="Đã ẩn">Đã ẩn</option>
                             <option value="Đã khóa">Đã khóa</option>
+                            <option value="Hết hạn">Hết hạn</option>
+                            <option value="Chưa thanh toán">Chưa thanh toán</option>
                         </select>
 
                         <select
@@ -231,7 +281,7 @@ const ManagePost = () => {
                                 <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Giá/tháng</th>
                                 <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Ngày đăng</th>
                                 <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Hết hạn</th>
-                                <th className='px-6 py-4 text-left text-xl font-medium text-gray-500'>Loại Tin</th>
+                                <th className="px-6 py-4 text-left text-xl font-medium text-gray-500 w-32">Loại Tin</th>
                                 <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Trạng thái</th>
                                 <th className="px-6 py-4 text-left text-xl font-medium text-gray-500">Tùy chọn</th>
                             </tr>
@@ -268,33 +318,80 @@ const ManagePost = () => {
                                         <td className="px-6 py-4 whitespace-nowrap text-xl text-gray-600">
                                             {formatDate(post?.created_at)}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-xl text-gray-600">
-                                            {calculateEndDate(post?.created_at)}
+                                        <td className="px-6 py-4 whitespace-nowrap text-xl">
+                                            {post.is_paid ? (
+                                                new Date(post.expires_at) < new Date() ? (
+                                                    <span className="text-red-600 font-medium">
+                                                        {formatDate(post.expires_at)}
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-green-600">
+                                                        {formatDate(post.expires_at)}
+                                                    </span>
+                                                )
+                                            ) : (
+                                                <span className="text-gray-400">
+                                                    Chưa thanh toán
+                                                </span>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-4 py-2 rounded-full text-base font-medium ${
-                                                post?.post_type?.name === 'VIP' 
-                                                    ? 'bg-amber-100 text-amber-800 border-2 border-amber-500' 
+                                        <td className="px-6 py-4 whitespace-nowrap w-40"> {/* Tăng width lên w-40 */}
+                                            <span className={`
+                                                px-4 py-2 
+                                                rounded-full 
+                                                text-base 
+                                                font-medium 
+                                                w-full 
+                                                inline-block 
+                                                text-center
+                                                transition-all 
+                                                duration-300
+                                                ${post?.post_type?.name === 'VIP' 
+                                                    ? 'bg-amber-100 text-amber-800 border-2 border-amber-500 shadow-lg hover:shadow-amber-200 hover:scale-105 animate-pulse-slow' 
                                                     : 'bg-gray-100 text-gray-800'
-                                            }`}>
-                                                {post?.post_type?.name || 'NORMAL'}
+                                                }
+                                            `}>
+                                                <div className="flex items-center justify-center gap-1">
+                                                    {post?.post_type?.name === 'VIP' && (
+                                                        <svg 
+                                                            className="w-4 h-4 text-amber-600" 
+                                                            fill="currentColor" 
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                        </svg>
+                                                    )}
+                                                    {post?.post_type?.name || 'NORMAL'}
+                                                </div>
                                             </span>
                                         </td>
                                         <td className="px-4 py-4 whitespace-nowrap">
                                             <div className="flex flex-col gap-2">
-                                                {/* Only show status badge if post is paid or has other status */}
-                                                {(post?.is_paid || getStatus(post?.is_active, post?.is_approved, post?.is_block, post?.is_paid)) && (
-                                                    <span className={`text-center px-2 py-2 rounded-full text-lg font-medium justify-center ${
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        if (post?.is_expired) {
+                                                            handleRenewal(post.id, post.post_type);
+                                                        }
+                                                    }}
+                                                    className={`text-center px-2 py-2 rounded-full text-lg font-medium justify-center ${
                                                         post?.is_block ? 'bg-red-100 text-red-800' :
-                                                        post?.is_active && !post?.is_approved ? 'bg-yellow-100 text-yellow-800' :
+                                                        post?.is_expired ? 'bg-red-100 text-red-800 hover:bg-red-200 cursor-pointer' :
                                                         !post?.is_active ? 'bg-gray-100 text-gray-800' :
-                                                        'bg-green-100 text-green-800'
-                                                    }`}>
-                                                        {getStatus(post?.is_active, post?.is_approved, post?.is_block, post?.is_paid)}
-                                                    </span>
-                                                )}
+                                                        !post?.is_approved ? 'bg-yellow-100 text-yellow-800' :
+                                                        post?.is_paid ? 'bg-green-100 text-green-800' :
+                                                        'bg-blue-100 text-blue-800'
+                                                    }`}
+                                                >
+                                                    {getStatus(
+                                                        post?.is_active,
+                                                        post?.is_approved,
+                                                        post?.is_block,
+                                                        post?.is_paid,
+                                                        post?.is_expired
+                                                    )}
+                                                </button>
 
-                                                {/* Show payment button for unpaid posts */}
                                                 {!post?.is_paid && (
                                                     <button
                                                         onClick={(e) => {
@@ -390,6 +487,11 @@ const ManagePost = () => {
                     onClose={() => setShowDetailModal(false)} 
                 />
             )}
+            <ExpiredPostsModal 
+                isOpen={showExpiredModal}
+                onClose={() => setShowExpiredModal(false)}
+                expiredPosts={expiredPosts}
+            />
         </div>
     );
 };

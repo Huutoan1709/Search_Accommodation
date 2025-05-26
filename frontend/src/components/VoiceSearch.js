@@ -9,7 +9,9 @@ const VoiceSearch = ({ onVoiceResult }) => {
     const [genAI, setGenAI] = useState(null);
     const [lastRequestTime, setLastRequestTime] = useState(0);
     const [showGuide, setShowGuide] = useState(false);
-    const COOLDOWN_TIME = 5000; // 10 giây giữa các request
+    const [showTranscriptModal, setShowTranscriptModal] = useState(false);
+    const [currentTranscript, setCurrentTranscript] = useState('');
+    const COOLDOWN_TIME = 5000;
     const EXCLUSION_WORDS = [
         'dưới',
         'trên',
@@ -42,30 +44,38 @@ const VoiceSearch = ({ onVoiceResult }) => {
         }
     }, []);
 
-    const processWithAI = async (transcript) => {
-        const now = Date.now();
-        if (now - lastRequestTime < COOLDOWN_TIME) {
-            const waitTime = Math.ceil((COOLDOWN_TIME - (now - lastRequestTime)) / 1000);
-            notifyWarning(`Vui lòng đợi ${waitTime} giây trước khi thử lại`);
-            return null;
+    const processWithAI = async (transcript, skipCooldown = false) => {
+        console.log('Raw transcript:', transcript);
+
+        // Chỉ kiểm tra cooldown nếu không skip
+        if (!skipCooldown) {
+            const now = Date.now();
+            if (now - lastRequestTime < COOLDOWN_TIME) {
+                const waitTime = Math.ceil((COOLDOWN_TIME - (now - lastRequestTime)) / 1000);
+                notifyWarning(`Vui lòng đợi ${waitTime} giây trước khi thử lại`);
+                return null;
+            }
         }
 
         if (!genAI) {
+            console.log('AI not initialized'); // Log trạng thái AI
             notifyError('AI chưa được khởi tạo');
             return null;
         }
 
         try {
             setIsProcessing(true);
-            setLastRequestTime(now);
+            setLastRequestTime(Date.now());
 
             // Xử lý text mà không cần AI nếu là các trường hợp đơn giản
             const simpleResult = processSimpleCommands(transcript);
             if (simpleResult) {
+                console.log('Simple processing result:', simpleResult); // Log kết quả xử lý đơn giản
                 return simpleResult;
             }
 
             const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+            console.log('Using AI model:', 'gemini-pro'); // Log model được sử dụng
 
             const prompt = `Phân tích yêu cầu tìm kiếm nhà trọ sau và trả về kết quả dưới dạng JSON với format:
             {
@@ -90,20 +100,22 @@ const VoiceSearch = ({ onVoiceResult }) => {
             const result = await model.generateContent(prompt);
             const response = await result.response;
             const text = response.text();
+            console.log('AI response:', text); // Log phản hồi từ AI
 
             try {
                 const jsonMatch = text.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     const jsonResult = JSON.parse(jsonMatch[0]);
+                    console.log('Parsed JSON result:', jsonResult); // Log kết quả JSON đã parse
                     return jsonResult;
                 }
             } catch (parseError) {
-                console.error('Error parsing JSON:', parseError);
+                console.error('JSON parsing error:', parseError); // Log lỗi parse JSON
                 notifyError('Lỗi xử lý kết quả AI');
             }
             return null;
         } catch (error) {
-            console.error('Error processing with AI:', error);
+            console.error('AI processing error:', error); // Log lỗi xử lý AI
             if (error.message.includes('RATE_LIMIT_EXCEEDED')) {
                 notifyError('Đã vượt quá giới hạn yêu cầu, vui lòng thử lại sau');
             } else {
@@ -223,7 +235,7 @@ const VoiceSearch = ({ onVoiceResult }) => {
             },
             // Khoảng X triệu
             {
-                regex: /(?:khoảng|khoang|giá|gia)\s+(\d+)\s*triệu/,
+                regex: /(?:khoảng|khoang|giá|gia|GIÁ|Giá)\s+(\d+)\s*triệu/,
                 handler: (matches) => {
                     const price = parseInt(matches[1]);
                     result.price.min = price - 1;
@@ -484,7 +496,10 @@ const VoiceSearch = ({ onVoiceResult }) => {
     };
 
     const startListening = () => {
+        console.log('Starting voice recognition...'); // Log bắt đầu nhận dạng
+
         if (!genAI) {
+            console.log('AI not ready'); // Log trạng thái AI
             notifyError('AI chưa được khởi tạo');
             return;
         }
@@ -496,54 +511,58 @@ const VoiceSearch = ({ onVoiceResult }) => {
             recognition.lang = 'vi-VN';
 
             recognition.onstart = () => {
+                console.log('=== BẮT ĐẦU NHẬN DẠNG GIỌNG NÓI ===');
                 setIsListening(true);
             };
 
             recognition.onresult = async (event) => {
                 const transcript = event.results[0][0].transcript;
-                console.log('Recognized text:', transcript);
+                setCurrentTranscript(transcript); // Lưu văn bản vào state
+                setShowTranscriptModal(true); // Hiển thị modal
+
+                console.log('🎤 Văn bản nhận dạng được:', transcript);
+                console.log('📊 Độ chính xác:', Math.round(event.results[0][0].confidence * 100) + '%');
 
                 const aiResult = await processWithAI(transcript);
+                console.log('🤖 Kết quả xử lý AI:', {
+                    Loại_phòng: aiResult?.room_type || 'Không xác định',
+                    Địa_điểm: {
+                        Thành_phố: aiResult?.location?.city || 'Không xác định',
+                        Quận_Huyện: aiResult?.location?.district || 'Không xác định',
+                        Phường_Xã: aiResult?.location?.ward || 'Không xác định'
+                    },
+                    Giá_cả: {
+                        Tối_thiểu: aiResult?.price?.min ? `${aiResult.price.min} triệu` : 'Không xác định',
+                        Tối_đa: aiResult?.price?.max ? `${aiResult.price.max} triệu` : 'Không xác định'
+                    },
+                    Diện_tích: {
+                        Tối_thiểu: aiResult?.area?.min ? `${aiResult.area.min}m²` : 'Không xác định',
+                        Tối_đa: aiResult?.area?.max ? `${aiResult.area.max}m²` : 'Không xác định'
+                    }
+                });
+
                 if (aiResult) {
                     onVoiceResult(aiResult);
                 }
             };
 
             recognition.onerror = (event) => {
-                console.error('Speech recognition error:', event.error);
+                console.error('❌ Lỗi nhận dạng:', event.error);
                 setIsListening(false);
                 notifyError('Lỗi nhận dạng giọng nói');
             };
 
             recognition.onend = () => {
+                console.log('=== KẾT THÚC NHẬN DẠNG ===');
                 setIsListening(false);
             };
 
             recognition.start();
         } else {
+            console.log('❌ Trình duyệt không hỗ trợ nhận dạng giọng nói');
             notifyError('Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói');
         }
     };
-
-    const searchGuideExamples = [
-        {
-            category: 'Loại phòng',
-            examples: ['phòng trọ', 'nhà nguyên căn', 'căn hộ dịch vụ', 'chung cư']
-        },
-        {
-            category: 'Địa điểm',
-            examples: ['quận 1', 'thành phố Hồ Chí Minh', 'phường Bến Nghé']
-        },
-        {
-            category: 'Khoảng giá',
-            examples: ['dưới 5 triệu', 'từ 3 đến 7 triệu', 'khoảng 4 triệu']
-        },
-        {
-            category: 'Diện tích',
-            examples: ['trên 30m2', 'từ 20 đến 50m2', 'khoảng 25m2']
-        }
-    ];
-
     return (
         <div className="relative inline-block">
             <div className="flex items-center gap-2">
@@ -641,6 +660,51 @@ const VoiceSearch = ({ onVoiceResult }) => {
                         </div>
                     )}
                 </div>
+
+                {/* Voice Recognition Modal */}
+                {showTranscriptModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                        <div className="bg-white rounded-lg p-6 w-[500px] shadow-xl">
+                            <div className="mb-4">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                                    Xác nhận nội dung tìm kiếm
+                                </h3>
+                                <p className="text-gray-600 text-sm mb-4">
+                                    Đây là nội dung bạn vừa nói. Nếu chính xác, hãy bấm "Xác nhận" để tìm kiếm.
+                                </p>
+                            </div>
+                            
+                            <div className="bg-gray-50 rounded p-4 mb-4">
+                                <p className="text-gray-800 font-medium">"{currentTranscript}"</p>
+                            </div>
+                            
+                            <div className="flex justify-end gap-2">
+                                <button
+                                    onClick={() => {
+                                        setShowTranscriptModal(false);
+                                        startListening(); // Cho phép người dùng thử lại
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                >
+                                    Thử lại
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        setShowTranscriptModal(false);
+                                        // Gọi processWithAI với skipCooldown = true
+                                        const aiResult = await processWithAI(currentTranscript, true);
+                                        if (aiResult) {
+                                            onVoiceResult(aiResult);
+                                        }
+                                    }}
+                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                >
+                                    Xác nhận
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 <audio
                     id="startSound"

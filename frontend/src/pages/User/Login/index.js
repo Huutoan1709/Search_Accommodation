@@ -101,7 +101,6 @@ function Login() {
                 console.log('User info being stored:', user); // Log user info trước khi lưu
                 localStorage.setItem('user', JSON.stringify(user));
 
-                notifySuccess('Đăng nhập thành công với Google');
                 login(user);
 
                 // Log navigation

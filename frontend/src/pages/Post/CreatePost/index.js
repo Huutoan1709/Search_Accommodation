@@ -147,24 +147,45 @@ const CreatePost = () => {
                 });
             }
 
-            // 4. Tạo thanh toán VNPay
-            const paymentData = {
-                post_id: postId,
-                post_type_id: selectedPostType.id,
-                amount: selectedPostType.price
-            };
+            // Cập nhật phần xử lý thanh toán
+            try {
+                // 4. Tạo thanh toán VNPay
+                const paymentData = {
+                    post_id: postId,
+                    post_type_id: selectedPostType.id,
+                    amount: selectedPostType.price
+                };
+                console.log('Dữ liệu thanh toán gửi đi:', paymentData);
 
-            const paymentResponse = await authApi().post(endpoints.paymentcreate, paymentData);
+                const paymentResponse = await authApi().post(endpoints.paymentcreate, paymentData);
+                console.log('Phản hồi từ server:', paymentResponse.data);
 
-            if (paymentResponse.data.payment_url) {
-                notifySuccess('Tạo bài đăng thành công! Chuyển hướng đến trang thanh toán...');
+                if (paymentResponse.data.payment_url) {
+                    notifySuccess('Tạo bài đăng thành công! Chuyển hướng đến trang thanh toán...');
+                    setTimeout(() => {
+                        window.location.href = paymentResponse.data.payment_url;
+                    }, 1500);
+                } else {
+                    notifyError('Không nhận được URL thanh toán từ VNPay');
+                }
+
+            } catch (error) {
+                console.error('Chi tiết lỗi:', {
+                    message: error.message,
+                    data: error.response?.data,
+                    status: error.response?.status,
+                    headers: error.response?.headers
+                });
                 
-                // Thêm delay ngắn để hiển thị thông báo
-                setTimeout(() => {
-                    window.location.href = paymentResponse.data.payment_url;
-                }, 1500);
-            } else {
-                notifyError('Có lỗi xảy ra khi tạo thanh toán');
+                if (error.response) {
+                    notifyError(`Lỗi từ server: ${error.response.data.message || 'Không xác định'}`);
+                } else if (error.request) {
+                    notifyError('Không thể kết nối đến server thanh toán');
+                } else {
+                    notifyError('Lỗi khi tạo yêu cầu thanh toán: ' + error.message);
+                }
+            } finally {
+                setLoading(false);
             }
 
         } catch (error) {

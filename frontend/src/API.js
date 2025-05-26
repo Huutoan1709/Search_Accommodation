@@ -46,6 +46,7 @@ export const endpoints = {
     deleteUser: (userId) => `/user/${userId}/`,
     detailuseradmin: (userId) => `/user/${userId}/`,
     updateUser: (userId) => `/user/${userId}/`,
+    deleteUser: (userId) => `/user/${userId}/`,
     searchhistory: '/search-history/',
     recommendedrooms: '/recommendations/recommended-rooms/',
     PhoneOTPReset: '/phone-reset-password/',

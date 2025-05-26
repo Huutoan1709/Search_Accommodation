@@ -81,14 +81,30 @@ class Post(BaseModel):
     title = models.CharField(max_length=400)
     content = models.TextField()
     is_approved = models.BooleanField(default=False)
-    is_block = models.BooleanField(default=False)
+    is_block = models.BooleanField(default=False) 
     user = models.ForeignKey('User', related_name='User_Post', on_delete=models.CASCADE)
     room = models.ForeignKey('Rooms', related_name='Room_Post', on_delete=models.CASCADE)
     is_paid = models.BooleanField(default=False)
     expires_at = models.DateTimeField(null=True, blank=True)
     post_type = models.ForeignKey('PostType', on_delete=models.SET_NULL, null=True)
+    is_expired = models.BooleanField(default=False)  # Thêm trường mới
+
+    def save(self, *args, **kwargs):
+        # Kiểm tra trạng thái hết hạn khi lưu
+        if self.expires_at and self.is_paid:
+            self.is_expired = timezone.now() > self.expires_at
+        super().save(*args, **kwargs)
+
+    @property
+    def check_expired(self):
+        # Property để kiểm tra trạng thái hết hạn realtime
+        if self.expires_at and self.is_paid:
+            return timezone.now() > self.expires_at
+        return False
+
     def __str__(self):
         return f'{self.title} + {self.room}'
+
 
 class PostType(BaseModel):
     NORMAL = 'NORMAL'

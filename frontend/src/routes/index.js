@@ -33,7 +33,6 @@ import PaymentResult from '../pages/Post/PaymentResult';
 import PaymentHistory from '../pages/Payment/PaymentHistory';
 const publicroutes = [
     { path: '/', component: Home },
-
     { path: '/login', component: Login },
     { path: '/register', component: Register },
     { path: '/post/:postId', component: DetailPost },

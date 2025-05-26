@@ -108,11 +108,6 @@ const AdminSidebar = () => {
                                                 Danh sách người dùng
                                             </MenuLink>
                                         </li>
-                                        <li>
-                                            <MenuLink to="/admin/user/permission" icon={RiUserLine}>
-                                                Phân quyền
-                                            </MenuLink>
-                                        </li>
                                     </ul>
                                 )}
                             </li>

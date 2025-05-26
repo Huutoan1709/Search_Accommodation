@@ -6,6 +6,7 @@ import { notifySuccess, notifyWarning, notifyError } from '../../components/Toas
 import API, { endpoints, authApi } from '../../API';
 import { useContext } from 'react';
 import MyContext from '../../context/MyContext';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaComments } from 'react-icons/fa';
 
 const SupportRequest = () => {
     const { user, login, fetchUser } = useContext(MyContext);
@@ -47,36 +48,73 @@ const SupportRequest = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col bg-gray-50">
             <Header />
-            <div className="flex-1 w-[1024px] mx-auto ">
-                <div className="flex flex-col md:flex-row md:space-x-8 mt-10">
-                    <div className="md:w-1/2 bg-gradient-to-b from-blue-500 to-cyan-500 text-white p-6 rounded-lg">
-                        <h2 className="text-2xl font-semibold mb-4">Thông tin liên hệ</h2>
-                        <p className="mb-4">
-                            Chúng tôi biết bạn có rất nhiều sự lựa chọn. Nhưng cảm ơn vì đã lựa chọn chúng tôi
-                        </p>
-                        <p>
-                            <strong>Điện thoại:</strong> 096 1499 124
-                        </p>
-                        <p>
-                            <strong>Email:</strong> nguyenhuutoan010@gmail.com
-                        </p>
-                        <p>
-                            <strong>Zalo:</strong> 096 1499 124
-                        </p>
-                        <p className="mt-4">
-                            <strong>Địa chỉ:</strong>
-                        </p>
-                        <p>18 đường số 5, phường 17, quận Gò Vấp, TP.Hồ Chí Minh</p>
+            <div className="flex-1 container mx-auto px-4 py-8 max-w-6xl">
+                <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">
+                    Liên Hệ & Hỗ Trợ
+                </h1>
+
+                <div className="grid md:grid-cols-2 gap-8">
+                    {/* Contact Information Card */}
+                    <div className="bg-gradient-to-br from-blue-600 to-blue-800 text-white rounded-2xl shadow-xl p-8">
+                        <h2 className="text-2xl font-bold mb-6">Thông Tin Liên Hệ</h2>
+                        
+                        <div className="space-y-6">
+                            <div className="flex items-center space-x-4">
+                                <div className="bg-white/20 p-3 rounded-full">
+                                    <FaPhone className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Điện thoại</p>
+                                    <p className="text-lg">096 1499 124</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <div className="bg-white/20 p-3 rounded-full">
+                                    <FaEnvelope className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Email</p>
+                                    <p className="text-lg">nguyenhuutoan010@gmail.com</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <div className="bg-white/20 p-3 rounded-full">
+                                    <FaComments className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Zalo</p>
+                                    <p className="text-lg">096 1499 124</p>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center space-x-4">
+                                <div className="bg-white/20 p-3 rounded-full">
+                                    <FaMapMarkerAlt className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <p className="font-medium">Địa chỉ</p>
+                                    <p className="text-lg">18 đường số 5, phường 17, quận Gò Vấp, TP.Hồ Chí Minh</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 p-4 bg-white/10 rounded-xl">
+                            <p className="text-sm italic">
+                                "Chúng tôi biết bạn có rất nhiều sự lựa chọn. Cảm ơn vì đã lựa chọn chúng tôi"
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Support Request Form Section */}
-                    <div className="md:w-1/2 mt-6 md:mt-0">
-                        <h2 className="text-2xl font-semibold mb-4">Liên hệ trực tuyến</h2>
-                        <form onSubmit={handleSubmit} className="bg-white p-6 shadow-lg rounded-lg">
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-2" htmlFor="subject">
+                    {/* Support Request Form */}
+                    <div className="bg-white rounded-2xl shadow-xl p-8">
+                        <h2 className="text-2xl font-bold text-gray-800 mb-6">Gửi Yêu Cầu Hỗ Trợ</h2>
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2" htmlFor="subject">
                                     Chủ đề
                                 </label>
                                 <input
@@ -85,14 +123,14 @@ const SupportRequest = () => {
                                     name="subject"
                                     value={formData.subject}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Nhập chủ đề"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+                                    placeholder="Nhập chủ đề của bạn"
                                     required
                                 />
                             </div>
 
-                            <div className="mb-4">
-                                <label className="block text-gray-700 mb-2" htmlFor="description">
+                            <div>
+                                <label className="block text-gray-700 font-medium mb-2" htmlFor="description">
                                     Nội dung
                                 </label>
                                 <textarea
@@ -100,18 +138,17 @@ const SupportRequest = () => {
                                     name="description"
                                     value={formData.description}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    rows="6"
-                                    placeholder="Nhập nội dung yêu cầu"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 min-h-[200px]"
+                                    placeholder="Mô tả chi tiết yêu cầu của bạn..."
                                     required
                                 ></textarea>
                             </div>
 
                             <button
                                 type="submit"
-                                className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-xl transition duration-200 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                                Gửi liên hệ
+                                Gửi yêu cầu
                             </button>
                         </form>
                     </div>

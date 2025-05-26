@@ -98,7 +98,7 @@ const Home = ({ room_type = '' }) => {
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 mb-8">
                     <div className="w-[1024px] mx-auto text-center">
                         <h1 className="text-4xl font-bold mb-4">
-                            Kênh thông tin Phòng Trọ số 1 Việt Nam
+                            Kênh thông tin Phòng Trọ Việt Nam
                         </h1>
                         <p className="text-xl opacity-90">
                             Tìm phòng trọ nhanh chóng, thuận tiện và hoàn toàn miễn phí

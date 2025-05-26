@@ -28,7 +28,7 @@ admin_site = MyAdminSite(name='myadmin')
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'phone', 'role', 'is_active', 'date_joined')
+    list_display = ('id','username', 'email', 'phone', 'role', 'is_active', 'date_joined')
     search_fields = ('username', 'email', 'phone')
     list_filter = ('role', 'is_active')
     def save_model(self, request, obj, form, change):

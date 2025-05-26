@@ -29,7 +29,6 @@ import hmac
 import urllib.parse
 from oauth2_provider.models import Application, AccessToken, RefreshToken
 from django.utils import timezone
-import datetime
 from oauthlib.common import generate_token
 import random
 import string
@@ -337,13 +336,13 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Post.objects.filter(is_active=True, is_approved=True, is_block=False)
+        queryset = Post.objects.filter(is_active=True, is_approved=True, is_block=False, is_expired=False)
 
         if self.request.query_params.get('all', None) == 'true':
             queryset = Post.objects.all()
         if self.action in ['destroy', 'partial_update', 'update', 'delete_image']:
             queryset = Post.objects.all()
-        if (self.action) in ['images','video']:
+        if self.action in ['images','video']:
             queryset = Post.objects.filter(is_active=True)
 
         # Lấy các giá trị từ query params
@@ -1168,6 +1167,9 @@ class VNPayViewSet(viewsets.ViewSet):
                 # Cập nhật trạng thái đã thanh toán cho bài đăng
                 post = payment.post
                 post.is_paid = True
+                # Tính thời hạn dựa trên post_type
+                duration_days = payment.post_type.duration
+                post.expires_at = timezone.now() + timezone.timedelta(days=duration_days)  # Thay đổi thời gian hết hạn nếu cần
                 post.save()
 
                 return response.Response({"message": "success"})
@@ -1205,6 +1207,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth import get_user_model
 import random, string
+
 
 class AuthViewSet(ViewSet):
     
@@ -1266,14 +1269,14 @@ class AuthViewSet(ViewSet):
             # Generate new tokens
             access_token = generate_token()
             refresh_token = generate_token()
-            expires = timezone.now() + datetime.timedelta(days=1)
+            expires = timezone.now() + timedelta(days=1)  # Sử dụng timedelta thay vì datetime.timedelta
 
             # Create OAuth2 tokens
             AccessToken.objects.create(
                 user=user,
                 application=app,
                 token=access_token,
-                expires=expires
+                expires=expires  # Sử dụng expires đã được tính đúng
             )
 
             RefreshToken.objects.create(
