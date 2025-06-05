@@ -148,6 +148,24 @@ function Footer() {
                     </div>
                 </div>
 
+                {/* Thêm phần thông tin cam kết */}
+                <div className="mt-8 border-t pt-4">
+                    <div className="text-lg text-gray-600 mb-4">
+                        <p className="font-semibold mb-2">TO.vn - Nền tảng đăng tin bất động sản</p>
+                        <p className="mb-2">
+                            TO.vn là nền tảng công nghệ cung cấp không gian đăng tin bất động sản giữa người mua và người thuê.
+                            Chúng tôi không phải là bên trung gian môi giới và không tham gia vào bất kỳ giao dịch nào giữa các bên.
+                        </p>
+                        <p className="mb-2">
+                            Mặc dù thông tin đăng tin được kiểm duyệt, TO.vn không đảm bảo tính chính xác tuyệt đối của các thông tin này. 
+                            Người dùng cần tự thẩm định và xác minh các thông tin trước khi thực hiện giao dịch.
+                        </p>
+                        <p>
+                            Vui lòng đọc kỹ thông tin và tự cân nhắc trước khi quyết định giao dịch. TO.vn khuyến nghị các bên nên thực hiện giao dịch thông qua hợp đồng bằng văn bản.
+                        </p>
+                    </div>
+                </div>
+
                 {/* Phần dưới cùng */}
                 <div className="mt-8 flex justify-between items-center border-t pt-4">
                     <div className="text-sm text-gray-600 items-center">

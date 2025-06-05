@@ -74,7 +74,7 @@ const RecommendedRooms = () => {
     };
 
     const handleFavoriteClick = async (e, postId) => {
-        e.stopPropagation(); // Ngăn không cho click lan ra ngoài
+        e.stopPropagation();
         
         try {
             const res = await authApi().post(endpoints.createFavorite, { 

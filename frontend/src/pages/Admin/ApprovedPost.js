@@ -3,7 +3,7 @@ import API, { authApi, endpoints } from '../../API';
 import { MdDelete } from 'react-icons/md';
 import { RiEditFill } from 'react-icons/ri';
 import { BiSearch, BiDotsHorizontalRounded } from 'react-icons/bi';
-import { notifySuccess } from '../../components/ToastManager';
+import { notifySuccess, notifyError } from '../../components/ToastManager';
 import AdminDetailPost from './AdminDetailPost';
 import PaginationUser from '../../components/PaginationUser';
 
@@ -69,18 +69,37 @@ const ApprovedPost = ({ post }) => {
             return;
         }
 
-        const confirmApprove = window.confirm('Duyệt các bài đăng đã chọn. Bạn chắc chắn chứ?');
+        // Filter out unpaid posts from selection
+        const paidPosts = Array.from(selectedPosts).filter(postId => 
+            posts.find(post => post.id === postId)?.is_paid
+        );
+
+        if (paidPosts.length === 0) {
+            alert('Không có bài đăng nào đủ điều kiện để duyệt. Vui lòng chọn bài đăng đã thanh toán.');
+            return;
+        }
+
+        const unpaidCount = selectedPosts.size - paidPosts.length;
+        const confirmMessage = unpaidCount > 0 
+            ? `Có ${unpaidCount} bài đăng chưa thanh toán sẽ không được duyệt.\nBạn có muốn duyệt ${paidPosts.length} bài đăng đã thanh toán không?`
+            : `Bạn có chắc chắn muốn duyệt ${paidPosts.length} bài đăng đã chọn không?`;
+
+        const confirmApprove = window.confirm(confirmMessage);
 
         if (confirmApprove) {
             try {
-                for (const postId of selectedPosts) {
+                let successCount = 0;
+                for (const postId of paidPosts) {
                     await authApi().patch(endpoints.updatepost(postId), { is_approved: true });
+                    successCount++;
                 }
-                notifySuccess('Đã duyệt tất cả bài đăng đã chọn');
+                
+                notifySuccess(`Đã duyệt thành công ${successCount} bài đăng`);
                 fetchApprovedPosts();
                 setSelectedPosts(new Set());
             } catch (error) {
                 console.error('Failed to approve posts:', error);
+                notifyError('Có lỗi xảy ra khi duyệt bài đăng');
             }
         }
     };

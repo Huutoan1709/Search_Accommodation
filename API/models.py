@@ -323,7 +323,7 @@ class SearchHistory(BaseModel):
 class UserPreference(BaseModel):
     user = models.ForeignKey('User', on_delete=models.CASCADE)
     feature_vector = models.JSONField()
-    vector_size = models.IntegerField(default=0)  # Thêm field này
+    vector_size = models.IntegerField(default=0)
     last_updated = models.DateTimeField(auto_now=True)
 
     class Meta:

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import API, { endpoints } from '../../../API';
 import { useNavigate } from 'react-router-dom';
@@ -9,27 +9,33 @@ import Footer from '../../DefaultLayout/footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import { jwtDecode } from 'jwt-decode';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 function Login() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(null);
+    const [captchaValue, setCaptchaValue] = useState(null);
+    const recaptchaRef = useRef();
     const navigate = useNavigate();
     const { login } = useContext(MyContext);
 
     const handleLogin = async (event) => {
         event.preventDefault();
 
+        if (!captchaValue) {
+            notifyWarning('Vui lòng xác thực CAPTCHA');
+            return;
+        }
+
         const formData = new FormData();
         formData.append('username', username);
         formData.append('password', password);
-        formData.append('client_id', '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0');
-        formData.append(
-            'client_secret',
-            'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0',
-        );
+        formData.append('client_id', process.env.REACT_APP_OAUTH_CLIENT_ID);
+        formData.append('client_secret', process.env.REACT_APP_OAUTH_CLIENT_SECRET);
         formData.append('grant_type', 'password');
+        formData.append('recaptcha', captchaValue);
 
         try {
             const response = await API.post(endpoints['login'], formData, {
@@ -62,6 +68,8 @@ function Login() {
         } catch (err) {
             notifyWarning('Vui lòng kiểm tra thông tin');
             setError('Tên đăng nhập hoặc mật khẩu không đúng.');
+            recaptchaRef.current.reset();
+            setCaptchaValue(null);
         }
     };
 
@@ -79,7 +87,7 @@ function Login() {
                 first_name: decodedToken.given_name,
                 last_name: decodedToken.family_name,
                 avatar: decodedToken.picture,
-                client_id: '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0',
+                client_id: process.env.REACT_APP_OAUTH_CLIENT_ID,
             };
             console.log('Data being sent to backend:', googleData); // Log data gửi đến backend
 
@@ -127,12 +135,16 @@ function Login() {
         }
     };
 
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
+
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
     return (
-        <GoogleOAuthProvider clientId="523523903240-ukrka3u9ki6i991qcc0nb04st1pjpmhl.apps.googleusercontent.com">
+        <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
             <div>
                 <Header />
                 <div className="flex justify-center items-center bg-gray-100">
@@ -167,6 +179,17 @@ function Login() {
                                     <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} size={30} />
                                 </span>
                             </div>
+
+                            {/* Add ReCAPTCHA before submit button */}
+                            <div className="flex justify-center my-4">
+                                <ReCAPTCHA
+                                    ref={recaptchaRef}
+                                    sitekey={process.env.REACT_APP_RECAPTCHA_SITE_KEY}
+                                    onChange={handleCaptchaChange}
+                                    theme="light"
+                                />
+                            </div>
+
                             <button
                                 type="submit"
                                 className="w-full py-3 text-2xl font-semibold text-white bg-red-500 rounded-md shadow hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
@@ -176,7 +199,7 @@ function Login() {
                         </form>
 
                         {/* Google Login Button */}
-                        <div className="mt-6 text-lg text-center">
+                        <div className="mt-6 text-lg text-center flex flex-col items-center">
                             <GoogleLogin
                                 onSuccess={handleGoogleLoginSuccess}
                                 onError={() => notifyWarning('Đăng nhập Google thất bại')}

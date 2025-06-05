@@ -15,6 +15,8 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from .models import PasswordResetOTP
 from django.conf import settings
+import requests
+from django.conf import settings
 from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count, Avg, StdDev, Max, Case, When
@@ -31,7 +33,6 @@ from oauth2_provider.models import Application, AccessToken, RefreshToken
 from django.utils import timezone
 from oauthlib.common import generate_token
 import random
-import string
 
 # from django_filters.rest_framework import DjangoFilterBackend
 class UpdatePartialAPIView(generics.UpdateAPIView):
@@ -1056,15 +1057,7 @@ class RecommendationViewSet(viewsets.ViewSet):
         serializer = DetailPostSerializer(recommended_posts, many=True)
         return response.Response(serializer.data)
 
-    # def _get_default_recommendations(self):
-    #     """Trả về các bài đăng mới nhất khi không có đề xuất phù hợp"""
-    #     default_posts = (
-    #         Post.objects
-    #         .filter(is_active=True, is_approved=True, is_block=False)
-    #         .order_by('-created_at')
-    #     )
-    #     serializer = DetailPostSerializer(default_posts, many=True)
-    #     return response.Response(serializer.data)
+   
 
 import hmac
 import hashlib
@@ -1307,3 +1300,13 @@ class AuthViewSet(ViewSet):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
+
+def verify_recaptcha(recaptcha_response):
+    secret_key = settings.RECAPTCHA_SECRET_KEY
+    verify_url = 'https://www.google.com/recaptcha/api/siteverify'
+    data = {
+        'secret': secret_key,
+        'response': recaptcha_response
+    }
+    response = requests.post(verify_url, data=data)
+    return response.json()['success']
