@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
-echo "Building the project..."
+echo "Đang build project..."
+python -m pip install --upgrade pip
+
+# Cài đặt các dependencies
 pip install -r requirements.txt
 
-# Collect static files
+# Thu thập file tĩnh
 python manage.py collectstatic --noinput --clear
