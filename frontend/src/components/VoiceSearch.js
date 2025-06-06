@@ -156,7 +156,14 @@ const VoiceSearch = ({ onVoiceResult }) => {
                     }
                 },
             },
-            // Quận/Huyện/Thị xã - đặt pattern này trước pattern xã
+            // Quận/Huyện (số)
+            {
+                regex: /(?:quận|quan)\s+(\d+)(?:,|\s|$)/i,
+                handler: (matches) => {
+                    const districtNumber = matches[1];
+                    result.location.district = `Quận ${districtNumber}`;
+                }
+            },
             {
                 regex: /(?:quận|quan|huyện|huyen|thị xã|thi xa)\s+([^,\d]+)(?:,|\s|$)/i,
                 handler: (matches) => {
@@ -179,7 +186,9 @@ const VoiceSearch = ({ onVoiceResult }) => {
 
                     result.location.district = `${prefix} ${normalizedName}`;
                 },
+                
             },
+            
 
             // Phường/Xã/Thị trấn - đặt pattern này sau pattern thị xã
             {
