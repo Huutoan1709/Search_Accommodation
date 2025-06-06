@@ -1,11 +1,12 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hcir*ovge^5yd#1kijji1tf44@!zaa@c$l1w87lz7_1x4edos&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['*']
+DEBUG = False
+ALLOWED_HOSTS = ['*', '.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -40,10 +41,9 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Search_accommodation.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://localhost:3001",
+    "https://your-frontend-domain.vercel.app"  # Thêm domain frontend của bạn
 ]
 
-import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -63,7 +63,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / "API/static",
 ]
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 WSGI_APPLICATION = 'Search_accommodation.wsgi.application'
 
 # Database
@@ -77,7 +77,8 @@ DATABASES = {
         'NAME': 'accommodationdb',
         'USER': 'root',
         'PASSWORD': 'Huutoan123@',
-        'HOST': ''  # mặc định localhost
+        'HOST': 'localhost',
+        'PORT': '3306',
     }
 }
 
