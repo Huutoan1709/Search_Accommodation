@@ -75,23 +75,19 @@ WSGI_APPLICATION = 'Search_accommodation.wsgi.application'
 import pymysql
 
 pymysql.install_as_MySQLdb()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('MYSQL_DATABASE', 'accommodationdb'),
-        'USER': os.getenv('MYSQL_USER', 'root'),
-        'PASSWORD': os.getenv('MYSQL_PASSWORD', 'Huutoan123@'),
-        'HOST': os.getenv('MYSQL_HOST', 'localhost'),
-        'PORT': os.getenv('MYSQL_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-            'use_unicode': True,
+        'NAME': 'accommodationdb',
+        'USER': 'root',
+        'PASSWORD': 'Huutoan123@',
+        'HOST': 'localhost',
+        'PORT': '3306',
         }
     }
-}
 
-# Password validation
+# Password validati
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
