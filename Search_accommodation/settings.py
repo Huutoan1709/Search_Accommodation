@@ -41,8 +41,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'Search_accommodation.urls'
 CORS_ALLOWED_ORIGINS = [
+    "https://search-accommodation.vercel.app",
     "http://localhost:3000",
-    "https://search-accommodation.vercel.app/"  # Thêm domain frontend của bạn
+      # Thêm domain frontend của bạn
 ]
 
 TEMPLATES = [
