@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-hcir*ovge^5yd#1kijji1tf44@!zaa@c$l1w87lz7_1x4edos&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*', '.onrender.com']
 
 INSTALLED_APPS = [
@@ -79,13 +79,19 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'accommodationdb',
+        'NAME': 'railway',
         'USER': 'root',
-        'PASSWORD': 'Huutoan123@',
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'PASSWORD': 'zcuvuxnxumKtuWCmeBHAKlYekZyuQIRl',
+        'HOST': 'shinkansen.proxy.rlwy.net',
+        'PORT': '36871',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            'charset': 'utf8mb4',
+            'use_unicode': True,
+            'autocommit': True,
         }
     }
+}
 
 # Password validati
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -178,6 +184,6 @@ VNPAY_RETURN_URL = "http://localhost:3000/payment/vnpay-return"
 RECAPTCHA_SECRET_KEY = '6Lf8S1YrAAAAADWdTOYdaXMH1a86b165PyKj2JVV'
 
 
-CLIENT_ID = '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0'
-CLIENT_SECRET = 'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0'
+# CLIENT_ID = '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0'
+# CLIENT_SECRET = 'NwUGjlwU12WU7wxyWjv6tbbEK7oV8dl3CHoXNRIBruwT3cPZc8lpc5RJzJhBCdfKQKpy2F6xUzIxlVgb9m0gBphmVHLSupWIFTBkdWU6R8hNrJNOacOA6tEH220Hk9i0'
 
