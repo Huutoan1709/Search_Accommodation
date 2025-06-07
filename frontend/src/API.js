@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const HOST = 'http://127.0.0.1:8000';
+const HOST = 'https://search-accommodation.onrender.com';
 
 export const endpoints = {
     post: '/post/',
@@ -46,7 +46,6 @@ export const endpoints = {
     deleteUser: (userId) => `/user/${userId}/`,
     detailuseradmin: (userId) => `/user/${userId}/`,
     updateUser: (userId) => `/user/${userId}/`,
-    deleteUser: (userId) => `/user/${userId}/`,
     searchhistory: '/search-history/',
     recommendedrooms: '/recommendations/recommended-rooms/',
     PhoneOTPReset: '/phone-reset-password/',
