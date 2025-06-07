@@ -42,7 +42,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'Search_accommodation.urls'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://your-frontend-domain.vercel.app"  # Thêm domain frontend của bạn
+    "https://search-accommodation.vercel.app/"  # Thêm domain frontend của bạn
 ]
 
 TEMPLATES = [
@@ -177,7 +177,7 @@ TWILIO_PHONE_NUMBER = '+18382312114'
 VNPAY_TMN_CODE = "WGJBLJR3"  
 VNPAY_HASH_SECRET = "U3LUJWFRKPKVXYIM0R1V5OF8R6TLVCZ4" 
 VNPAY_PAYMENT_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
-VNPAY_RETURN_URL = "http://localhost:3000/payment/vnpay-return"
+VNPAY_RETURN_URL = "https://search-accommodation.vercel.app/payment/vnpay-return"
 
 
 
