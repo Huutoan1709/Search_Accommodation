@@ -31,7 +31,8 @@ function Register() {
             .string()
             .matches(
                 /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$/,
-                'Mật khẩu tối thiểu phải chứa 8 ký tự, có ít nhất 1 ký tự thường, hoa và số',
+                'Mật khẩu tối thiểu phải chứa 8 ký tự, có ít nhất 1 ký tự thường, hoa và số, không chứa ký tự đặc biệt',
+                
             )
             .required('Mật khẩu là bắt buộc'),
         confirmPassword: yup
@@ -101,7 +102,10 @@ function Register() {
                     <form onSubmit={handleRegister} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Họ</label>
+                            <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Họ</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                                 <input
                                     type="text"
                                     placeholder="Nhập họ"
@@ -112,7 +116,10 @@ function Register() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Tên</label>
+                            <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Tên</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                                 <input
                                     type="text"
                                     placeholder="Nhập tên"
@@ -125,7 +132,10 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tên đăng nhập</label>
+                            <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Tên đăng nhập</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                             <input
                                 type="text"
                                 placeholder="Nhập tên đăng nhập"
@@ -137,7 +147,10 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Email</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                             <input
                                 type="email"
                                 placeholder="example@email.com"
@@ -149,7 +162,10 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                        <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Số điện thoại</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                             <input
                                 type="tel"
                                 placeholder="0123456789"
@@ -161,7 +177,10 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Mật khẩu</label>
+                        <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Mật khẩu</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -182,7 +201,10 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Xác nhận mật khẩu</label>
+                        <div className='flex items-center mb-1'>
+                                <label className="block text-xl font-medium text-gray-700 mb-1">Xác nhận mật khẩu</label>
+                                <label className="block text-xl text-red-700 font-bold mb-1">(*)</label>
+                            </div>
                             <div className="relative">
                                 <input
                                     type={showPassword ? 'text' : 'password'}
@@ -196,7 +218,7 @@ function Register() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Bạn là:</label>
+                            <label className="block text-xl font-medium text-gray-700 mb-2">Bạn là:</label>
                             <div className="flex gap-4">
                                 <label className="flex items-center">
                                     <input

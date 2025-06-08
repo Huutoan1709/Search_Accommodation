@@ -6,11 +6,11 @@ import Header from '../DefaultLayout/Header';
 import ListPost from '../Post/ListPost';
 import Sidebar from '../DefaultLayout/Sidebar';
 import Footer from '../DefaultLayout/footer';
-import binhduong from '../../assets/binhduong.jpg';
-import hanoi from '../../assets/hanoi.jpg';
-import binhphuoc from '../../assets/binhphuoc.jpg';
-import hochiminh from '../../assets/ho-chi-minh.jpg';
-import danang from '../../assets/danang.jpg';
+import binhduong from '../../assets/binhduong.png';
+import hanoi from '../../assets/hanoi.png';
+import binhphuoc from '../../assets/binhphuoc.png';
+import hochiminh from '../../assets/ho-chi-minh.png';
+import danang from '../../assets/danang.png';
 import Search from '../DefaultLayout/Search';
 import BackToTop from '../../components/BackToTop';
 import ChatBot from '../../components/ChatBot';
@@ -98,8 +98,8 @@ const Home = ({ room_type = '' }) => {
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 mb-8">
                     <div className="w-[1024px] mx-auto text-center">
                         <h1 className="text-4xl font-bold mb-4">
-                            TOA_ACOMMODATION
-                        </h1>   
+                                TOA_ACOMMODATION
+                        </h1>
                         <p className="text-xl opacity-90">
                             Tìm phòng trọ nhanh chóng, thuận tiện và hoàn toàn miễn phí
                         </p>

@@ -100,8 +100,8 @@ const Header = () => {
     return (
         <header className="header">
                  <div className="header-logo flex items-center gap-2 cursor-pointer" onClick={handleHomeClick}>
-                <img src={Logomotel} alt="Logo" className="w-12 h-12 object-cover rounded-md shadow-lg" />
-                <span className="font-bold text-2xl tracking-wide text-gray-800">TOA_ACCOMMODATION</span>
+                <img src={Logomotel} alt="Logo" className="w-15 h-15 object-cover rounded-full shadow-lg" />
+                <span className="font-bold text-2xl tracking-wide text-gray-800">TO_ACCOMMODATION</span>
             </div>
             <nav className="header-nav">
                 <span className={`cursor-pointer ${isActive('/')}`} onClick={handleHomeClick}>

@@ -4,6 +4,202 @@ import { FaCommentDots, FaTimes, FaPaperPlane } from 'react-icons/fa';
 import RoomSearchResult from './RoomSearchResult';
 import { endpoints } from '../API';
 
+// Thêm constant cho timeout
+const TIMEOUT_DURATION = 30000; // 30 seconds
+
+// Cập nhật axios configuration
+const API = axios.create({
+    timeout: TIMEOUT_DURATION,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+const specialLocations = {
+    // Thành phố trực thuộc Trung ương
+    hcm: 'Thành phố Hồ Chí Minh',
+    'sài gòn': 'Thành phố Hồ Chí Minh',
+    sg: 'Thành phố Hồ Chí Minh',
+    'hà nội': 'Thành phố Hà Nội',
+    hn: 'Thành phố Hà Nội',
+    'hải phòng': 'Thành phố Hải Phòng',
+    hp: 'Thành phố Hải Phòng',
+    'đà nẵng': 'Thành phố Đà Nẵng',
+    dn: 'Thành phố Đà Nẵng',
+    'cần thơ': 'Thành phố Cần Thơ',
+    ct: 'Thành phố Cần Thơ',
+
+    // Các tỉnh miền Bắc
+    'hà giang': 'Tỉnh Hà Giang',
+    'cao bằng': 'Tỉnh Cao Bằng',
+    'bắc kạn': 'Tỉnh Bắc Kạn',
+    'tuyên quang': 'Tỉnh Tuyên Quang',
+    'lào cai': 'Tỉnh Lào Cai',
+    'điện biên': 'Tỉnh Điện Biên',
+    'lai châu': 'Tỉnh Lai Châu',
+    'sơn la': 'Tỉnh Sơn La',
+    'yên bái': 'Tỉnh Yên Bái',
+    'hoà bình': 'Tỉnh Hoà Bình',
+    'thái nguyên': 'Tỉnh Thái Nguyên',
+    'lạng sơn': 'Tỉnh Lạng Sơn',
+    'quảng ninh': 'Tỉnh Quảng Ninh',
+    'bắc giang': 'Tỉnh Bắc Giang',
+    'phú thọ': 'Tỉnh Phú Thọ',
+    'vĩnh phúc': 'Tỉnh Vĩnh Phúc',
+    'bắc ninh': 'Tỉnh Bắc Ninh',
+    'hải dương': 'Tỉnh Hải Dương',
+    'hưng yên': 'Tỉnh Hưng Yên',
+    'thái bình': 'Tỉnh Thái Bình',
+    'hà nam': 'Tỉnh Hà Nam',
+    'nam định': 'Tỉnh Nam Định',
+    'ninh bình': 'Tỉnh Ninh Bình',
+
+    // Các tỉnh miền Trung
+    'thanh hoá': 'Tỉnh Thanh Hoá',
+    'nghệ an': 'Tỉnh Nghệ An',
+    'hà tĩnh': 'Tỉnh Hà Tĩnh',
+    'quảng bình': 'Tỉnh Quảng Bình',
+    'quảng trị': 'Tỉnh Quảng Trị',
+    'thừa thiên huế': 'Tỉnh Thừa Thiên Huế',
+    'quảng nam': 'Tỉnh Quảng Nam',
+    'quảng ngãi': 'Tỉnh Quảng Ngãi',
+    'bình định': 'Tỉnh Bình Định',
+    'phú yên': 'Tỉnh Phú Yên',
+    'khánh hoà': 'Tỉnh Khánh Hoà',
+    'ninh thuận': 'Tỉnh Ninh Thuận',
+    'bình thuận': 'Tỉnh Bình Thuận',
+    'kon tum': 'Tỉnh Kon Tum',
+    'gia lai': 'Tỉnh Gia Lai',
+    'đắk lắk': 'Tỉnh Đắk Lắk',
+    'đắk nông': 'Tỉnh Đắk Nông',
+    'lâm đồng': 'Tỉnh Lâm Đồng',
+
+    // Các tỉnh miền Nam
+    'bình phước': 'Tỉnh Bình Phước',
+    'tây ninh': 'Tỉnh Tây Ninh',
+    'bình dương': 'Tỉnh Bình Dương',
+    'đồng nai': 'Tỉnh Đồng Nai',
+    'bà rịa vũng tàu': 'Tỉnh Bà Rịa - Vũng Tàu',
+    'vũng tàu': 'Tỉnh Bà Rịa - Vũng Tàu',
+    'long an': 'Tỉnh Long An',
+    'tiền giang': 'Tỉnh Tiền Giang',
+    'bến tre': 'Tỉnh Bến Tre',
+    'trà vinh': 'Tỉnh Trà Vinh',
+    'vĩnh long': 'Tỉnh Vĩnh Long',
+    'đồng tháp': 'Tỉnh Đồng Tháp',
+    'an giang': 'Tỉnh An Giang',
+    'kiên giang': 'Tỉnh Kiên Giang',
+    'hậu giang': 'Tỉnh Hậu Giang',
+    'sóc trăng': 'Tỉnh Sóc Trăng',
+    'bạc liêu': 'Tỉnh Bạc Liêu',
+    'cà mau': 'Tỉnh Cà Mau',
+};
+
+const specialDistricts = {
+    // Miền Bắc
+    'hà giang': 'Thành phố Hà Giang',
+    'cao bằng': 'Thành phố Cao Bằng',
+    'bắc kạn': 'Thành phố Bắc Kạn',
+    'tuyên quang': 'Thành phố Tuyên Quang',
+    'lào cai': 'Thành phố Lào Cai',
+    'điện biên phủ': 'Thành phố Điện Biên Phủ',
+    'lai châu': 'Thành phố Lai Châu',
+    'sơn la': 'Thành phố Sơn La',
+    'yên bái': 'Thành phố Yên Bái',
+    'hoà bình': 'Thành phố Hòa Bình',
+    'thái nguyên': 'Thành phố Thái Nguyên',
+    'lạng sơn': 'Thành phố Lạng Sơn',
+    'hạ long': 'Thành phố Hạ Long',
+    'cẩm phả': 'Thành phố Cẩm Phả',
+    'uông bí': 'Thành phố Uông Bí',
+    'móng cái': 'Thành phố Móng Cái',
+    'bắc giang': 'Thành phố Bắc Giang',
+    'việt trì': 'Thành phố Việt Trì',
+    'vĩnh yên': 'Thành phố Vĩnh Yên',
+    'phúc yên': 'Thành phố Phúc Yên',
+    'bắc ninh': 'Thành phố Bắc Ninh',
+    'từ sơn': 'Thành phố Từ Sơn',
+    'hải dương': 'Thành phố Hải Dương',
+    'chí linh': 'Thành phố Chí Linh',
+    'hưng yên': 'Thành phố Hưng Yên',
+    'thái bình': 'Thành phố Thái Bình',
+    'phủ lý': 'Thành phố Phủ Lý',
+    'nam định': 'Thành phố Nam Định',
+    'ninh bình': 'Thành phố Ninh Bình',
+    'tam điệp': 'Thành phố Tam Điệp',
+
+    // Miền Trung
+    'thanh hóa': 'Thành phố Thanh Hóa',
+    'sầm sơn': 'Thành phố Sầm Sơn',
+    vinh: 'Thành phố Vinh',
+    'hoàng mai': 'Thành phố Hoàng Mai',
+    'cửa lò': 'Thành phố Cửa Lò',
+    'hà tĩnh': 'Thành phố Hà Tĩnh',
+    'hồng lĩnh': 'Thành phố Hồng Lĩnh',
+    'đồng hới': 'Thành phố Đồng Hới',
+    'đông hà': 'Thành phố Đông Hà',
+    'quảng trị': 'Thành phố Quảng Trị',
+    huế: 'Thành phố Huế',
+    'tam kỳ': 'Thành phố Tam Kỳ',
+    'hội an': 'Thành phố Hội An',
+    'quảng ngãi': 'Thành phố Quảng Ngãi',
+    'quy nhơn': 'Thành phố Quy Nhơn',
+    'tuy hoà': 'Thành phố Tuy Hòa',
+    'nha trang': 'Thành phố Nha Trang',
+    'cam ranh': 'Thành phố Cam Ranh',
+    'phan rang': 'Thành phố Phan Rang-Tháp Chàm',
+    'phan thiết': 'Thành phố Phan Thiết',
+    'la gi': 'Thành phố La Gi',
+
+    // Tây Nguyên
+    'kon tum': 'Thành phố Kon Tum',
+    pleiku: 'Thành phố Pleiku',
+    'an khê': 'Thành phố An Khê',
+    'ayun pa': 'Thành phố Ayun Pa',
+    'buôn ma thuột': 'Thành phố Buôn Ma Thuột',
+    'buôn hồ': 'Thành phố Buôn Hồ',
+    'gia nghĩa': 'Thành phố Gia Nghĩa',
+    'đà lạt': 'Thành phố Đà Lạt',
+    'bảo lộc': 'Thành phố Bảo Lộc',
+
+    // Miền Nam
+    'đồng xoài': 'Thành phố Đồng Xoài',
+    'bình long': 'Thành phố Bình Long',
+    'phước long': 'Thành phố Phước Long',
+    'tây ninh': 'Thành phố Tây Ninh',
+    'thủ dầu một': 'Thành phố Thủ Dầu Một',
+    'dĩ an': 'Thành phố Dĩ An',
+    'thuận an': 'Thành phố Thuận An',
+    'tân uyên': 'Thành phố Tân Uyên',
+    'biên hoà': 'Thành phố Biên Hòa',
+    'long khánh': 'Thành phố Long Khánh',
+    'vũng tàu': 'Thành phố Vũng Tàu',
+    'bà rịa': 'Thành phố Bà Rịa',
+    'tân an': 'Thành phố Tân An',
+    'kiến tường': 'Thành phố Kiến Tường',
+    'mỹ tho': 'Thành phố Mỹ Tho',
+    'gò công': 'Thành phố Gò Công',
+    'bến tre': 'Thành phố Bến Tre',
+    'trà vinh': 'Thành phố Trà Vinh',
+    'vĩnh long': 'Thành phố Vĩnh Long',
+    'bình minh': 'Thành phố Bình Minh',
+    'cao lãnh': 'Thành phố Cao Lãnh',
+    'sa đéc': 'Thành phố Sa Đéc',
+    'hồng ngự': 'Thành phố Hồng Ngự',
+    'long xuyên': 'Thành phố Long Xuyên',
+    'châu đốc': 'Thành phố Châu Đốc',
+    'rạch giá': 'Thành phố Rạch Giá',
+    'hà tiên': 'Thành phố Hà Tiên',
+    'vị thanh': 'Thành phố Vị Thanh',
+    'ngã bảy': 'Thành phố Ngã Bảy',
+    'sóc trăng': 'Thành phố Sóc Trăng',
+    'bạc liêu': 'Thành phố Bạc Liêu',
+    'cà mau': 'Thành phố Cà Mau',
+
+    // Thành phố thuộc thành phố trực thuộc trung ương
+    'thủ đức': 'Thành phố Thủ Đức',
+};
+
 const ChatBot = () => {
     const [question, setQuestion] = useState('');
     const [isOpen, setIsOpen] = useState(false);
@@ -14,10 +210,11 @@ const ChatBot = () => {
             timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
         }
     ]);
+    const [isLoading, setIsLoading] = useState(false);
 
     const API_KEY = 'AIzaSyCBPja5XKspahQL_sh7nWDOEng2dEEwnVM';
     const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
-    const BACKEND_API = `http://127.0.0.1:8000${endpoints.post}`; 
+    const BACKEND_API = `https://search-accommodation.onrender.com${endpoints.post}`; 
 
     const extractSearchParams = (text) => {
         const params = {
@@ -40,7 +237,7 @@ const ChatBot = () => {
 
         const textLower = text.toLowerCase().trim();
 
-        // 1. Xử lý loại phòng
+        
         if (textLower.includes('phòng trọ') || textLower.includes('nhà trọ')) 
             params.room_type = 'Phòng trọ';
         else if (textLower.includes('nhà nguyên căn')) 
@@ -50,9 +247,9 @@ const ChatBot = () => {
         else if (textLower.includes('chung cư')) 
             params.room_type = 'Chung cư';
 
-        // 2. Xử lý giá cả
+       
         const pricePatterns = [
-            // Từ X đến Y triệu
+            
             {
                 regex: /(?:từ|tu|trên|tren|hơn|hon)\s*(\d+)\s*(?:triệu|tr)?\s*(?:đến|tới|den|toi)\s*(\d+)\s*triệu/,
                 handler: (matches) => {
@@ -60,21 +257,21 @@ const ChatBot = () => {
                     params.price.max = parseInt(matches[2]);
                 }
             },
-            // Dưới/Không quá X triệu
+            
             {
                 regex: /(?:dưới|duoi|thấp hơn|thap hon|không quá|khong qua)\s*(\d+)\s*triệu/,
                 handler: (matches) => {
                     params.price.max = parseInt(matches[1]);
                 }
             },
-            // Trên/Từ X triệu
+           
             {
                 regex: /(?:từ|từ|trên|tren|hơn|hon|lớn hơn|lon hon)\s*(\d+)\s*triệu/,
                 handler: (matches) => {
                     params.price.min = parseInt(matches[1]) ;
                 }
             },
-            // Khoảng X triệu
+            
             {
                 regex: /(?:khoảng|khoang|giá|gia)\s*(\d+)\s*triệu/,
                 handler: (matches) => {
@@ -85,9 +282,9 @@ const ChatBot = () => {
             }
         ];
 
-        // 3. Xử lý diện tích
+        
         const areaPatterns = [
-            // Từ X đến Y mét vuông
+            
             {
                 regex: /(?:từ|tu|trên|tren)\s*(\d+)\s*(?:m2|m²|mét vuông)?\s*(?:đến|tới|den|toi)\s*(\d+)\s*(?:m2|m²|mét vuông)?/,
                 handler: (matches) => {
@@ -95,21 +292,21 @@ const ChatBot = () => {
                     params.area.max = parseInt(matches[2]);
                 }
             },
-            // Dưới X mét vuông
+            
             {
                 regex: /(?:dưới|duoi|thấp hơn|thap hon|không quá|khong qua)\s*(\d+)\s*(?:m2|m²|mét vuông)/,
                 handler: (matches) => {
                     params.area.max = parseInt(matches[1]);
                 }
             },
-            // Trên X mét vuông
+            
             {
                 regex: /(?:trên|tren|hơn|hon|lớn hơn|lon hon)\s*(\d+)\s*(?:m2|m²|mét vuông)/,
                 handler: (matches) => {
                     params.area.min = parseInt(matches[1]);
                 }
             },
-            // Khoảng X mét vuông
+            
             {
                 regex: /khoảng\s*(\d+)\s*(?:m2|m²|mét vuông)/,
                 handler: (matches) => {
@@ -120,53 +317,87 @@ const ChatBot = () => {
             }
         ];
 
-        // 4. Xử lý địa điểm
+        
         const locationPatterns = [
-            // Thành phố/Tỉnh
+            // Pattern cho thành phố/tỉnh
             {
-                regex: /(?:tại|ở|trong)?\s*((?:thành phố|tp|tỉnh)\s+[^,\d]+)(?:,|\s|$)/i,
+                regex: /(?:tại|ở|trong|o)?\s*((?:thành phố|tp|tỉnh)\s+[^,\d]+)(?:,|\s|$)/i,
                 handler: (matches) => {
-                    const cityName = matches[1].trim();
-                    if (cityName.match(/(?:tp|thành phố)\s*hồ?\s*chí?\s*minh/i)) {
+                    const cityName = matches[1].trim().toLowerCase();
+                    // Chuẩn hóa tên thành phố/tỉnh
+                    if (cityName.match(/(?:tp|thành phố|thanh pho)\s*hồ?\s*chí?\s*minh/i)) {
                         params.location.city = 'Thành phố Hồ Chí Minh';
+                        return;
+                    }
+                    Object.entries(specialLocations).forEach(([key, value]) => {
+                        if (cityName.includes(key)) {
+                            params.location.city = value;
+                        }
+                    });
+                }
+            },
+
+            // Pattern cho quận/huyện/thành phố thuộc tỉnh
+            {
+                regex: /(?:quận|quan|huyện|huyen|thành phố|tp)\s+([^,\d]+)(?:,|\s|$)/i,
+                handler: (matches) => {
+                    const districtName = matches[1].trim().toLowerCase();
+
+                    // Kiểm tra các thành phố thuộc tỉnh trước
+                    let found = false;
+                    Object.entries(specialDistricts).forEach(([key, value]) => {
+                        if (districtName.includes(key)) {
+                            params.location.district = value;
+                            found = true;
+                        }
+                    });
+
+                    // Nếu không phải thành phố thuộc tỉnh, xử lý như quận/huyện bình thường
+                    if (!found) {
+                        let prefix = '';
+                        if (matches[0].toLowerCase().includes('thành phố') || matches[0].toLowerCase().includes('tp')) {
+                            prefix = 'Thành phố';
+                        } else if (matches[0].toLowerCase().includes('quận') || matches[0].toLowerCase().includes('quan')) {
+                            prefix = 'Quận';
+                        } else if (matches[0].toLowerCase().includes('huyện') || matches[0].toLowerCase().includes('huyen')) {
+                            prefix = 'Huyện';
+                        }
+                        const cleanedName = cleanLocationName(districtName);
+                        params.location.district = `${prefix} ${capitalizeFirstLetter(cleanedName)}`;
                     }
                 }
             },
-            // Quận/Huyện (số)
-            {
-                regex: /(?:quận|quan)\s+(\d+)(?:,|\s|$)/i,
-                handler: (matches) => {
-                    const districtNumber = matches[1];
-                    params.location.district = `Quận ${districtNumber}`;
-                }
-            },
-            // Quận/Huyện (chữ)
-            {
-                regex: /(?:quận|quan|huyện|huyen|thị xã|thi xa)\s+([^,\d]+)(?:,|\s|$)/i,
-                handler: (matches) => {
-                    let districtName = matches[1].trim();
-                    districtName = cleanLocationName(districtName);
-                    const prefix = matches[0].toLowerCase().includes('thị xã') ? 'Thị xã' :
-                                 matches[0].toLowerCase().includes('quận') ? 'Quận' : 'Huyện';
-                    params.location.district = `${prefix} ${capitalizeFirstLetter(districtName)}`;
-                }
-            },
-            // Phường/Xã
+
+            // Pattern cho phường/xã/thị trấn
             {
                 regex: /(?:phường|phuong|xã|xa|thị trấn|thi tran)\s+([^,\d]+)(?:,|\s|$)/i,
                 handler: (matches) => {
-                    if (!textLower.includes('thị xã')) {
+                    if (!text.toLowerCase().includes('thị xã') && !text.toLowerCase().includes('thi xa')) {
                         let wardName = matches[1].trim();
                         wardName = cleanLocationName(wardName);
-                        const prefix = matches[0].toLowerCase().includes('phường') ? 'Phường' :
-                                    matches[0].toLowerCase().includes('thị trấn') ? 'Thị trấn' : 'Xã';
+                        let prefix = '';
+                        if (matches[0].toLowerCase().includes('phường') || matches[0].toLowerCase().includes('phuong')) {
+                            prefix = 'Phường';
+                        } else if (matches[0].toLowerCase().includes('thị trấn') || matches[0].toLowerCase().includes('thi tran')) {
+                            prefix = 'Thị trấn';
+                        } else if (matches[0].toLowerCase().includes('xã') || matches[0].toLowerCase().includes('xa')) {
+                            prefix = 'Xã';
+                        }
                         params.location.ward = `${prefix} ${capitalizeFirstLetter(wardName)}`;
                     }
                 }
             }
         ];
 
-        // 5. Xử lý tiện ích
+        // Special cases for district numbers
+        {
+            const districtNumberMatch = text.toLowerCase().match(/(?:quận|quan)\s+(\d+)(?:,|\s|$)/i);
+            if (districtNumberMatch) {
+                params.location.district = `Quận ${districtNumberMatch[1]}`;
+            }
+        }
+
+      
         const amenities = [
             'máy lạnh', 'wifi', 'tủ lạnh', 'máy giặt', 'ban công', 
             'camera', 'bảo vệ', 'thang máy', 'giường', 'tủ quần áo',
@@ -179,7 +410,7 @@ const ChatBot = () => {
             }
         });
 
-        // Áp dụng tất cả patterns
+       
         [...pricePatterns, ...areaPatterns, ...locationPatterns].forEach(pattern => {
             const matches = textLower.match(pattern.regex);
             if (matches) {
@@ -187,7 +418,7 @@ const ChatBot = () => {
             }
         });
 
-        // Chuyển đổi kết quả sang format API
+        
         const apiParams = {};
         if (params.room_type) apiParams.room_type = params.room_type;
         if (params.location.city) apiParams.city = params.location.city;
@@ -221,8 +452,9 @@ const ChatBot = () => {
     };
 
     const handleSubmit = async () => {
-        if (!question.trim()) return;
+        if (!question.trim() || isLoading) return;
 
+        setIsLoading(true);
         const newMessages = [...messages, {
             type: 'question',
             text: question,
@@ -232,9 +464,13 @@ const ChatBot = () => {
 
         const params = extractSearchParams(question);
 
-        if (params) {
-            try {
-                const res = await axios.get(BACKEND_API, { params });
+        try {
+            if (params) {
+                const res = await API.get(BACKEND_API, { 
+                    params,
+                    timeout: TIMEOUT_DURATION,
+                    timeoutErrorMessage: 'Request timed out'
+                });
                 if (res.data.results && res.data.results.length > 0) {
                     setMessages([...newMessages, {
                         type: 'room_results',
@@ -249,18 +485,12 @@ const ChatBot = () => {
                         timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                     }]);
                 }
-            } catch (err) {
-                console.error('Error fetching posts:', err);
-                setMessages([...newMessages, {
-                    type: 'answer',
-                    text: 'Có lỗi khi truy vấn dữ liệu phòng trọ.',
-                    timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-                }]);
-            }
-        } else {
-            try {
-                const response = await axios.post(API_URL, {
-                    contents: [{ parts: [{ text: question }] }],
+            } else {
+                const response = await API.post(API_URL, {
+                    contents: [{ parts: [{ text: question }] }]
+                }, {
+                    timeout: TIMEOUT_DURATION,
+                    timeoutErrorMessage: 'Request timed out'
                 });
                 const answer = response.data.candidates[0].content.parts[0].text;
                 setMessages([...newMessages, {
@@ -268,26 +498,35 @@ const ChatBot = () => {
                     text: answer,
                     timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
                 }]);
-            } catch (error) {
-                setMessages([...newMessages, {
-                    type: 'answer',
-                    text: 'Xin lỗi, đã có lỗi xảy ra!',
-                    timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-                }]);
             }
+        } catch (error) {
+            console.error('ChatBot Error:', error);
+            
+            const errorMessage = error.code === 'ECONNABORTED' 
+                ? 'Kết nối quá thời gian, vui lòng thử lại.'
+                : 'Xin lỗi, đã có lỗi xảy ra!';
+
+            setMessages([...newMessages, {
+                type: 'answer',
+                text: errorMessage,
+                timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
+            }]);
+        } finally {
+            setIsLoading(false);
+            setQuestion('');
         }
-        setQuestion('');
     };
+
     const searchSuggestions = [
         {
             text: "Tìm phòng quận 1 dưới 5 triệu",
-            params: { district: "Quận 1", maxPrice: 5000000 }
+            params: { district: "Quận 1", maxPrice: 5 }
         },
         {
-            text: "Phòng trọ Tân Bình có máy lạnh",
-            params: { district: "Tân Bình", amenities: ["máy lạnh"] }
+            text: "tìm trọ thủ đức giá từ 2 triệu đến 6 triệu",
+            params: { district: "Thành phố Thủ Đức", minPrice: 2, maxPrice: 6 }
+            
         },
-        // Thêm các gợi ý khác...
     ];
 
     const MessageBubble = ({ msg }) => (
@@ -329,7 +568,7 @@ const ChatBot = () => {
     );
 
     return (
-        <div className="fixed bottom-36 right-8 z-[9999]"> {/* Thay đổi bottom và z-index */}
+        <div className="fixed bottom-36 right-8 z-[9999]">
             {!isOpen ? (
                 <button
                     className="bg-red-500 p-4 rounded-full text-white shadow-lg hover:bg-red-600 transition-colors"
@@ -352,8 +591,8 @@ const ChatBot = () => {
                     </div>
                 
                     {/* Messages container */}
-                    <div className="flex-1 overflow-hidden"> {/* Add overflow-hidden */}
-                        <div className="h-full overflow-y-auto px-4 py-2"> {/* Add h-full and change padding */}
+                    <div className="flex-1 overflow-hidden"> 
+                        <div className="h-full overflow-y-auto px-4 py-2">
                             {messages.map((msg, index) => (
                                 <MessageBubble key={index} msg={msg} />
                             ))}
@@ -384,10 +623,16 @@ const ChatBot = () => {
                                 onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                             />
                             <button
-                                className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors flex-shrink-0"
+                                className={`bg-red-500 text-white p-2 rounded-full transition-colors flex-shrink-0
+                                    ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-600'}`}
                                 onClick={handleSubmit}
+                                disabled={isLoading}
                             >
-                                <FaPaperPlane />
+                                {isLoading ? (
+                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                ) : (
+                                    <FaPaperPlane />
+                                )}
                             </button>
                         </div>
                     </div>

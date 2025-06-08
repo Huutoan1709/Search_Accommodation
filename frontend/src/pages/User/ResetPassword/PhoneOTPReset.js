@@ -46,7 +46,6 @@ const PhoneOTPReset = () => {
             }
         } else {
             formData.append('phone', phone);
-
             try {
                 const response = await API.post(endpoints.PhoneOTPReset, formData);
                 if (response.status === 200) {
@@ -70,7 +69,7 @@ const PhoneOTPReset = () => {
         try {
             const formData = new FormData();
             formData.append('phone', phone);
-            const response = await API.post(endpoints.resetpasswordphone, formData);
+            const response = await API.post(endpoints.PhoneOTPReset, formData);
             if (response.status === 200) {
                 notifySuccess('Một OTP mới đã được gửi đến số điện thoại của bạn.');
                 setTimer(60);
@@ -84,12 +83,12 @@ const PhoneOTPReset = () => {
     return (
         <>
             <Header />
-            <div className="flex justify-center items-center bg-gray-100 min-h-screen py-12">
-                <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+            <div className="flex justify-center items-center bg-gray-100">
+                <div className="w-full max-w-2xl p-8 bg-white rounded-lg shadow-lg mt-10">
                     <h2 className="text-3xl font-bold text-center text-gray-900 mb-8">
                         Đặt Lại Mật Khẩu Qua SMS
                     </h2>
-                    {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+                    {error && <p className="text-lg text-red-500 mb-4">{error}</p>}
                     
                     <form onSubmit={handleResetPassword} className="space-y-6">
                         <div>
@@ -102,7 +101,7 @@ const PhoneOTPReset = () => {
                                 onChange={(e) => setPhone(e.target.value)}
                                 disabled={isOtpSent}
                                 required
-                                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                 placeholder="Nhập số điện thoại"
                             />
                         </div>
@@ -118,7 +117,7 @@ const PhoneOTPReset = () => {
                                         value={otp}
                                         onChange={(e) => setOtp(e.target.value)}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Nhập mã OTP"
                                     />
                                 </div>
@@ -132,7 +131,7 @@ const PhoneOTPReset = () => {
                                         value={newPassword}
                                         onChange={(e) => setNewPassword(e.target.value)}
                                         required
-                                        className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        className="block w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         placeholder="Nhập mật khẩu mới"
                                     />
                                 </div>
@@ -141,7 +140,7 @@ const PhoneOTPReset = () => {
 
                         <button
                             type="submit"
-                            className="w-full py-3 text-lg font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                            className="w-full py-3 text-lg font-semibold text-white bg-red-500 rounded-md shadow hover:bg-red-600 focus:outline-none"
                         >
                             {isOtpSent ? 'Đặt lại mật khẩu' : 'Gửi OTP'}
                         </button>
@@ -155,7 +154,7 @@ const PhoneOTPReset = () => {
                                 ) : (
                                     <button
                                         onClick={handleResendOTP}
-                                        className="text-blue-600 hover:text-blue-800"
+                                        className="text-red-600 hover:text-yellow-500"
                                     >
                                         Gửi lại OTP
                                     </button>
@@ -164,11 +163,19 @@ const PhoneOTPReset = () => {
                         </div>
                     )}
 
-                    <div className="mt-6 text-center">
-                        <a href="/login" className="text-blue-600 hover:text-blue-800">
-                            Quay lại đăng nhập
+                    <p className="mt-6 text-lg text-center">
+                        Đặt lại mật khẩu bằng?{' '}
+                        <a href="/reset-password" className="text-red-600 hover:text-yellow-500">
+                            Email
                         </a>
-                    </div>
+                    </p>
+
+                    <p className="mt-6 text-lg text-center">
+                        Bạn đã có tài khoản?{' '}
+                        <a href="/login" className="text-red-600 hover:text-yellow-500">
+                            Đăng nhập
+                        </a>
+                    </p>
                 </div>
             </div>
             <Footer />
