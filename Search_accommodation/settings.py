@@ -1,15 +1,11 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
-# Load biến môi trường
-load_dotenv()
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+SECRET_KEY = 'django-insecure-hcir*ovge^5yd#1kijji1tf44@!zaa@c$l1w87lz7_1x4edos&'
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
 ALLOWED_HOSTS = ['*', '.onrender.com']
 
 INSTALLED_APPS = [
@@ -84,11 +80,11 @@ pymysql.install_as_MySQLdb()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
+        'NAME': 'railway',
+        'USER': 'root',
+        'PASSWORD': 'zcuvuxnxumKtuWCmeBHAKlYekZyuQIRl',
+        'HOST': 'shinkansen.proxy.rlwy.net',
+        'PORT': '36871',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
@@ -152,9 +148,9 @@ AUTH_USER_MODEL = "API.User"
 import cloudinary
 
 cloudinary.config(
-    cloud_name=os.getenv('CLOUDINARY_NAME'),
-    api_key=os.getenv('CLOUDINARY_API_KEY'),
-    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+    cloud_name='daf0utpgr',
+    api_key='289778753498617',
+    api_secret='zby6hktt9jdExd3hxriUakdhrqQ',
     secure=True
 )
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
@@ -165,28 +161,28 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_USER = 'nguyenhuutoan010@gmail.com'
+EMAIL_HOST_PASSWORD = 'vosoawnodgzbcqzk'
 
 AUTHENTICATION_BACKENDS = (
     'social_core.backends.google.GoogleOAuth2', 
     'django.contrib.auth.backends.ModelBackend',
 )
 
-TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-TWILIO_PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+TWILIO_ACCOUNT_SID = 'ACbae9f4ab58360a075924f3bd4eed3359'
+TWILIO_AUTH_TOKEN = '4b336129020c9fa25b9af8a17f8b59f5'
+TWILIO_PHONE_NUMBER = '+17623568775'
 
 
 # VNPay Configuration
-VNPAY_TMN_CODE = os.getenv('VNPAY_TMN_CODE')
-VNPAY_HASH_SECRET = os.getenv('VNPAY_HASH_SECRET')
+VNPAY_TMN_CODE = "WGJBLJR3"  
+VNPAY_HASH_SECRET = "U3LUJWFRKPKVXYIM0R1V5OF8R6TLVCZ4" 
 VNPAY_PAYMENT_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
 VNPAY_RETURN_URL = "https://search-accommodation.vercel.app/payment/vnpay-return"
 
 
 
-RECAPTCHA_SECRET_KEY = os.getenv('RECAPTCHA_SECRET_KEY')
+RECAPTCHA_SECRET_KEY = '6Lf8S1YrAAAAADWdTOYdaXMH1a86b165PyKj2JVV'
 
 
 # CLIENT_ID = '7gS8oCrdq9x2rfSnqgPG27zdPWsPbA82erZThYH0'
