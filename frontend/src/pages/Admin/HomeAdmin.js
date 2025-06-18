@@ -8,6 +8,7 @@ import ApprovedPost from './ApprovedPost';
 import AdminRoomType from './AdminRoomType';
 import AdminSupportRequest from './AdminSupportRequest';
 import AdminAmenities from './AdminAmenities';
+import AdminPayment from './AdminPayment';
 
 const HomeAdmin = () => {
     let element = useRoutes([
@@ -18,6 +19,7 @@ const HomeAdmin = () => {
         { path: '/listuser', element: <AdminUser /> },
         { path: '/supportrequest', element: <AdminSupportRequest /> },
         { path: '/amenities', element: <AdminAmenities /> },
+        { path: '/payment', element: <AdminPayment /> },
     ]);
 
     return (

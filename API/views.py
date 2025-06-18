@@ -3,10 +3,11 @@ from API import serializers, perms, paginators
 from .serializers import UserInfoSerializer, RoomTypeSerializer, RoomsSerializer, DetailRoomSerializer, PriceSerializer, \
     SupportRequestsSerializer, WriteRoomSerializer, SearchHistorySerializer ,AmenitiesSerializer, PostSerializer, DetailPostSerializer, \
     CreatePostSerializer, PostImageSerializer, ReviewSerializer, CreateReviewSerializer,PaymentSerializer ,PostVideoSerializer, PostTypeSerializer
-from rest_framework import viewsets, generics, response, status, permissions, filters
+from rest_framework import viewsets, generics, response, permissions, filters
+from rest_framework import status
 from rest_framework.decorators import action, api_view
 from API.models import User, Follow, Rooms, RoomType, Reviews, SupportRequests, FavoritePost, Price, Post, PostType, PostImage, \
-    Amenities, PasswordResetOTP, PostVideo,SearchHistory
+    Amenities, PasswordResetOTP, PostVideo,SearchHistory,Payment
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import QueryDict
 from django.core.mail import send_mail
@@ -21,6 +22,7 @@ from django.template.loader import render_to_string
 from django.shortcuts import render, redirect
 from django.db.models import Q, Count, Avg, StdDev, Max, Case, When
 from django.db import models
+from django.db.models import Sum
 import jwt
 from datetime import datetime, timedelta
 from sklearn.preprocessing import StandardScaler
@@ -1310,3 +1312,112 @@ def verify_recaptcha(recaptcha_response):
     }
     response = requests.post(verify_url, data=data)
     return response.json()['success']
+
+from .serializers import ListPaymentSerializer
+
+class PaymentViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_serializer_class(self):
+        if self.action == 'list':
+            return ListPaymentSerializer
+        return PaymentSerializer
+
+    def list(self, request):
+        try:
+            # Get query parameters for filtering
+            status_param = request.query_params.get('status')
+            start_date = request.query_params.get('start_date')
+            end_date = request.query_params.get('end_date')
+            payment_method = request.query_params.get('payment_method')
+
+            # Start with all payments and use select_related to optimize queries
+            queryset = Payment.objects.select_related(
+                'user', 
+                'post',
+                'post_type'
+            ).order_by('-created_at')
+
+            # Apply filters if provided
+            if status_param:
+                queryset = queryset.filter(status=status_param)
+            
+            if start_date:
+                queryset = queryset.filter(created_at__gte=start_date)
+            
+            if end_date:
+                queryset = queryset.filter(created_at__lte=end_date)
+            
+            if payment_method:
+                queryset = queryset.filter(payment_method=payment_method)
+
+            # Calculate statistics efficiently using annotate
+            stats = queryset.aggregate(
+                total_amount=Sum('amount'),
+                total_count=Count('id'),
+                successful_count=Count('id', filter=Q(status='COMPLETED'))
+            )
+
+            success_rate = (
+                (stats['successful_count'] / stats['total_count'] * 100)
+                if stats['total_count'] > 0 else 0
+            )
+
+            # Serialize payment data
+            serializer = self.get_serializer_class()(queryset, many=True)
+
+            response_data = {
+                'payments': serializer.data,
+                'statistics': {
+                    'total_amount': stats['total_amount'] or 0,
+                    'total_count': stats['total_count'],
+                    'successful_count': stats['successful_count'],
+                    'success_rate': round(success_rate, 2)
+                }
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to fetch payment history: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['get'])
+    def statistics(self, request):
+        try:
+            # Get all payments
+            payments = Payment.objects.all()
+
+            # Calculate overall statistics
+            total_amount = payments.aggregate(total=Sum('amount'))['total'] or 0
+            total_count = payments.count()
+            successful_payments = payments.filter(status='COMPLETED')
+            successful_count = successful_payments.count()
+            success_rate = (successful_count / total_count * 100) if total_count > 0 else 0
+
+            # Calculate monthly statistics
+            monthly_stats = payments.values('created_at__year', 'created_at__month')\
+                .annotate(
+                    total=Sum('amount'),
+                    count=Count('id'),
+                    successful=Count('id', filter=Q(status='COMPLETED'))
+                )\
+                .order_by('created_at__year', 'created_at__month')
+
+            return Response({
+                'overall': {
+                    'total_amount': total_amount,
+                    'total_count': total_count,
+                    'successful_count': successful_count,
+                    'success_rate': round(success_rate, 2)
+                },
+                'monthly': monthly_stats
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Failed to fetch payment statistics: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

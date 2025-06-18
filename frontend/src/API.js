@@ -53,6 +53,8 @@ export const endpoints = {
     paymentcreate: '/payment/create_payment/',
     paymentreturn: '/payment/vnpay-return/',
     mypaymenthistory: '/payment/my-payment/',
+    listpayment: '/listpayment/',
+    paymentstatistics: '/listpayment/statistics/',
     google_login: '/auth/google-login/',
 };
 

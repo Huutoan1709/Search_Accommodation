@@ -1,6 +1,6 @@
 import React, { useContext, useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { RiDashboardLine, RiFileListLine, RiUserLine } from 'react-icons/ri';
+import { RiDashboardLine, RiFileListLine, RiMoneyCnyBoxLine, RiUserLine } from 'react-icons/ri';
 import { FaChevronDown } from 'react-icons/fa';
 import { BiLogOut } from 'react-icons/bi';
 import MyContext from '../../context/MyContext';
@@ -81,6 +81,11 @@ const AdminSidebar = () => {
                         <li>
                             <MenuLink to="/admin/overview" icon={RiDashboardLine}>
                                 Tổng Quan
+                            </MenuLink>
+                        </li>
+                        <li>
+                            <MenuLink to="/admin/payment" icon={RiMoneyCnyBoxLine}>
+                                Doanh Thu
                             </MenuLink>
                         </li>
 

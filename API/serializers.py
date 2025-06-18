@@ -312,6 +312,42 @@ class PaymentSerializer(serializers.ModelSerializer):
     def get_created_at(self, obj):
         return obj.created_at.strftime('%d/%m/%Y %H:%M:%S')
 
+    
+
+class ListPaymentSerializer(serializers.ModelSerializer):
+    user_info = serializers.SerializerMethodField()
+    post_info = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(format="%d/%m/%Y %H:%M")
+    status_display = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            'id',
+            'user_info',
+            'post_info',
+            'amount',
+            'status',
+            'status_display',
+            'payment_method',
+            'transaction_id',
+            'created_at'
+        ]
+
+    def get_user_info(self, obj):
+        return {
+            'id': obj.user.id,
+            'name': f"{obj.user.first_name} {obj.user.last_name}",
+            'phone': obj.user.phone
+        }
+
+    def get_post_info(self, obj):
+        return {
+            'id': obj.post.id,
+            'title': obj.post.title,
+            'type': obj.post_type.name if obj.post_type else 'N/A'
+        }
+
     def get_status_display(self, obj):
         status_map = {
             'PENDING': 'Đang xử lý',
