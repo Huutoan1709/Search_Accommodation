@@ -132,81 +132,109 @@ function LocationSearch({ onClose, onSubmit }) {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg w-[800px] max-h-[90vh] overflow-y-auto">
-                <div className="location-search-container p-4 space-y-4">
-                    <h3 className="flex items-center justify-center font-semibold text-[20px] mt-4">Tìm kiếm xung quanh</h3>
-                    <span className="flex items-center justify-center text-gray-600 text-[15px]">Tìm kiếm phòng trọ xung quanh theo bán kính tại vị trí lựa chọn</span>
-                    <div className="form-group">
-                        <label className="block text-gray-700">Chọn Tỉnh</label>
-                        <select
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            onChange={handleCityChange}
-                        >
-                            <option value="">Chọn tỉnh</option>
-                            {cities.map((city) => (
-                                <option key={city.code} value={city.code}>
-                                    {city.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start md:items-center justify-center z-50 p-4 overflow-y-auto">
+            <div className="bg-white rounded-lg w-full sm:w-[90%] md:w-[800px] my-4 md:my-0 max-h-[85vh] md:max-h-[90vh] overflow-y-auto">
+                <div className="location-search-container p-3 md:p-4 space-y-3 md:space-y-4">
+                    {/* Header Section - Reduced spacing on mobile */}
+                    <h3 className="text-center font-semibold text-lg md:text-[20px] mt-1 md:mt-4">
+                        Tìm kiếm xung quanh
+                    </h3>
+                    <span className="block text-center text-gray-600 text-base md:text-[15px]">
+                        Tìm kiếm phòng trọ xung quanh theo bán kính tại vị trí lựa chọn
+                    </span>
 
-                    <div className="form-group">
-                        <label className="block text-gray-700">Chọn Quận/Huyện</label>
-                        <select
-                            className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            onChange={handleDistrictChange}
-                        >
-                            <option value="">Chọn quận/huyện</option>
-                            {districts.map((district) => (
-                                <option key={district.code} value={district.code}>
-                                    {district.name}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label className="block text-gray-700">Bán kính tìm kiếm</label>
-                        <div className="flex gap-2 mt-2">
-                            {[5, 10, 15].map((r) => (
-                                <button
-                                    key={r}
-                                    onClick={() => setRadius(r)}
-                                    className={`px-4 py-2 rounded-md ${
-                                        radius === r
-                                            ? 'bg-blue-500 text-white'
-                                            : 'bg-gray-200 hover:bg-gray-300'
-                                    }`}
-                                >
-                                    {r}km
-                                </button>
-                            ))}
+                    {/* Form Groups - Tighter spacing on mobile */}
+                    <div className="space-y-3 md:space-y-4">
+                        {/* City Selection */}
+                        <div className="form-group">
+                            <label className="block text-gray-700 text-base md:text-base mb-1">
+                                Chọn Tỉnh
+                            </label>
+                            <select
+                                className="w-full px-2 py-1.5 md:px-4 md:py-2 border rounded-md text-sm md:text-base
+                                         focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                onChange={handleCityChange}
+                            >
+                                <option value="">Chọn tỉnh</option>
+                                {cities.map((city) => (
+                                    <option key={city.code} value={city.code}>
+                                        {city.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
-                    </div>
 
-                    <div className='border-2 border-gray-300 rounded-lg relative h-[300px]'>
-                        <MapBox
-                            latitude={formData.latitude}
-                            longitude={formData.longitude}
-                            onCoordinatesChange={(lat, lng) => setFormData({ ...formData, latitude: lat, longitude: lng })}
-                        />
-                    </div>
+                        {/* District Selection */}
+                        <div className="form-group">
+                            <label className="block text-gray-700 text-lg md:text-base mb-1">
+                                Chọn Quận/Huyện
+                            </label>
+                            <select
+                                className="w-full px-2 py-1.5 md:px-4 md:py-2 border rounded-md text-sm md:text-base
+                                         focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                onChange={handleDistrictChange}
+                            >
+                                <option value="">Chọn quận/huyện</option>
+                                {districts.map((district) => (
+                                    <option key={district.code} value={district.code}>
+                                        {district.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                    <div className="form-group space-x-4 mt-4 flex justify-center items-center">
-                        <button onClick={handleSubmit} className="px-6 py-2 bg-gray-800 text-white rounded-md">
-                            <div className="flex items-center">
-                                <BiSearch className="mr-2" />
-                                Tìm kiếm
+                        {/* Radius Selection - Compact on mobile */}
+                        <div className="form-group">
+                            <label className="block text-gray-700 text-lg md:text-base mb-1">
+                                Bán kính tìm kiếm
+                            </label>
+                            <div className="flex flex-wrap gap-1.5 md:gap-2 mt-1 md:mt-2">
+                                {[5, 10, 15].map((r) => (
+                                    <button
+                                        key={r}
+                                        onClick={() => setRadius(r)}
+                                        className={`px-2 py-1 md:px-4 md:py-2 rounded-md text-xs md:text-base
+                                            ${radius === r 
+                                                ? 'bg-blue-500 text-white' 
+                                                : 'bg-gray-200 hover:bg-gray-300'
+                                            }`}
+                                    >
+                                        {r}km
+                                    </button>
+                                ))}
                             </div>
-                        </button>
-                        <button
-                            onClick={onClose}
-                            className="px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none"
-                        >
-                            Đóng
-                        </button>
+                        </div>
+
+                        {/* Map Container - Shorter on mobile */}
+                        <div className='border-2 border-gray-300 rounded-lg relative h-[180px] md:h-[300px]'>
+                            <MapBox
+                                latitude={formData.latitude}
+                                longitude={formData.longitude}
+                                onCoordinatesChange={(lat, lng) => 
+                                    setFormData({ ...formData, latitude: lat, longitude: lng })}
+                            />
+                        </div>
+
+                        {/* Action Buttons - Compact on mobile */}
+                        <div className="form-group flex flex-col md:flex-row gap-2 md:gap-4 justify-center items-center mt-3 md:mt-4">
+                            <button 
+                                onClick={handleSubmit} 
+                                className="w-full md:w-auto px-4 py-1.5 md:px-6 md:py-2 bg-gray-800 text-white rounded-md
+                                         text-sm md:text-base hover:bg-gray-700 transition-colors"
+                            >
+                                <div className="flex items-center justify-center">
+                                    <BiSearch className="mr-1.5 md:mr-2 w-4 h-4 md:w-5 md:h-5" />
+                                    Tìm kiếm
+                                </div>
+                            </button>
+                            <button
+                                onClick={onClose}
+                                className="w-full md:w-auto px-4 py-1.5 md:px-6 md:py-2 bg-red-500 text-white rounded-md 
+                                         text-sm md:text-base hover:bg-red-600 transition-colors"
+                            >
+                                Đóng
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

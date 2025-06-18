@@ -174,61 +174,65 @@ function DetailPost() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="max-w-[1024px] mx-auto py-6"
+                className="max-w-[1024px] mx-auto py-4 md:py-6 px-4 md:px-0"
             >
-                <div className="flex gap-6">
+                {/* Main Content - Stack on mobile, side-by-side on desktop */}
+                <div className="flex flex-col md:flex-row md:gap-6">
                     {/* Main Content Column */}
-                    <div className="w-[70%] space-y-6">
+                    <div className="w-full md:w-[70%] space-y-4 md:space-y-6">
                         {/* Image Slider */}
                         <div className="rounded-xl overflow-hidden shadow-lg">
                             <SliderCustom images={post?.images} video={post?.video?.video} />
                         </div>
 
                         {/* Post Details */}
-                        <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 space-y-4 md:space-y-6">
                             {/* Title & Location */}
-                            <div className="space-y-3">
-                                <h2 className="text-3xl font-bold text-gray-800 leading-tight">
+                            <div className="space-y-2 md:space-y-3">
+                                <h2 className="text-xl md:text-3xl font-bold text-gray-800 leading-tight">
                                     {post?.title}
                                 </h2>
                                 <div className="flex items-center text-gray-600">
-                                    <PiMapPinAreaFill className="text-amber-500 mr-2" size={20} />
-                                    <span className="text-xl">
+                                    <PiMapPinAreaFill className="text-amber-500 mr-2" size={16} />
+                                    <span className="text-sm md:text-xl">
                                         {post?.room?.ward}, {post?.room?.district}, {post?.room?.city}
                                     </span>
                                 </div>
                             </div>
 
                             {/* Key Information */}
-                            <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 rounded-lg">
-                                <div className="flex items-center gap-2">
-                                    <MdOutlineAttachMoney size={24} className="text-green-500" />
+                            <div className="grid grid-cols-3 gap-2 md:gap-4 p-3 md:p-4 bg-gray-50 rounded-lg">
+                                {/* Price */}
+                                <div className="flex items-center gap-1 md:gap-2">
+                                    <MdOutlineAttachMoney size={20} className="text-green-500" />
                                     <div>
-                                        <p className="text-2xl font-bold text-green-600">
+                                        <p className="text-lg md:text-2xl font-bold text-green-600">
                                             {post?.room?.price} triệu
                                         </p>
-                                        <p className="text-sm text-gray-500">mỗi tháng</p>
+                                        <p className="text-xs md:text-sm text-gray-500">mỗi tháng</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <BiArea size={24} className="text-amber-500" />
+                                {/* Area */}
+                                <div className="flex items-center gap-1 md:gap-2">
+                                    <BiArea size={20} className="text-amber-500" />
                                     <div>
-                                        <p className="text-2xl font-bold text-gray-700">
+                                        <p className="text-lg md:text-2xl font-bold text-gray-700">
                                             {post?.room?.area} m²
                                         </p>
-                                        <p className="text-sm text-gray-500">diện tích</p>
+                                        <p className="text-xs md:text-sm text-gray-500">diện tích</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                    <CiStopwatch size={24} className="text-blue-500" />
+                                {/* Time */}
+                                <div className="flex items-center gap-1 md:gap-2">
+                                    <CiStopwatch size={20} className="text-blue-500" />
                                     <div>
-                                        <p className="text-sm font-medium text-gray-700">
+                                        <p className="text-xs md:text-sm font-medium text-gray-700">
                                             {formatDistanceToNow(parseISO(post?.created_at), {
                                                 addSuffix: true,
                                                 locale: vi,
                                             })}
                                         </p>
-                                        <p className="text-sm text-gray-500">đăng tin</p>
+                                        <p className="text-xs md:text-sm text-gray-500">đăng tin</p>
                                     </div>
                                 </div>
                             </div>
@@ -242,19 +246,19 @@ function DetailPost() {
                             </div>
 
                             {/* Features Grid */}
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-gray-800">Đặc điểm tin đăng</h3>
-                                <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-3 md:space-y-4">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-800">Đặc điểm tin đăng</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                     {features.map((feature, index) => (
                                         <div key={index}
-                                            className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                                            <div className="flex items-center gap-3">
-                                                <div className="p-2 bg-white rounded-full shadow-sm">
+                                            className="flex items-center justify-between p-3 md:p-4 bg-gray-50 rounded-lg">
+                                            <div className="flex items-center gap-2 md:gap-3">
+                                                <div className="p-1.5 md:p-2 bg-white rounded-full shadow-sm">
                                                     {feature.icon}
                                                 </div>
-                                                <span className="font-medium text-gray-700">{feature.label}</span>
+                                                <span className="text-sm md:font-medium text-gray-700">{feature.label}</span>
                                             </div>
-                                            <span className="text-gray-600">{feature.value}</span>
+                                            <span className="text-sm md:text-base text-gray-600">{feature.value}</span>
                                         </div>
                                     ))}
                                 </div>
@@ -281,10 +285,10 @@ function DetailPost() {
                             )}
 
                             {/* Map Section */}
-                            <div className="space-y-4">
-                                <h3 className="text-xl font-bold text-gray-800">Vị trí trên bản đồ</h3>
+                            <div className="space-y-3 md:space-y-4">
+                                <h3 className="text-lg md:text-xl font-bold text-gray-800">Vị trí trên bản đồ</h3>
                                 <div className="rounded-xl overflow-hidden shadow-lg">
-                                    <div className="relative h-[400px]">
+                                    <div className="relative h-[250px] md:h-[400px]">
                                         <MapBox 
                                             latitude={post?.room?.latitude} 
                                             longitude={post?.room?.longitude} 
@@ -314,10 +318,10 @@ function DetailPost() {
                         </div>
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="w-[30%] space-y-6 ">
+                    {/* Sidebar - Full width on mobile */}
+                    <div className="w-full md:w-[30%] space-y-4 md:space-y-6 mt-4 md:mt-0">
                         {/* User Profile Card */}
-                        <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100">
+                        <div className="bg-white rounded-xl shadow-lg p-4 md:p-6 border border-gray-100">
                             <div className="flex flex-col items-center">
                                 <img
                                     src={post?.user?.avatar || '/default-avatar.png'}

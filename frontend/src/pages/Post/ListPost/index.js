@@ -188,12 +188,12 @@ const ListPost = ({ searchParams }) => {
     }
 
     return (
-        <div className="w-full border border-gray-300 rounded-xl p-4 bg-[#fff]">
-            <div className="flex items-center justify-between my-3">
-                <h3 className="font-semibold text-2xl px-4">{title}</h3>
+        <div className="w-full border border-gray-300 rounded-xl p-2 md:p-4 bg-[#fff]">
+            <div className="flex items-center justify-between my-2 md:my-3">
+                <h3 className="font-semibold text-lg md:text-2xl px-2 md:px-4">{title}</h3>
             </div>
 
-            <div className="items">
+            <div className="items space-y-3 md:space-y-4">
                 {data.length > 0 ? (
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -221,13 +221,15 @@ const ListPost = ({ searchParams }) => {
             </div>
 
             {data.length > 0 && (
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    previousPage={previousPage}
-                    nextPage={nextPage}
-                    onPageChange={handlePageChange}
-                />
+                <div className="mt-4 md:mt-6">
+                    <Pagination
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        previousPage={previousPage}
+                        nextPage={nextPage}
+                        onPageChange={handlePageChange}
+                    />
+                </div>
             )}
         </div>
     );

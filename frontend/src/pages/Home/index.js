@@ -95,18 +95,21 @@ const Home = ({ room_type = '' }) => {
         >
             <div className='relative'>
                 <Header />
-                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-12 mb-8">
-                    <div className="w-[1024px] mx-auto text-center">
-                        <h1 className="text-4xl font-bold mb-4">
-                                TOA_ACOMMODATION
+                {/* Update hero section */}
+                <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-8 md:py-12 mb-4 md:mb-8">
+                    <div className="w-full px-4 md:w-[1024px] mx-auto text-center">
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2 md:mb-4">
+                            TOA_ACOMMODATION
                         </h1>
-                        <p className="text-xl opacity-90">
+                        <p className="text-lg md:text-xl opacity-90">
                             Tìm phòng trọ nhanh chóng, thuận tiện và hoàn toàn miễn phí
                         </p>
                     </div>
                 </div>
-                <div className="w-[1024px] m-auto mt-5"> {/* Add fixed padding-top */}
-                    
+
+                {/* Make main container responsive */}
+                <div className="w-full px-4 md:w-[1024px] mx-auto mt-5">
+                    {/* Search bar container */}
                     <div className={`
                         transition-all duration-300 ease-in-out
                         ${isScrolled ? 
@@ -115,8 +118,8 @@ const Home = ({ room_type = '' }) => {
                         }
                     `}>
                         <div className={`
-                            max-w-[1024px] mx-auto
-                            ${isScrolled ? 'px-1' : ''}
+                            max-w-full md:max-w-[1024px] mx-auto px-4
+                            ${isScrolled ? 'px-4' : ''}
                         `}>
                             <Search 
                                 setSearchParams={setSearchParams} 
@@ -124,10 +127,10 @@ const Home = ({ room_type = '' }) => {
                             />
                         </div>
                     </div>
-                    <div className={`${isScrolled ? 'h-[60px]' : ''}`} />
-                    
-                    <div className="bg-white rounded-lg shadow-lg p-8 mt-8">
-                        <div className="grid grid-cols-4 gap-8">
+
+                    {/* Statistics cards - make responsive */}
+                    <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 mt-8">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                             <div className="text-center">
                                 <div className="flex justify-center">
                                     <FaHome className="text-4xl text-blue-500 mb-3" />
@@ -159,86 +162,92 @@ const Home = ({ room_type = '' }) => {
                         </div>
                     </div>
 
-                    <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
-                    <div className="my-10 flex gap-4 p-2">
-                        <div
-                            className="relative w-1/3 group cursor-pointer"
-                            onClick={() => handleCityClick('Thành phố Hồ Chí Minh')}
-                        >
-                            <img src={hochiminh} alt="Hồ Chí Minh" className="rounded-lg object-cover w-full h-[310px]" />
-                            <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
-                                <h3 className="text-2xl font-bold">Hồ Chí Minh</h3>
-                                <p className="text-lg"></p>
-                            </div>
-                        </div>
-                        <div className="w-2/3 grid grid-cols-2 gap-4 cursor-pointer">
-                            <div className="relative group" onClick={() => handleCityClick('Thành phố Hà Nội')}>
-                                <img src={hanoi} alt="Hà Nội" className="rounded-lg object-cover w-full h-[150px]" />
+                    {/* Cities section - hide on mobile */}
+                    <div className="hidden md:block">
+                        <h1 className="text-[20px] font-semibold mt-8 text-center">Thành phố nổi bật</h1>
+                        <div className="my-10 flex gap-4 p-2">
+                            <div
+                                className="relative w-1/3 group cursor-pointer"
+                                onClick={() => handleCityClick('Thành phố Hồ Chí Minh')}
+                            >
+                                <img src={hochiminh} alt="Hồ Chí Minh" className="rounded-lg object-cover w-full h-[310px]" />
                                 <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
-                                    <h3 className="text-2xl font-bold">Hà Nội</h3>
+                                    <h3 className="text-2xl font-bold">Hồ Chí Minh</h3>
                                     <p className="text-lg"></p>
                                 </div>
                             </div>
-                            <div
-                                className="relative group cursor-pointer"
-                                onClick={() => handleCityClick('Tỉnh Bình Dương')}
-                            >
-                                <img
-                                    src={binhduong}
-                                    alt="Bình Dương"
-                                    className="rounded-lg object-cover w-full h-[150px]"
-                                />
-                                <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
-                                    <h3 className="text-2xl font-bold">Bình Dương</h3>
-                                    <p className="text-lg"></p>
+                            <div className="w-2/3 grid grid-cols-2 gap-4 cursor-pointer">
+                                <div className="relative group" onClick={() => handleCityClick('Thành phố Hà Nội')}>
+                                    <img src={hanoi} alt="Hà Nội" className="rounded-lg object-cover w-full h-[150px]" />
+                                    <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
+                                        <h3 className="text-2xl font-bold">Hà Nội</h3>
+                                        <p className="text-lg"></p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                className="relative group cursor-pointer"
-                                onClick={() => handleCityClick('Thành phố Đà Nẵng')}
-                            >
-                                <img src={danang} alt="Đà Nẵng" className="rounded-lg object-cover w-full h-[150px]" />
-                                <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
-                                    <h3 className="text-2xl font-bold ">Đà Nẵng</h3>
-                                    <p className="text-lg"></p>
+                                <div
+                                    className="relative group cursor-pointer"
+                                    onClick={() => handleCityClick('Tỉnh Bình Dương')}
+                                >
+                                    <img
+                                        src={binhduong}
+                                        alt="Bình Dương"
+                                        className="rounded-lg object-cover w-full h-[150px]"
+                                    />
+                                    <div className="absolute inset-0 to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
+                                        <h3 className="text-2xl font-bold">Bình Dương</h3>
+                                        <p className="text-lg"></p>
+                                    </div>
                                 </div>
-                            </div>
-                            <div
-                                className="relative group cursor-pointer"
-                                onClick={() => handleCityClick('Tỉnh Bình Phước')}
-                            >
-                                <img
-                                    src={binhphuoc}
-                                    alt="Bình Phước"
-                                    className="rounded-lg object-cover w-full h-[150px]"
-                                />
-                                <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
-                                    <h3 className="text-2xl font-bold">Bình Phước</h3>
-                                    <p className="text-lg"></p>
+                                <div
+                                    className="relative group cursor-pointer"
+                                    onClick={() => handleCityClick('Thành phố Đà Nẵng')}
+                                >
+                                    <img src={danang} alt="Đà Nẵng" className="rounded-lg object-cover w-full h-[150px]" />
+                                    <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
+                                        <h3 className="text-2xl font-bold ">Đà Nẵng</h3>
+                                        <p className="text-lg"></p>
+                                    </div>
+                                </div>
+                                <div
+                                    className="relative group cursor-pointer"
+                                    onClick={() => handleCityClick('Tỉnh Bình Phước')}
+                                >
+                                    <img
+                                        src={binhphuoc}
+                                        alt="Bình Phước"
+                                        className="rounded-lg object-cover w-full h-[150px]"
+                                    />
+                                    <div className="absolute inset-0  to-transparent bg-gradient-to-t group-hover:from-black/70 group-hover:to-transparent group-hover:bg-opacity-90 text-white rounded-lg p-6 flex flex-col justify-end transition-all duration-300 from-black/20">
+                                        <h3 className="text-2xl font-bold">Bình Phước</h3>
+                                        <p className="text-lg"></p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div className="flex w-full gap-4">
-                        <div className="w-[70%] ">
+
+                    {/* Main content area - make responsive */}
+                    <div className="flex flex-col md:flex-row w-full gap-4">
+                        <div className="w-full md:w-[70%]">
                             <ListPost searchParams={searchParams} room_type={searchParams.room_type} />
                         </div>
                         
-                        <div className="w-[30%] flex flex-col gap-4 justify-start items-center ">
+                        <div className="w-full md:w-[30%] flex flex-col gap-4 justify-start items-center">
                             <Sidebar setSearchParams={setSearchParams} room_type={room_type} searchParams={searchParams} />
                         </div>
                     </div>
+
+                    {/* Recommendations section */}
                     <div className='w-full flex justify-center items-center'>
-                        {/* Chỉ hiển thị khi có user */}
                         {user && <RecommendedRooms />}
                     </div>
-
                 </div>
                 
-                <div className="bg-gray-50 py-16">
-                    <div className="w-[1024px] mx-auto">
-                        <h2 className="text-3xl font-bold text-center mb-12">Tại sao chọn chúng tôi?</h2>
-                        <div className="grid grid-cols-3 gap-8">
+                {/* Why choose us section - make responsive */}
+                <div className="bg-gray-50 py-8 md:py-16">
+                    <div className="w-full px-4 md:w-[1024px] mx-auto">
+                        <h2 className="text-2xl md:text-3xl font-bold text-center mb-8 md:mb-12">Tại sao chọn chúng tôi?</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
                             <div className="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
                                 <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center mb-4">
                                     <FaHome className="text-2xl text-blue-600" />

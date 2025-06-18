@@ -66,7 +66,7 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
 
     return (
         <div className={`
-            relative flex w-full p-6 gap-6 bg-white rounded-xl 
+            relative flex flex-col md:flex-row w-full p-4 md:p-6 gap-4 md:gap-6 bg-white rounded-xl 
             transition-all duration-300 ease-in-out
             ${post_type?.name === 'VIP' 
                 ? 'border-2 border-amber-500 hover:shadow-lg hover:shadow-amber-100' 
@@ -75,9 +75,9 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
         `}>
             {/* VIP Badge */}
             {post_type?.name === 'VIP' && (
-                <div className="absolute top-4 right-4 z-10">
-                    <span className="inline-flex items-center px-4 py-1.5 rounded-full text-xl font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg">
-                        <PiListStarThin className="mr-2"  size={20}/>
+                <div className="absolute top-2 right-2 md:top-4 md:right-4 z-10">
+                    <span className="inline-flex items-center px-3 py-1 md:px-4 md:py-1.5 rounded-full text-base md:text-xl font-medium bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg">
+                        <PiListStarThin className="mr-1 md:mr-2" size={16} />
                         VIP
                     </span>
                 </div>
@@ -85,7 +85,7 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
 
             {/* Image Section */}
             <div
-                className="w-[42%] relative rounded-lg overflow-hidden cursor-pointer group"
+                className="w-full md:w-[42%] relative rounded-lg overflow-hidden cursor-pointer group"
                 onClick={handlePostClick}
             >
                 <div className="grid grid-cols-2 gap-1">
@@ -94,39 +94,39 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
                             key={index} 
                             src={image.url} 
                             alt="image" 
-                            className="w-full h-[125px] object-cover transition-transform duration-300 group-hover:scale-105" 
+                            className="w-full h-[100px] md:h-[125px] object-cover transition-transform duration-300 group-hover:scale-105" 
                         />
                     ))}
                 </div>
                 
-                 <span className="absolute top-2 right-4 bg-black/60 backdrop-blur-sm text-white text-lg px-3 py-1 rounded-full">
+                 <span className="absolute top-2 right-2 md:right-4 bg-black/60 backdrop-blur-sm text-white text-sm md:text-lg px-2 md:px-3 py-1 rounded-full">
                     {images.length} ảnh
                 </span>
 
                 {/* Favorite button */}
                 <button
-                    className="absolute bottom-2 right-4 p-2 rounded-full bg-white/80 backdrop-blur-sm 
-                             hover:bg-white transition-all duration-300 "
+                    className="absolute bottom-2 right-2 md:right-4 p-1.5 md:p-2 rounded-full bg-white/80 backdrop-blur-sm 
+                             hover:bg-white transition-all duration-300"
                     onMouseEnter={() => setHoverHearth(true)}
                     onMouseLeave={() => setHoverHearth(false)}
                     onClick={handleFavoriteClick}
                 >
                     {favorite ? (
-                        <PiHeartStraightFill size={24} className="text-red-500" />
+                        <PiHeartStraightFill size={20} className="text-red-500" />
                     ) : HoverHearth ? (
-                        <PiHeartStraightFill size={24} className="text-red-500" />
+                        <PiHeartStraightFill size={20} className="text-red-500" />
                     ) : (
-                        <PiHeartStraightLight size={24} className="text-gray-600" />
+                        <PiHeartStraightLight size={20} className="text-gray-600" />
                     )}
                 </button>
             </div>
 
             {/* Content Section */}
-            <div className="w-[60%] pl-4 flex flex-col justify-between">
+            <div className="w-full md:w-[60%] md:pl-4 flex flex-col justify-between">
                 {/* Title */}
                 <div className="items-center">
                     <h3 
-                        className={`text-xl font-semibold mb-4 cursor-pointer hover:text-amber-600 transition-colors
+                        className={`text-lg md:text-xl font-semibold mb-2 md:mb-4 cursor-pointer hover:text-amber-600 transition-colors
                             ${post_type?.name === 'VIP' ? 'text-amber-800' : 'text-gray-800'}`} 
                         onClick={handlePostClick}
                     >
@@ -135,36 +135,36 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
                 </div>
 
                 {/* Price and Area Section */}
-                <div className="flex items-center gap-6 mb-4">
-                    <div className="flex items-center gap-2">
-                        <MdOutlineAttachMoney size={24} className="text-amber-500" />
-                        <span className="text-2xl font-bold text-green-600">
+                <div className="flex items-center gap-4 md:gap-6 mb-2 md:mb-4">
+                    <div className="flex items-center gap-1 md:gap-2">
+                        <MdOutlineAttachMoney size={20} className="text-amber-500" />
+                        <span className="text-xl md:text-2xl font-bold text-green-600">
                             {room?.price} triệu/tháng
                         </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <BiArea size={22} className="text-amber-500" />
-                        <span className="text-lg text-gray-700">
+                    <div className="flex items-center gap-1 md:gap-2">
+                        <BiArea size={18} className="text-amber-500" />
+                        <span className="text-base md:text-lg text-gray-700">
                             {room?.area}m²
                         </span>
                     </div>
                 </div>
 
                 {/* Location and Time Info */}
-                <div className="space-y-3 mb-4">
-                    <div className="flex items-center gap-2 text-gray-700">
-                        <PiMapPinAreaFill className="text-amber-500" size={20} />
-                        <span className="text-lg">{`${room?.district}, ${room?.city}`}</span>
+                <div className="space-y-2 md:space-y-3 mb-2 md:mb-4">
+                    <div className="flex items-center gap-1 md:gap-2 text-gray-700">
+                        <PiMapPinAreaFill className="text-amber-500" size={18} />
+                        <span className="text-base md:text-lg">{`${room?.district}, ${room?.city}`}</span>
                     </div>
 
-                    <div className={`flex items-center gap-3 text-lg
+                    <div className={`flex items-center gap-2 md:gap-3 text-base md:text-lg
                         ${post_type?.name === 'VIP' ? 'text-amber-700' : 'text-gray-600'}`}>
-                        <span className="flex items-center gap-2">
-                            <CiStopwatch className="text-amber-500" size={20} />
+                        <span className="flex items-center gap-1 md:gap-2">
+                            <CiStopwatch className="text-amber-500" size={18} />
                             {timeAgo}
                         </span>
                         {post_type?.name === 'VIP' && (
-                            <span className="flex items-center gap-2 text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded-full">
+                            <span className="hidden md:flex items-center gap-2 text-amber-600 font-medium bg-amber-50 px-2 py-1 rounded-full">
                                 <AiFillSafetyCertificate className="text-amber-500" />
                                 Tin ưu tiên
                             </span>
@@ -172,8 +172,8 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
                     </div>
                 </div>
 
-                {/* Description */}
-                <div className="text-gray-600 text-base leading-relaxed mb-4 line-clamp-3">
+                {/* Description - Hide on mobile */}
+                <div className="hidden md:block text-gray-600 text-base leading-relaxed mb-4 line-clamp-3">
                     {content.length > 150 ? (
                         <div dangerouslySetInnerHTML={{ __html: `${content.slice(0, 150)}...` }}></div>
                     ) : (
@@ -182,26 +182,26 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
                 </div>
 
                 {/* Footer - User Info and Contact */}
-                <div className="flex items-center justify-between pt-4 mt-auto border-t border-gray-200">
-                    <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between pt-2 md:pt-4 mt-auto border-t border-gray-200">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <div className="relative">
                             <img 
                                 src={user?.avatar} 
                                 alt="avatar" 
-                                className="w-10 h-10 rounded-full object-cover border-2 border-amber-500" 
+                                className="w-8 h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-amber-500" 
                             />
     
                             
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-medium text-gray-800">
+                            <span className="text-sm md:text-base font-medium text-gray-800">
                                 {user?.first_name} {user?.last_name}
                             </span>
                             {user?.reputation && (
-                                <span className="text-base text-green-600 flex items-center gap-1">
+                                <span className="text-sm md:text-base text-green-600 flex items-center gap-1">
 
                                     Người đăng tin uy tín
-                                     <AiFillSafetyCertificate size={16} />
+                                     <AiFillSafetyCertificate size={14} />
                                      </span>
                             )}
                         </div>
@@ -209,10 +209,10 @@ const Item = ({ images, title, content, room, created_at, user, id, post_type })
 
                     <button 
                         type="button" 
-                        className="px-4 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600
-                                 transition-all duration-300 flex items-center gap-2 font-medium shadow-md"
+                        className="px-3 py-2 md:px-4 md:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600
+                                 transition-all duration-300 flex items-center gap-1 md:gap-2 text-sm md:text-base font-medium shadow-md"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 md:w-5 md:h-5">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
                         </svg>
                         <span>{user?.phone}</span>

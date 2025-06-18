@@ -261,52 +261,57 @@ const CreatePost = () => {
     };
 
     return (
-        <div className="container mx-auto p-6">
+        <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
             {loading ? (
                 <Loading message={loadingMessage} />
             ) : (
                 <>
-                    <h1 className="text-4xl font-medium mb-8 text-gray-800">Tạo Bài Đăng Mới</h1>
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-8">
-                            <form onSubmit={handlePostCreation} className="space-y-8">
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-medium mb-4 sm:mb-8 text-gray-800">
+                        Tạo Bài Đăng Mới
+                    </h1>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-8">
+                        <div className="lg:col-span-2 space-y-4 sm:space-y-8">
+                            <form onSubmit={handlePostCreation} className="space-y-4 sm:space-y-8">
+                                {/* Room Selection Section */}
                                 <div className="space-y-2">
-                                    <label className="block text-red-400 font-semibold">Chọn phòng có sẵn</label>
-                                    <div className="flex gap-4 items-center">
+                                    <label className="block text-red-400 font-semibold text-lg sm:text-xl">
+                                        Chọn phòng có sẵn
+                                    </label>
+                                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
                                         <select
-                                            className="border border-gray-300 p-3 rounded-lg w-full focus:ring focus:ring-blue-500"
+                                            className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full"
                                             onChange={(e) => handleRoomSelect(e.target.value)}
                                             value={selectedRoom || ""}
                                         >
                                             <option value="">Chọn phòng</option>
                                             {rooms.map((room) => (
                                                 <option key={room.id} value={room.id}>
-                                                    Căn phòng {room?.ward} - {room?.district} - {room?.city} - {room?.price}{' '}
-                                                    triệu/tháng
+                                                    Căn phòng {room?.ward} - {room?.district}
                                                 </option>
                                             ))}
                                         </select>
                                         <button
                                             type="button"
                                             onClick={() => setShowCreateRoom(true)}
-                                            className="flex items-center gap-2 bg-green-500 text-white px-4 py-3 rounded-lg hover:bg-green-600 transition-all duration-300 whitespace-nowrap"
+                                            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-500 text-white px-4 py-2 sm:py-3 rounded-lg"
                                         >
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                                            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" />
                                             </svg>
-                                            Thêm phòng mới
+                                            <span className="hidden sm:inline">Thêm phòng mới</span>
+                                            <span className="sm:hidden">Thêm</span>
                                         </button>
                                     </div>
                                 </div>
 
                                 {selectedRoom && (
-                                    <div className="w-full">
-                                        {/* Thông tin phòng */}
-                                        <div>
-                                            <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center">
-                                                <i className="fas fa-info-circle mr-2"></i> Thông Tin Phòng
+                                    <div className="space-y-4 sm:space-y-6">
+                                        {/* Room Info Section */}
+                                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                                            <h2 className="text-xl sm:text-2xl font-bold text-red-400 mb-4">
+                                                Thông Tin Phòng
                                             </h2>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
                                                     <label className="block text-gray-600">Giá (triệu/tháng)</label>
                                                     <div className="relative">
@@ -406,41 +411,16 @@ const CreatePost = () => {
                                             </div>
                                         </div>
 
-                                        {/* Liên hệ */}
-                                        <div className="mt-6">
-                                            <h2 className="text-2xl font-bold text-red-400 mb-4 flex items-center">
-                                                <i className="fas fa-user-circle mr-2"></i> Liên Hệ
+                                        {/* Image Upload Section */}
+                                        <div className="bg-white p-4 sm:p-6 rounded-lg shadow-md">
+                                            <h2 className="text-xl sm:text-2xl font-bold text-red-400 mb-2">
+                                                Hình ảnh(*)
                                             </h2>
-                                            <div className="bg-gray-100 p-4 rounded-lg shadow">
-                                                <h2 className="text-xl font-semibold mb-2 flex items-center gap-2">
-                                                    <p>{currentUser?.first_name}</p>
-                                                    <p>{currentUser?.last_name}</p>
-                                                </h2>
-                                                <div className="space-y-2">
-                                                    <div className="flex items-center">
-                                                        <FaPhone className="text-pink-500 mr-2" />
-                                                        <span>{currentUser?.phone}</span>
-                                                    </div>
-                                                    <div className="flex items-center">
-                                                        <FaEnvelope className="text-pink-500 mr-2" />
-                                                        <span>{currentUser?.email}</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div className="bg-white p-6 rounded-lg shadow-md space-y-4 mt-6">
-                                            <h2 className="text-2xl font-bold text-red-400">Hình ảnh(*)</h2>
-                                            <p className="text-md text-gray-500 mb-2">
-                                                Cập nhật hình ảnh rõ ràng sẽ cho thuê nhanh hơn
-                                            </p>
-                                            <div className="min-h-[180px] border-dashed border-2 border-gray-300 p-6 flex justify-center items-center">
+                                            <div className="min-h-[120px] sm:min-h-[180px] border-dashed border-2 border-gray-300 p-4 sm:p-6">
                                                 <label htmlFor="upload" className="cursor-pointer flex flex-col items-center">
-                                                    <img src={uploadimage} alt="Upload" className="w-32 h-24 object-cover" />
+                                                    <img src={uploadimage} alt="Upload" className="w-24 sm:w-32 h-20 sm:h-24" />
                                                     <span className="mt-2 font-medium text-blue-500">Thêm Ảnh</span>
-                                                    <p className="text-lg text-gray-500 mt-1">
-                                                        {images.length} / 10 ảnh
-                                                    </p>
+                                                    <p className="text-base sm:text-lg text-gray-500">{images.length} / 10 ảnh</p>
                                                 </label>
                                                 <input
                                                     id="upload"
@@ -451,7 +431,8 @@ const CreatePost = () => {
                                                     className="hidden"
                                                 />
                                             </div>
-                                            <div className="mt-4 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                                            {/* Image Preview Grid */}
+                                            <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
                                                 {images.map((image, index) => (
                                                     <div key={index} className="relative group">
                                                         <img
@@ -665,23 +646,35 @@ const CreatePost = () => {
                         </div>
                         {selectedRoom && roomDetails.latitude && roomDetails.longitude && (
                             <div className="lg:col-span-1">
-                                <h2 className="text-2xl font-bold mb-4 text-red-400">Bản đồ</h2>
-                                <div className="relative h-[300px] border-2 border-gray-300 rounded-lg">
-                                    <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
-                                </div>
-
-                                <div className="bg-yellow-100 p-4 rounded-lg mt-4">
-                                    <h3 className="font-bold">Lưu ý:</h3>
-                                    <ul className="list-disc list-inside pl-4">
-                                        <li>Khi đăng tin phải điền đầy đủ thông tin các trường nội dung, tiêu đề.</li>
-                                        <li>Hình ảnh bắt buộc phải có ít nhất 4 ảnh.</li>
-                                        <li>Nội dung phải viết bằng tiếng Việt có dấu</li>
-                                        <li>Không đăng tin trùng lặp</li>
-                                        <li>
-                                            Tin đăng có hình ảnh rõ ràng sẽ được xem và gọi gấp nhiều lần so với tin rao không
-                                            có ảnh. Hãy đăng ảnh để được giao dịch nhanh chóng!
-                                        </li>
-                                    </ul>
+                                <div className="sticky top-4">
+                                    <h2 className="text-xl sm:text-2xl font-bold mb-4 text-red-400">Bản đồ</h2>
+                                    <div className="h-[250px] sm:h-[300px] rounded-lg overflow-hidden">
+                                        <MapBox latitude={roomDetails.latitude} longitude={roomDetails.longitude} />
+                                    </div>
+                                    
+                                    {/* Post Guidelines Section */}
+                                    <div className="bg-yellow-100 p-4 rounded-lg mt-4">
+                                        <h3 className="font-bold text-lg mb-2">Lưu ý khi đăng tin:</h3>
+                                        <ul className="list-disc list-inside space-y-2 text-sm md:text-base">
+                                            <li>Khi đăng tin phải điền đầy đủ thông tin các trường nội dung, tiêu đề.</li>
+                                            <li>Hình ảnh bắt buộc phải có ít nhất 4 ảnh.</li>
+                                            <li>Nội dung phải viết bằng tiếng Việt có dấu.</li>
+                                            <li>Không đăng tin trùng lặp.</li>
+                                            <li>Tin đăng có hình ảnh rõ ràng sẽ được xem và gọi gấp nhiều lần so với tin rao không có ảnh. Hãy đăng ảnh để được giao dịch nhanh chóng!</li>
+                                        </ul>
+                                        
+                                        {/* Additional Guidelines */}
+                                        <div className="mt-4 p-3 bg-white rounded-lg shadow-sm">
+                                            <h4 className="font-semibold text-red-500 mb-2">Quy định đăng tin:</h4>
+                                            <ul className="list-disc list-inside space-y-2 text-sm md:text-base text-gray-600">
+                                                <li>Tin đăng phải có thông tin chính xác.</li>
+                                                <li>Hình ảnh phải chụp thực tế từ căn phòng.</li>
+                                                <li>Thông tin liên hệ phải chính xác.</li>
+                                                <li>Không đăng tin với nội dung quảng cáo khác.</li>
+                                                <li>Video nên quay rõ nét để người xem dễ hình dung.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}

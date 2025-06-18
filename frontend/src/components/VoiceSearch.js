@@ -556,19 +556,19 @@ const VoiceSearch = ({ onVoiceResult }) => {
             };
 
             recognition.onerror = (event) => {
-                console.error('❌ Lỗi nhận dạng:', event.error);
+                
                 setIsListening(false);
                 notifyError('Lỗi nhận dạng giọng nói');
             };
 
             recognition.onend = () => {
-                console.log('=== KẾT THÚC NHẬN DẠNG ===');
+                
                 setIsListening(false);
             };
 
             recognition.start();
         } else {
-            console.log('❌ Trình duyệt không hỗ trợ nhận dạng giọng nói');
+            
             notifyError('Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói');
         }
     };
@@ -576,8 +576,8 @@ const VoiceSearch = ({ onVoiceResult }) => {
         <div className="relative inline-block">
             <div className="flex items-center gap-2">
                 <div className="relative">
+                    {/* Voice Search Button - Made more compact on mobile */}
                     <span
-                        type="button"
                         onClick={() => {
                             const audio = document.getElementById('startSound');
                             audio.play();
@@ -590,76 +590,69 @@ const VoiceSearch = ({ onVoiceResult }) => {
                             isListening ? 'bg-red-500' : 
                             isProcessing ? 'bg-gray-500' : 
                             !genAI ? 'bg-gray-400' : 'bg-gray-800'
-                        } py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center`}
+                        } py-2 md:py-4 px-2 rounded-md text-[12px] md:text-[13px] gap-1 md:gap-2 text-white font-medium flex items-center justify-center`}
                         title={!genAI ? 'AI chưa sẵn sàng' : 'Tìm kiếm bằng giọng nói'}
                     >
-                        <FaMicrophone className={`${isListening ? 'animate-pulse' : ''}`} size={15} />
+                        <FaMicrophone className={`${isListening ? 'animate-pulse' : ''} w-3 h-3 md:w-4 md:h-4`} />
                         {isListening ? 'Đang nghe...' : 'Tìm kiếm'}
                     </span>
 
-                    {/* Guide Popup */}
+                    {/* Guide Popup - Responsive layout */}
                     {showGuide && (
-                        <div className="absolute z-50 right-0 mt-2 w-[400px] bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl shadow-lg p-6 border border-gray-200">
-                            <div className="space-y-6">
-                                {/* Hướng dẫn chung */}
+                        <div className="absolute z-50 right-0 mt-2 w-[280px] md:w-[400px] bg-gradient-to-r from-slate-100 to-slate-200 rounded-xl shadow-lg p-3 md:p-6 border border-gray-200">
+                            <div className="space-y-4 md:space-y-6">
+                                {/* General Guide */}
                                 <div>
-                                    <h3 className="text-2xl font-semibold  mb-3">
+                                    <h3 className="text-lg md:text-2xl font-semibold mb-2 md:mb-3">
                                         Hướng dẫn tìm kiếm bằng giọng nói
                                     </h3>
-                                    <ul className="space-y-2">
+                                    <ul className="space-y-2 text-sm md:text-base">
                                         <li className="flex items-start gap-2">
                                             <span className="text-blue-500 mt-1">•</span>
                                             <span className="text-gray-700">Nói rõ và từ từ các thông tin bạn muốn tìm kiếm.</span>
                                         </li>
-                                        
                                         <li className="flex items-start gap-2">
                                             <span className="text-blue-500 mt-1">•</span>
                                             <span className="text-gray-700">Các thông tin kết hợp có thể bao gồm: loại phòng, địa điểm, giá cả và diện tích.</span>
                                         </li>
-                                        <li className="flex items-start gap-2">
+                                        <li className="flex items-start gap-2 text-xs md:text-sm">
                                             <span className="text-blue-500 mt-1">•</span>
                                             <span className="text-gray-700">Khi tìm kiếm khu vực ở cấp 
                                                 <span className='font-semibold'> Quận/Huyện/Thị xã/Thành phố thuộc tỉnh </span>
-                                                 ví dụ như Thành phố Quy nhơn thì bắt buộc phải nói có tiền tố đi kèm</span>
+                                                ví dụ như Thành phố Quy nhơn thì bắt buộc phải nói có tiền tố đi kèm</span>
                                         </li>
-                                        <li className="flex items-start gap-2">
+                                        <li className="flex items-start gap-2 text-xs md:text-sm">
                                             <span className="text-blue-500 mt-1">•</span>
                                             <span className="text-gray-700">Tương tự đối với tìm kiếm cấp
                                                 <span className='font-semibold'> Phường/Xã/Thị Trấn </span> kèm tiền tố
-                                                 </span>
+                                            </span>
                                         </li>
                                     </ul>
                                 </div>
 
-                                {/* Danh sách ví dụ */}
-                                <div>
+                                {/* Examples */}
+                                <div className="text-sm md:text-base">
                                     <h4 className="font-semibold text-gray-800 mb-2">Các ví dụ câu tìm kiếm:</h4>
                                     <ul className="space-y-2">
                                         <li className="flex items-start gap-2">
                                             <span className="text-red-500 mt-1">→</span>
-                                            <span className="text-gray-700 italic">
+                                            <span className="text-gray-700 italic text-xs md:text-sm">
                                                 "Tìm phòng trọ ở quận gò vấp, giá từ 3 đến 5 triệu, diện tích trên 25m2"
                                             </span>
                                         </li>
                                         <li className="flex items-start gap-2">
                                             <span className="text-red-500 mt-1">→</span>
-                                            <span className="text-gray-700 italic">
+                                            <span className="text-gray-700 italic text-xs md:text-sm">
                                                 "Tìm nhà nguyên căn dưới 10 triệu ở thành phố Hồ Chí Minh"
-                                            </span>
-                                        </li>
-                                        <li className="flex items-start gap-2">
-                                            <span className="text-red-500 mt-1">→</span>
-                                            <span className="text-gray-700 italic">
-                                                "Tìm phòng trọ ở huyện Hoài Ân, giá khoảng 2 triệu"
                                             </span>
                                         </li>
                                     </ul>
                                 </div>
 
-                                {/* Lưu ý */}
-                                <div className="bg-blue-50 p-3 rounded-lg">
-                                    <p className="text-xl text-blue-800 font-medium flex items-center gap-2">
-                                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                {/* Note */}
+                                <div className="bg-blue-50 p-2 md:p-3 rounded-lg">
+                                    <p className="text-sm md:text-xl text-blue-800 font-medium flex items-center gap-2">
+                                        <svg className="w-4 h-4 md:w-5 md:h-5" fill="currentColor" viewBox="0 0 20 20">
                                             <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                                         </svg>
                                         Nhấn vào nút microphone và đợi tiếng "bíp" trước khi nói
@@ -670,43 +663,42 @@ const VoiceSearch = ({ onVoiceResult }) => {
                     )}
                 </div>
 
-                {/* Voice Recognition Modal */}
+                {/* Voice Recognition Modal - Responsive */}
                 {showTranscriptModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                        <div className="bg-white rounded-lg p-6 w-[500px] shadow-xl">
-                            <div className="mb-4">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+                        <div className="bg-white rounded-lg p-4 md:p-6 w-full max-w-[320px] md:max-w-[500px] shadow-xl">
+                            <div className="mb-3 md:mb-4">
+                                <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-2">
                                     Xác nhận nội dung tìm kiếm
                                 </h3>
-                                <p className="text-gray-600 text-sm mb-4">
+                                <p className="text-gray-600 text-xs md:text-sm mb-3 md:mb-4">
                                     Đây là nội dung bạn vừa nói. Nếu chính xác, hãy bấm "Xác nhận" để tìm kiếm.
                                 </p>
                             </div>
                             
-                            <div className="bg-gray-50 rounded p-4 mb-4">
-                                <p className="text-gray-800 font-medium">"{currentTranscript}"</p>
+                            <div className="bg-gray-50 rounded p-3 md:p-4 mb-4">
+                                <p className="text-gray-800 font-medium text-sm md:text-base">"{currentTranscript}"</p>
                             </div>
                             
                             <div className="flex justify-end gap-2">
                                 <button
                                     onClick={() => {
                                         setShowTranscriptModal(false);
-                                        startListening(); // Cho phép người dùng thử lại
+                                        startListening();
                                     }}
-                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                    className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
                                 >
                                     Thử lại
                                 </button>
                                 <button
                                     onClick={async () => {
                                         setShowTranscriptModal(false);
-                                        // Gọi processWithAI với skipCooldown = true
                                         const aiResult = await processWithAI(currentTranscript, true);
                                         if (aiResult) {
                                             onVoiceResult(aiResult);
                                         }
                                     }}
-                                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                                    className="px-3 py-1.5 md:px-4 md:py-2 text-xs md:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
                                 >
                                     Xác nhận
                                 </button>

@@ -82,19 +82,21 @@ const FavoritePost = () => {
     return (
         <div className="min-h-screen bg-gray-50">
             <Header />
-            <div className="w-[1280px] mx-auto px-4 py-8">
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-3xl font-bold text-gray-800">
+            {/* Change fixed width to responsive width */}
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2 sm:mb-0">
                         Tin đã lưu 
-                        <span className="text-gray-500 text-2xl ml-2">
+                        <span className="text-gray-500 text-xl sm:text-2xl ml-2">
                             ({favoritePosts.length})
                         </span>
                     </h1>
                 </div>
 
-                <div className="flex gap-8">
-                    {/* Main Content */}
-                    <div className="flex-1">
+                {/* Make flex column on mobile, row on desktop */}
+                <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
+                    {/* Main Content - full width on mobile */}
+                    <div className="w-full lg:flex-1">
                         {favoritePosts.length > 0 ? (
                             <motion.div
                                 initial={{ opacity: 0 }}
@@ -120,13 +122,14 @@ const FavoritePost = () => {
                         )}
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="w-[30%] space-y-6">
-                        <div className="bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b">
+                    {/* Sidebar - full width on mobile, 30% on desktop */}
+                    <div className="w-full lg:w-[30%] space-y-4 sm:space-y-6">
+                        {/* Utilities Section */}
+                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 pb-3 border-b">
                                 Hỗ trợ tiện ích
                             </h3>
-                            <ul className="space-y-3">
+                            <ul className="grid grid-cols-2 sm:grid-cols-1 gap-2 sm:space-y-3">
                                 {[
                                     'Tư vấn phong thủy',
                                     'Dự tính chi phí làm nhà',
@@ -134,8 +137,10 @@ const FavoritePost = () => {
                                     'Quy trình xây nhà',
                                     'Xem tuổi làm nhà'
                                 ].map((item, index) => (
-                                    <li key={index} className="flex items-center text-gray-600 hover:text-blue-600 cursor-pointer transition-colors">
-                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <li key={index} 
+                                        className="flex items-center text-sm sm:text-base text-gray-600 hover:text-blue-600 cursor-pointer transition-colors"
+                                    >
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                         </svg>
                                         {item}
@@ -144,8 +149,9 @@ const FavoritePost = () => {
                             </ul>
                         </div>
 
-                        <div className=" bg-white rounded-xl shadow-lg p-6">
-                            <h3 className="text-xl font-bold text-gray-800 mb-4 pb-3 border-b">
+                        {/* Recent Posts Section */}
+                        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-3 sm:mb-4 pb-3 border-b">
                                 Tin mới đăng
                             </h3>
                             <NewPost />

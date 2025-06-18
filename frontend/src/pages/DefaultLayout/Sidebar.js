@@ -84,69 +84,83 @@ const Sidebar = ({ setSearchParams, searchParams, room_type }) => {
     ];
     return (
         <>
-            <div className="w-full bg-[#fff] rounded-xl border border-gray-300 p-5 shadow-xl">
-                <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Danh mục cho thuê</h3>
-                <div className="flex flex-col gap-2">
+            {/* Category Section */}
+            <div className="w-full bg-white rounded-xl border border-gray-300 p-3 md:p-5 shadow-xl">
+                <h3 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4 border-b-2 border-gray-300 pb-2">
+                    Danh mục cho thuê
+                </h3>
+                <div className="flex flex-col gap-1 md:gap-2">
                     {roomtype.map((room) => (
                         <p
                             key={room.id}
                             onClick={() => handleRoomTypeClick(room.name, room.id)}
-                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
-                                ${
-                                    selectedRoomType === room.id
-                                        ? 'text-red-500 font-semibold'
-                                        : 'text-gray-600 hover:text-red-500'
+                            className={`text-[12px] md:text-[13px] flex items-center gap-1 cursor-pointer 
+                                border-b border-gray-200 pb-1 border-dashed transition-colors duration-200
+                                ${selectedRoomType === room.id
+                                    ? 'text-red-500 font-semibold'
+                                    : 'text-gray-600 hover:text-red-500'
                                 }`}
                         >
-                            <MdNavigateNext size={14} />
+                            <MdNavigateNext size={12} className="md:w-4 md:h-4" />
                             {room.name}
                         </p>
                     ))}
                 </div>
             </div>
 
-            <div className="w-full bg-[#fff] mb-4 rounded-xl border border-gray-300 p-5 shadow-xl mt-0">
-                <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Xem theo giá</h3>
-                <div className="flex flex-col gap-2">
+            {/* Price Range Section */}
+            <div className="w-full bg-white mb-3 md:mb-4 rounded-xl border border-gray-300 p-3 md:p-5 shadow-xl mt-3 md:mt-4">
+                <h3 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4 border-b-2 border-gray-300 pb-2">
+                    Xem theo giá
+                </h3>
+                <div className="flex flex-col gap-1 md:gap-2">
                     {priceRanges.map((range, index) => (
                         <p
                             key={index}
                             onClick={() => handlePriceClick(range.min, range.max, index)}
-                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
-                                ${
-                                    selectedPriceRange === index
-                                        ? 'text-red-600 font-semibold'
-                                        : 'text-gray-600 hover:text-red-600'
+                            className={`text-[12px] md:text-[13px] flex items-center gap-1 cursor-pointer 
+                                border-b border-gray-200 pb-1 border-dashed transition-colors duration-200
+                                ${selectedPriceRange === index
+                                    ? 'text-red-600 font-semibold'
+                                    : 'text-gray-600 hover:text-red-600'
                                 }`}
                         >
-                            <MdNavigateNext size={14} /> {range.label}
+                            <MdNavigateNext size={12} className="md:w-4 md:h-4" />
+                            {range.label}
                         </p>
                     ))}
                 </div>
             </div>
 
-            <div className="w-full bg-[#fff] mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
-                <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Xem theo diện tích</h3>
-                <div className="flex flex-col gap-2">
+            {/* Area Range Section */}
+            <div className="w-full bg-white mb-3 md:mb-5 rounded-xl border border-gray-300 p-3 md:p-5 shadow-xl">
+                <h3 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4 border-b-2 border-gray-300 pb-2">
+                    Xem theo diện tích
+                </h3>
+                <div className="flex flex-col gap-1 md:gap-2">
                     {areaRanges.map((range, index) => (
                         <p
                             key={index}
                             onClick={() => handleAreaClick(range.min, range.max, index)}
-                            className={`text-[13px] flex items-center gap-1 text-xl cursor-pointer border-b border-gray-200 pb-1 border-dashed 
-                                ${
-                                    selectedAreaRange === index
-                                        ? 'text-red-600 font-semibold'
-                                        : 'text-gray-600 hover:text-red-600'
+                            className={`text-[12px] md:text-[13px] flex items-center gap-1 cursor-pointer 
+                                border-b border-gray-200 pb-1 border-dashed transition-colors duration-200
+                                ${selectedAreaRange === index
+                                    ? 'text-red-600 font-semibold'
+                                    : 'text-gray-600 hover:text-red-600'
                                 }`}
                         >
-                            <MdNavigateNext size={14} /> {range.label}
+                            <MdNavigateNext size={12} className="md:w-4 md:h-4" />
+                            {range.label}
                         </p>
                     ))}
                 </div>
             </div>
 
-            <div className="w-full bg-white  mb-5 rounded-xl border border-gray-300 border-b-2 p-5 shadow-xl">
-                <h3 className="text-2xl font-semibold mb-4 border-b-2 border-gray-300 pb-2">Tin mới đăng</h3>
+            {/* Recent Posts Section */}
+            <div className="w-full bg-white mb-3 md:mb-5 rounded-xl border border-gray-300 p-3 md:p-5 shadow-xl">
+                <h3 className="text-lg md:text-2xl font-semibold mb-2 md:mb-4 border-b-2 border-gray-300 pb-2">
+                    Tin mới đăng
+                </h3>
                 <NewPost />
             </div>
         </>

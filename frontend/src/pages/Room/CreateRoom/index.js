@@ -288,67 +288,71 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
         }
     }, [formData.latitude, formData.longitude]);
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-start z-50 overflow-y-auto p-4 top-20">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-[1100px] my-8">
-                <div className="p-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex justify-center items-start z-50 overflow-y-auto p-2 sm:p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-[1100px] my-2 sm:my-8">
+                <div className="p-4 sm:p-6">
                     {/* Header */}
-                    <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-3xl font-bold text-gray-800">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                        <h2 className="text-xl sm:text-3xl font-bold text-gray-800">
                             {showEdit ? 'Chỉnh sửa phòng' : 'Tạo phòng mới'}
                         </h2>
                         <button
                             onClick={onClose}
-                            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                            className="p-1 sm:p-2 hover:bg-gray-100 rounded-full transition-colors"
                         >
-                            <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                         {/* Price and Area Section */}
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-2">
-                                <label className="text-xl font-medium text-gray-700">Giá (triệu/tháng)</label>
+                                <label className="text-base sm:text-lg font-medium text-gray-700">
+                                    Giá (triệu/tháng)
+                                </label>
                                 <div className="relative">
                                     <input
                                         type="number"
                                         name="price"
                                         value={formData.price}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                                         placeholder="Vd: 10, 3"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">triệu</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm sm:text-base">triệu</span>
                                 </div>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Diện tích (m²)</label>
+                                <label className="text-lg sm:text-xl font-medium text-gray-700">
+                                    Diện tích (m²)
+                                </label>
                                 <div className="relative">
                                     <input
                                         type="number"
                                         name="area"
                                         value={formData.area}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                                         placeholder="Vd: 30, 50"
                                     />
-                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">m²</span>
+                                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm sm:text-base">m²</span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Location Section */}
-                        <div className="grid grid-cols-3 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
+                                <label className="text-lg sm:text-base font-medium text-gray-700">Tỉnh/Thành phố</label>
                                 <select
                                     name="city"
                                     value={formData.city}
                                     onChange={handleCityChange}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-lg sm:text-base"
                                 >
                                     <option value="">Chọn tỉnh/thành phố</option>
                                     {cities.map((city) => (
@@ -357,12 +361,12 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Quận/Huyện</label>
+                                <label className="text-lg sm:text-base font-medium text-gray-700">Quận/Huyện</label>
                                 <select
                                     name="district"
                                     value={formData.district}
                                     onChange={handleDistrictChange}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 text-sm sm:text-base"
                                     disabled={!formData.city}
                                 >
                                     <option value="">Chọn quận/huyện</option>
@@ -372,12 +376,12 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Phường/Xã</label>
+                                <label className="text-lg sm:text-base font-medium text-gray-700">Phường/Xã</label>
                                 <select
                                     name="ward"
                                     value={formData.ward}
                                     onChange={handleWardChange}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 text-sm sm:text-base"
                                     disabled={!formData.district}
                                 >
                                     <option value="">Chọn phường/xã</option>
@@ -390,27 +394,29 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
 
                         {/* Street Address */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Số nhà, tên đường</label>
+                            <label className="text-lg sm:text-base font-medium text-gray-700">
+                                Số nhà, tên đường
+                            </label>
                             <input
                                 type="text"
                                 name="other_address"
                                 value={formData.other_address}
                                 onChange={handleChange}
-                                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                                className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-sm sm:text-base"
                                 placeholder="Nhập số nhà, tên đường"
                             />
                         </div>
 
                         {/* Room Type & Amenities */}
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Loại phòng</label>
+                                <label className="text-lg sm:text-base font-medium text-gray-700">Loại phòng</label>
                                 <select
                                     name="room_type"
                                     value={formData.room_type}
                                     onChange={handleChange}
                                     disabled={showEdit}
-                                    className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100"
+                                    className="w-full px-3 sm:px-4 py-2 sm:py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent disabled:bg-gray-100 text-sm sm:text-base"
                                 >
                                     <option value="">Chọn loại phòng</option>
                                     {roomTypes.map((type) => (
@@ -419,8 +425,8 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                                 </select>
                             </div>
                             <div className="space-y-2">
-                                <label className="text-sm font-medium text-gray-700">Nội thất</label>
-                                <div className="grid grid-cols-2 gap-4 p-3 border border-gray-300 rounded-lg bg-gray-50">
+                                <label className="text-lg sm:text-base font-medium text-gray-700">Nội thất</label>
+                                <div className="grid grid-cols-1 xs:grid-cols-2 gap-2 sm:gap-4 p-2 sm:p-3 border border-gray-300 rounded-lg bg-gray-50">
                                     {amenitiesList.map((amenity) => (
                                         <label key={amenity.id} className="flex items-center gap-2">
                                             <input
@@ -431,7 +437,7 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                                                 onChange={handleChange}
                                                 className="rounded border-gray-300 text-amber-500 focus:ring-amber-500"
                                             />
-                                            <span className="text-sm text-gray-700">{amenity.name}</span>
+                                            <span className="text-xs sm:text-sm text-gray-700">{amenity.name}</span>
                                         </label>
                                     ))}
                                 </div>
@@ -440,8 +446,8 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
 
                         {/* Map */}
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-700">Vị trí trên bản đồ</label>
-                            <div className="relative h-[300px] rounded-lg overflow-hidden border border-gray-300">
+                            <label className="text-sm sm:text-base font-medium text-gray-700">Vị trí trên bản đồ</label>
+                            <div className="relative h-[200px] sm:h-[300px] rounded-lg overflow-hidden border border-gray-300">
                                 <MapBox
                                     latitude={formData.latitude}
                                     longitude={formData.longitude}
@@ -457,29 +463,33 @@ const CreateRoom = ({ onClose, showEdit, roomData }) => {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex justify-end gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4 pt-4">
                             <button
                                 type="button"
                                 onClick={debouncedHandleGeocode}
-                                className="px-6 py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm sm:text-base"
                             >
                                 Xem trên map
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="px-6 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:bg-gray-300"
+                                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors disabled:bg-gray-300 text-sm sm:text-base"
                             >
                                 {loading ? (
-                                    <span className="flex items-center gap-2">
-                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-4 w-4 sm:h-5 sm:w-5" viewBox="0 0 24 24">
                                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                                         </svg>
-                                        {showEdit ? 'Đang cập nhật...' : 'Đang tạo...'}
+                                        <span className="text-xl sm:text-base">
+                                            {showEdit ? 'Đang cập nhật...' : 'Đang tạo...'}
+                                        </span>
                                     </span>
                                 ) : (
-                                    showEdit ? 'Cập nhật' : 'Tạo phòng'
+                                    <span className="text-xl sm:text-base">
+                                        {showEdit ? 'Cập nhật' : 'Tạo phòng'}
+                                    </span>
                                 )}
                             </button>
                         </div>

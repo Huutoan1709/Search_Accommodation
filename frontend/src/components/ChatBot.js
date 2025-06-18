@@ -530,13 +530,13 @@ const ChatBot = () => {
     ];
 
     const MessageBubble = ({ msg }) => (
-        <div className={`flex w-full ${msg.type === 'question' ? 'justify-end' : 'justify-start'} mb-4`}>
-            <div className="flex flex-col" style={{ maxWidth: '75%' }}>
+        <div className={`flex w-full ${msg.type === 'question' ? 'justify-end' : 'justify-start'} mb-3 md:mb-4`}>
+            <div className="flex flex-col" style={{ maxWidth: '80%' }}>
                 {msg.type === 'answer' && (
-                    <div className="text-lg text-gray-500 mb-1 ml-2 font-bold">AI</div>
+                    <div className="text-base md:text-lg text-gray-500 mb-1 ml-2 font-bold">AI</div>
                 )}
                 <div
-                    className={`relative p-3 rounded-[20px] shadow-sm
+                    className={`relative p-2 md:p-3 rounded-[20px] shadow-sm
                         ${msg.type === 'question' 
                             ? 'bg-red-500 text-white border-2 border-red-200' 
                             : 'bg-gray-100 text-gray-800 border-2 border-gray-200'
@@ -544,18 +544,18 @@ const ChatBot = () => {
                 >
                     {msg.type === 'room_results' ? (
                         <div className="space-y-2">
-                            <p className="mb-2">Tôi tìm thấy {msg.posts.length} phòng phù hợp:</p>
+                            <p className="mb-2 text-sm md:text-base">Tôi tìm thấy {msg.posts.length} phòng phù hợp:</p>
                             {msg.posts.map((post) => (
                                 <RoomSearchResult key={post.id} post={post} />
                             ))}
                             {msg.totalCount > msg.posts.length && (
-                                <p className="text-sm text-gray-500 mt-2">
+                                <p className="text-xs md:text-sm text-gray-500 mt-2">
                                     ...và {msg.totalCount - msg.posts.length} phòng khác
                                 </p>
                             )}
                         </div>
                     ) : (
-                        <div className="break-words whitespace-pre-wrap text-xl">
+                        <div className="break-words whitespace-pre-wrap text-sm md:text-base">
                             {msg.text}
                         </div>
                     )}
@@ -568,31 +568,42 @@ const ChatBot = () => {
     );
 
     return (
-        <div className="fixed bottom-36 right-8 z-[9999]">
+        <div className={`
+            fixed z-[9999]
+            ${isOpen 
+                ? 'inset-0 md:inset-auto md:bottom-36 md:right-8' 
+                : 'bottom-20 right-4 md:bottom-36 md:right-8'
+            }
+        `}>
             {!isOpen ? (
                 <button
-                    className="bg-red-500 p-4 rounded-full text-white shadow-lg hover:bg-red-600 transition-colors"
+                    className="bg-red-500 p-3 md:p-4 rounded-full text-white shadow-lg hover:bg-red-600 transition-colors"
                     onClick={() => setIsOpen(true)}
                 >
-                    <FaCommentDots size={24} />
+                    <FaCommentDots size={20} className="md:w-6 md:h-6" />
                 </button>
             ) : (
-                <div className="bg-white shadow-lg rounded-lg w-[380px] h-[450px] flex flex-col overflow-hidden border border-gray-300">
+                <div className={`
+                    bg-white shadow-lg rounded-lg flex flex-col overflow-hidden border border-gray-300
+                    ${isOpen 
+                        ? 'fixed inset-0 md:relative md:w-[380px] md:h-[450px]' 
+                        : 'w-[380px] h-[450px]'
+                    }
+                `}>
                     {/* Header */}
                     <div className="flex items-center justify-between bg-red-600 text-white p-3 h-[50px] flex-shrink-0 rounded-t-lg">
-                        
-                        <h1 className="text-xl font-semibold">Chat Support</h1>
+                        <h1 className="text-lg md:text-xl font-semibold">Chat Support</h1>
                         <button
-                            className="hover:text-gray-200 transition"
-                            onClick={() => setIsOpen(false)}    
+                            className="hover:text-gray-200 transition p-1"
+                            onClick={() => setIsOpen(false)}
                         >
-                            <FaTimes size={20} />
+                            <FaTimes size={18} className="md:w-5 md:h-5" />
                         </button>
                     </div>
                 
                     {/* Messages container */}
                     <div className="flex-1 overflow-hidden"> 
-                        <div className="h-full overflow-y-auto px-4 py-2">
+                        <div className="h-full overflow-y-auto px-3 md:px-4 py-2">
                             {messages.map((msg, index) => (
                                 <MessageBubble key={index} msg={msg} />
                             ))}
@@ -603,7 +614,7 @@ const ChatBot = () => {
                             {searchSuggestions.map((suggestion, idx) => (
                                 <button
                                     key={idx}
-                                    className="text-sm bg-gray-100 hover:bg-gray-200 rounded-full px-3 py-1"
+                                    className="text-xs md:text-sm bg-gray-100 hover:bg-gray-200 rounded-full px-2 md:px-3 py-1"
                                     onClick={() => setQuestion(suggestion.text)}
                                 >
                                     {suggestion.text}
@@ -612,11 +623,11 @@ const ChatBot = () => {
                         </div>
                     </div>
                     {/* Input container */}
-                    <div className="border-t border-gray-200 p-3 bg-gray-100 rounded-b-lg">
+                    <div className="border-t border-gray-200 p-2 md:p-3 bg-gray-100 rounded-b-lg">
                         <div className="flex items-center gap-2">
                             <input
                                 type="text"
-                                className="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500"
+                                className="flex-1 p-2 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:border-red-500"
                                 placeholder="Nhập câu hỏi của bạn..."
                                 value={question}
                                 onChange={(e) => setQuestion(e.target.value)}
@@ -629,9 +640,9 @@ const ChatBot = () => {
                                 disabled={isLoading}
                             >
                                 {isLoading ? (
-                                    <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 md:w-6 md:h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
                                 ) : (
-                                    <FaPaperPlane />
+                                    <FaPaperPlane className="w-4 h-4 md:w-5 md:h-5" />
                                 )}
                             </button>
                         </div>

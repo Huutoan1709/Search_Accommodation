@@ -73,8 +73,8 @@ function MapViewModal({ isOpen, onClose }) {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center ">
-            <div className="relative w-[900px] h-[600px] rounded-lg overflow-hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center p-2 md:p-0">
+            <div className="relative w-full h-[85vh] md:w-[900px] md:h-[600px] rounded-lg overflow-hidden">
                 <ReactMapGL
                     {...viewport}
                     onMove={(evt) => setViewport(evt.viewState)}
@@ -93,7 +93,7 @@ function MapViewModal({ isOpen, onClose }) {
                     {posts.map((post) => (
                         <Marker key={post.id} latitude={post.room.latitude} longitude={post.room.longitude}>
                             <div className="cursor-pointer" onClick={() => setSelectedPost(post)}>
-                                <div className="flex flex-col items-center">
+                                <div className="flex flex-col items-center scale-90 md:scale-100">
                                     <div className="bg-black text-white font-bold px-2 py-1 rounded-md shadow-lg">
                                         {post.room.price} triệu
                                     </div>
@@ -113,29 +113,21 @@ function MapViewModal({ isOpen, onClose }) {
                             onClose={() => setSelectedPost(null)}
                             anchor="bottom"
                             offset={15}
+                            className="w-[250px] md:w-[300px]"
                         >
-                            <div
-                                className="flex p-1  max-w-[300px] cursor-pointer"
-                                onClick={() => handlePostClick(selectedPost.id)}
-                            >
-                                {' '}
-                                {/* Giảm kích thước ảnh */}
+                            <div className="flex p-1 cursor-pointer" onClick={() => handlePostClick(selectedPost.id)}>
                                 {selectedPost.images && selectedPost.images[0] && (
                                     <img
                                         src={selectedPost.images[0].url}
                                         alt={selectedPost.title}
-                                        className="w-[30%] h-[60px] object-cover rounded mr-2 border-2 border-gray-500 "
+                                        className="w-[30%] h-[50px] md:h-[60px] object-cover rounded mr-2 border-2 border-gray-500"
                                     />
                                 )}
                                 <div className="w-[70%] flex flex-col gap-1">
-                                    {' '}
-                                    {/* Reduced gap */}
-                                    <h3 className="font-bold  text-xl mb-1 truncate ">{selectedPost.title}</h3>
+                                    <h3 className="font-bold text-lg md:text-xl mb-1 truncate">{selectedPost.title}</h3>
                                     <div className="flex gap-2">
-                                        {' '}
-                                        {/* Reduced gap */}
-                                        <p className=" text-green-400 font-bold">{selectedPost.room.price} triệu - </p>
-                                        <p className=" font-bold">{selectedPost.room.area} m²</p>
+                                        <p className="text-green-400 font-bold">{selectedPost.room.price} triệu - </p>
+                                        <p className="font-bold">{selectedPost.room.area} m²</p>
                                     </div>
                                     <p className="text-base text-gray-600">{selectedPost.room.room_type?.name}</p>
                                 </div>
@@ -146,7 +138,7 @@ function MapViewModal({ isOpen, onClose }) {
 
                 <button
                     onClick={onClose}
-                    className="absolute top-5 right-5 rounded-lg shadow-lg hover:bg-blue-500 z-10 bg-blue-400"
+                    className="absolute top-2 right-2 md:top-5 md:right-5 rounded-lg shadow-lg hover:bg-blue-500 z-10 bg-blue-400 scale-90 md:scale-100"
                 >
                     <div className="flex items-center gap-2 p-2">
                         <FaTimes size={24} className="text-white" />
@@ -157,8 +149,8 @@ function MapViewModal({ isOpen, onClose }) {
                 {/* Loading indicator */}
                 {loading && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 z-10">
-                        <div className="bg-white p-4 rounded-lg shadow-lg">
-                            <div className="loader"></div>
+                        <div className="bg-white p-3 md:p-4 rounded-lg shadow-lg">
+                            <div className="loader scale-90 md:scale-100"></div>
                             <p className="mt-2">Đang tải dữ liệu...</p>
                         </div>
                     </div>

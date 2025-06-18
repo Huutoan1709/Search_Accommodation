@@ -277,77 +277,166 @@ function Search({ setSearchParams, room_type }) {
 
     return (
         <>
-            <div className="w-[1024px] h-[70px] p-[8px] bg-white border shadow-xl rounded-lg flex items-center justify-around gap-2">
-                <span className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                    <SearchItem
-                        iconBf={<PiBuildingApartmentBold size={15} />}
-                        iconAf={<MdNavigateNext size={15} />}
-                        text={selectedValues.room_type || 'Loại phòng'}
-                        className={selectedValues.room_type !== 'Loại phòng' ? 'font-semibold' : ''}
-                    />
-                </span>
-                <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                    <SearchItem
-                        iconBf={<MdLocationOn size={15} />}
-                        iconAf={<MdNavigateNext size={15} />}
-                        text={
-                            selectedValues.ward
-                                ? `${selectedValues.ward}, ${selectedValues.district}.`
-                                : selectedValues.district
-                                ? `${selectedValues.district}, ${selectedValues.city}`
-                                : selectedValues.city
-                                ? selectedValues.city
-                                : 'Toàn quốc'
-                        }
-                        className={
-                            selectedValues.city || selectedValues.district || selectedValues.ward ? 'font-semibold' : ''
-                        }
-                    />
-                </span>
-                <span onClick={() => openModal('price')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                    <SearchItem
-                        iconBf={<IoPricetagsOutline size={15} />}
-                        iconAf={<MdNavigateNext size={15} />}
-                        text={selectedValues.price}
-                        className={selectedValues.price !== 'Chọn giá' ? 'font-semibold' : ''}
-                    />
-                </span>
-                <span onClick={() => openModal('area')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
-                    <SearchItem
-                        iconBf={<RiCrop2Line size={15} />}
-                        iconAf={<MdNavigateNext size={15} />}
-                        text={selectedValues.area}
-                        className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
-                    />
-                </span>
-                
+            {/* Mobile Search Bar - Removed fixed positioning */}
+            <div className="md:hidden w-full bg-white">
+                <div className="flex flex-col gap-2 p-3">
+                    {/* Room Type */}
+                    <div onClick={() => openModal('room_type')} className="w-full">
+                        <SearchItem
+                            iconBf={<PiBuildingApartmentBold size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.room_type || 'Loại phòng'}
+                            className={selectedValues.room_type !== 'Loại phòng' ? 'font-semibold' : ''}
+                        />
+                    </div>
 
-                <span
-                    type="button"
-                    onClick={handleSearchAroundClick}
-                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
-                >
-                    <BiSearch />
-                    Xung quanh
-                </span>
-                <span
-                    type="button"
-                    onClick={() => setIsMapModalOpen(true)}
-                    className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text[13px] gap-2 text-white font-medium flex items-center justify-center"
-                >
-                    <FaMapMarked/>
-                    Xem trên map
-                </span>
-                <VoiceSearch onVoiceResult={handleVoiceResult} />
-                <span
-                    type="button"
-                    onClick={handleReset}
-                    className="cursor-pointer text-center bg-red-600 hover:bg-red-700 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
-                >
-                    <LuRefreshCcw />
-                    Reset
-                </span>
-                
+                    {/* Location */}
+                    <div onClick={() => openModal('region')} className="w-full">
+                        <SearchItem
+                            iconBf={<MdLocationOn size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={
+                                selectedValues.ward
+                                    ? truncateText(`${selectedValues.ward}, ${selectedValues.district}`)
+                                    : selectedValues.district
+                                    ? truncateText(`${selectedValues.district}, ${selectedValues.city}`)
+                                    : selectedValues.city
+                                    ? truncateText(selectedValues.city)
+                                    : 'Toàn quốc'
+                            }
+                            className={
+                                selectedValues.city || selectedValues.district || selectedValues.ward ? 'font-semibold' : ''
+                            }
+                        />
+                    </div>
+
+                    {/* Price Range */}
+                    <div onClick={() => openModal('price')} className="w-full">
+                        <SearchItem
+                            iconBf={<IoPricetagsOutline size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.price}
+                            className={selectedValues.price !== 'Chọn giá' ? 'font-semibold' : ''}
+                        />
+                    </div>
+
+                    {/* Area Range */}
+                    <div onClick={() => openModal('area')} className="w-full">
+                        <SearchItem
+                            iconBf={<RiCrop2Line size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.area}
+                            className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
+                        />
+                    </div>
+
+                    {/* Action Buttons - Improved mobile layout */}
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={handleSearchAroundClick}
+                            className="bg-gray-800 py-2.5 px-3 rounded-md text-white text-sm font-medium 
+                                     flex items-center justify-center gap-1.5"
+                        >
+                            <BiSearch size={15} />
+                            <span>Xung quanh</span>
+                        </button>
+                        <button
+                            onClick={() => setIsMapModalOpen(true)}
+                            className="bg-gray-800 py-2.5 px-3 rounded-md text-white text-sm font-medium 
+                                     flex items-center justify-center gap-1.5"
+                        >
+                            <FaMapMarked size={15} />
+                            <span>Xem bản đồ</span>
+                        </button>
+                        <div className="flex gap-2">
+                            <VoiceSearch onVoiceResult={handleVoiceResult} />
+                            <button
+                                onClick={handleReset}
+                                className="flex-1 bg-red-600 hover:bg-red-700 py-2.5 px-3 rounded-md 
+                                         text-white text-sm font-medium flex items-center justify-center"
+                            >
+                                <LuRefreshCcw size={15} />
+                                <span className="ml-1.5">Đặt lại</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Desktop Search Bar */}
+            <div className="hidden md:block w-full max-w-[1024px] h-[70px] p-[8px] bg-white border shadow-xl rounded-lg">
+                <div className="flex items-center justify-around gap-2 h-full">
+                    <span className="flex-1 cursor-pointer">
+                        <SearchItem
+                            iconBf={<PiBuildingApartmentBold size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.room_type || 'Loại phòng'}
+                            className={selectedValues.room_type !== 'Loại phòng' ? 'font-semibold' : ''}
+                        />
+                    </span>
+                    <span onClick={() => openModal('region')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                        <SearchItem
+                            iconBf={<MdLocationOn size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={
+                                selectedValues.ward
+                                    ? `${selectedValues.ward}, ${selectedValues.district}.`
+                                    : selectedValues.district
+                                    ? `${selectedValues.district}, ${selectedValues.city}`
+                                    : selectedValues.city
+                                    ? selectedValues.city
+                                    : 'Toàn quốc'
+                            }
+                            className={
+                                selectedValues.city || selectedValues.district || selectedValues.ward ? 'font-semibold' : ''
+                            }
+                        />
+                    </span>
+                    <span onClick={() => openModal('price')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                        <SearchItem
+                            iconBf={<IoPricetagsOutline size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.price}
+                            className={selectedValues.price !== 'Chọn giá' ? 'font-semibold' : ''}
+                        />
+                    </span>
+                    <span onClick={() => openModal('area')} className="flex-1 cursor-pointer gap-1 overflow-hidden whitespace-nowrap text-ellipsis">
+                        <SearchItem
+                            iconBf={<RiCrop2Line size={15} />}
+                            iconAf={<MdNavigateNext size={15} />}
+                            text={selectedValues.area}
+                            className={selectedValues.area !== 'Chọn diện tích' ? 'font-semibold' : ''}
+                        />
+                    </span>
+                    
+
+                    <span
+                        type="button"
+                        onClick={handleSearchAroundClick}
+                        className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
+                    >
+                        <BiSearch />
+                        Xung quanh
+                    </span>
+                    <span
+                        type="button"
+                        onClick={() => setIsMapModalOpen(true)}
+                        className="cursor-pointer text-center bg-gray-800 py-4 px-2 rounded-md text[13px] gap-2 text-white font-medium flex items-center justify-center"
+                    >
+                        <FaMapMarked/>
+                        Xem trên map
+                    </span>
+                    <VoiceSearch onVoiceResult={handleVoiceResult} />
+                    <span
+                        type="button"
+                        onClick={handleReset}
+                        className="cursor-pointer text-center bg-red-600 hover:bg-red-700 py-4 px-2 rounded-md text-[13px] gap-2 text-white font-medium flex items-center justify-center"
+                    >
+                        <LuRefreshCcw />
+                        Reset
+                    </span>
+                    
+                </div>
             </div>
             
 

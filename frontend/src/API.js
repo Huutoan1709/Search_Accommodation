@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-const HOST = 'https://search-accommodation.onrender.com';
+const HOST = 'http://127.0.0.1:8000';
 
 export const endpoints = {
     post: '/post/',

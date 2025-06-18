@@ -24,7 +24,11 @@ const NewPost = () => {
     }, []);
 
     if (!posts.length) {
-        return <div>Chưa có bài đăng nào gần đây</div>;
+        return (
+            <div className="text-center text-gray-500 text-sm md:text-base p-4">
+                Chưa có bài đăng nào gần đây
+            </div>
+        );
     }
 
     return posts.map((post) => {
@@ -34,23 +38,35 @@ const NewPost = () => {
         return (
             <div
                 key={post.id}
-                className="w-full flex items-center gap-1 py-2 border-b border-gray-300 cursor-pointer bg-white hover:bg-gray-100 transition duration-200 ease-in-out"
+                className="w-full flex items-center gap-2 md:gap-3 p-2 md:py-3 border-b border-gray-300 
+                         cursor-pointer bg-white hover:bg-gray-100 transition duration-200 ease-in-out"
                 onClick={handlePostClick}
             >
+                {/* Image - Responsive size */}
                 <img
                     src={post.images[0]?.url || 'default-image.jpg'}
                     alt="ảnh"
-                    className="w-[65px] h-[65px] object-cover rounded-md"
+                    className="w-[60px] h-[60px] md:w-[70px] md:h-[70px] object-cover rounded-md"
                 />
-                <div className="w-full pl-2">
-                    <h4 className="text-blue-500 text-[12px] mb-2">
-                        {post?.title.length > 40 ? `${post?.title.slice(0, 40)}...` : post?.title}
+
+                {/* Content Container */}
+                <div className="flex-1 pl-1 md:pl-2">
+                    {/* Title - Responsive text size and better truncation */}
+                    <h4 className="text-blue-500 text-[11px] md:text-[13px] font-medium mb-1 md:mb-2 line-clamp-2">
+                        {post?.title}
                     </h4>
+
+                    {/* Price and Time - Improved layout */}
                     <div className="flex items-center justify-between">
-                        <span className="text-green-500 font-medium text-[12px]">{post?.room?.price} triệu</span>
-                        <div className="flex gap-1 items-center">
-                            <CiStopwatch size={15} className="text-gray-500" />
-                            <span className="text-[10px]">
+                        {/* Price */}
+                        <span className="text-green-500 font-medium text-[11px] md:text-[13px]">
+                            {post?.room?.price} triệu
+                        </span>
+
+                        {/* Time */}
+                        <div className="flex items-center gap-1 md:gap-1.5">
+                            <CiStopwatch className="text-gray-500 w-3 h-3 md:w-4 md:h-4" />
+                            <span className="text-[9px] md:text-[11px] text-gray-500">
                                 {formatDistanceToNow(parseISO(post?.created_at), {
                                     addSuffix: true,
                                     locale: vi,

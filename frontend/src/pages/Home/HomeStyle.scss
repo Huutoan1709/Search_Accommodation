@@ -2,16 +2,28 @@
 // CONTENT
 .container {
     margin-top: 8px;
-    max-width: 1024px;
+    width: 100%;
+    padding: 0 1rem;
     margin: 0 auto;
+
+    @media (min-width: 768px) {
+        max-width: 1024px;
+        padding: 0;
+    }
 }
 
 //SEARCH BAR
 .listings {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-    padding: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    padding: 16px;
+
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        padding: 20px;
+    }
 }
 
 .listing-card {
@@ -21,44 +33,74 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
     background-color: #fff;
-}
 
-.listing-card:hover {
-    transform: translateY(-5px);
+    &:hover {
+        transform: translateY(-5px);
+    }
+
+    @media (max-width: 768px) {
+        &:hover {
+            transform: none;
+        }
+    }
 }
 
 .listing-image {
     width: 100%;
-    height: 200px;
-    object-fit: cover;
+    height: 180px;
+
+    @media (min-width: 768px) {
+        height: 200px;
+    }
 }
 
 .listing-details {
-    padding: 10px 15px;
-}
+    padding: 8px 12px;
 
-.listing-details h3 {
-    font-size: 18px;
-    margin: 0 0 10px;
-}
+    @media (min-width: 768px) {
+        padding: 10px 15px;
+    }
 
-.listing-details p {
-    margin: 5px 0;
-    font-size: 14px;
-    color: #555;
+    h3 {
+        font-size: 16px;
+        margin: 0 0 8px;
+
+        @media (min-width: 768px) {
+            font-size: 18px;
+            margin: 0 0 10px;
+        }
+    }
+
+    p {
+        margin: 4px 0;
+        font-size: 13px;
+
+        @media (min-width: 768px) {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    }
 }
 
 .pagination {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 20px;
-    gap: 7px;
-}
+    padding: 16px;
+    gap: 5px;
 
-.pagination button {
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    @media (min-width: 768px) {
+        padding: 20px;
+        gap: 7px;
+    }
+
+    button {
+        padding: 8px 12px;
+        border-radius: 4px;
+
+        @media (min-width: 768px) {
+            padding: 10px 15px;
+            border-radius: 5px;
+        }
+    }
 }

@@ -26,7 +26,7 @@ const SliderCustom = ({ images, video }) => {
         <div className="w-full">
             <Slider {...settings}>
                 {sliderItems.map((item, index) => (
-                    <div key={index} className="bg-black flex items-center justify-center h-[320px] px-12">
+                    <div key={index} className="bg-black flex items-center justify-center h-[200px] md:h-[320px] px-4 md:px-12">
                         {item.type === 'video' ? (
                             <video controls className="max-h-full m-auto h-full object-contain">
                                 <source src={item.url} type="video/mp4" />
