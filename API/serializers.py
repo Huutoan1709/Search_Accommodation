@@ -312,6 +312,13 @@ class PaymentSerializer(serializers.ModelSerializer):
     def get_created_at(self, obj):
         return obj.created_at.strftime('%d/%m/%Y %H:%M:%S')
 
+    def get_status_display(self, obj):
+        status_map = {
+            'PENDING': 'Đang xử lý',
+            'COMPLETED': 'Thành công',
+            'FAILED': 'Thất bại'
+        }
+        return status_map.get(obj.status, obj.status)
     
 
 class ListPaymentSerializer(serializers.ModelSerializer):
