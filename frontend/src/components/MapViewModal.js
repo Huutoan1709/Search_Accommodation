@@ -53,13 +53,43 @@ function MapViewModal({ isOpen, onClose }) {
         const fetchPosts = async () => {
             try {
                 setLoading(true);
-                const res = await API.get(endpoints.post);
-                // Lọc chỉ lấy các bài đăng có tọa độ
-                const postsWithCoordinates = res.data.results.filter(
-                    (post) => post.room && post.room.latitude && post.room.longitude,
-                );
-                console.log(postsWithCoordinates);
+                let allPosts = [];
+                let nextPage = endpoints.post;
+
+                // Lặp qua tất cả các trang
+                while (nextPage) {
+                    const res = await API.get(nextPage);
+                    
+                    // Thêm kết quả vào mảng allPosts
+                    allPosts = [...allPosts, ...res.data.results];
+                    
+                    // Cập nhật URL cho trang tiếp theo
+                    nextPage = res.data.next;
+                    if (nextPage) {
+                        // Chuyển đổi URL đầy đủ thành endpoint tương đối
+                        nextPage = nextPage.split('post')[1]; // Lấy phần query string
+                        nextPage = `post${nextPage}`; 
+                    }
+                }
+
+                console.log('Total posts fetched:', allPosts.length);
+
+                // Lọc các bài đăng hợp lệ
+                const postsWithCoordinates = allPosts.filter(post => {
+                    const hasValidCoordinates = post.room && 
+                                             post.room.latitude && 
+                                             post.room.longitude;
+                                             
+                    return hasValidCoordinates && 
+                           post.is_active && 
+                           !post.is_expired && 
+                           post.is_approved && 
+                           !post.is_block;
+                });
+
+                console.log('Posts with valid coordinates:', postsWithCoordinates.length);
                 setPosts(postsWithCoordinates);
+
             } catch (error) {
                 console.error('Error fetching posts:', error);
             } finally {
@@ -91,13 +121,29 @@ function MapViewModal({ isOpen, onClose }) {
 
                     {/* Markers cho các bài đăng */}
                     {posts.map((post) => (
-                        <Marker key={post.id} latitude={post.room.latitude} longitude={post.room.longitude}>
-                            <div className="cursor-pointer" onClick={() => setSelectedPost(post)}>
+                        <Marker 
+                            key={post.id} 
+                            latitude={post.room.latitude} 
+                            longitude={post.room.longitude}
+                        >
+                            <div 
+                                className="cursor-pointer" 
+                                onClick={() => {
+                                    console.log('Clicked post:', post); // Debug log
+                                    setSelectedPost(post);
+                                }}
+                            >
                                 <div className="flex flex-col items-center scale-90 md:scale-100">
-                                    <div className="bg-black text-white font-bold px-2 py-1 rounded-md shadow-lg">
+                                    <div className={`
+                                        bg-black text-white font-bold px-2 py-1 rounded-md shadow-lg
+                                        ${post.post_type?.name === 'VIP' ? 'bg-amber-500' : 'bg-black'}
+                                    `}>
                                         {post.room.price} triệu
                                     </div>
-                                    <div className="w-4 h-4 bg-black rounded-full border-2 border-white shadow-lg"></div>
+                                    <div className={`
+                                        w-4 h-4 rounded-full border-2 border-white shadow-lg
+                                        ${post.post_type?.name === 'VIP' ? 'bg-amber-500' : 'bg-black'}
+                                    `}></div>
                                 </div>
                             </div>
                         </Marker>
