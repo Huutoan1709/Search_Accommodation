@@ -339,7 +339,16 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
     ordering = ['-created_at']
 
     def get_queryset(self):
-        queryset = Post.objects.filter(is_active=True, is_approved=True, is_block=False, is_expired=False)
+        # Cập nhật trạng thái hết hạn cho tất cả các bài đăng trước khi trả về queryset
+        now = timezone.now()
+        Post.objects.filter(
+            is_paid=True,
+            expires_at__lt=now,
+            is_expired=False
+        ).update(is_expired=True)
+
+        # Tiếp tục với logic lọc hiện tại
+        queryset = Post.objects.filter(is_active=True, is_approved=True, is_block=False)
 
         if self.request.query_params.get('all', None) == 'true':
             queryset = Post.objects.all()
@@ -347,6 +356,12 @@ class PostViewSet(viewsets.ViewSet, generics.ListCreateAPIView, UpdatePartialAPI
             queryset = Post.objects.all()
         if self.action in ['images','video']:
             queryset = Post.objects.filter(is_active=True)
+
+        # Thêm điều kiện lọc bỏ các bài đăng hết hạn
+        queryset = queryset.filter(
+            models.Q(is_expired=False) |  # Chưa hết hạn
+            models.Q(is_paid=False)      # Hoặc chưa thanh toán
+        )
 
         # Lấy các giá trị từ query params
         min_price = self.request.query_params.get('min_price', None)

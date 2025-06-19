@@ -45,12 +45,14 @@ class PostAdmin(admin.ModelAdmin):
     def status(self, obj):
         if obj.is_block:
             return "Khóa"
-        elif obj.is_approved and obj.is_active:
+        elif obj.is_approved and obj.is_active and obj.is_expired is False:
             return "Hoạt động"
         elif not obj.is_active:
             return "Ẩn"
         elif obj.is_active and not obj.is_approved:
             return "Chờ duyệt"
+        elif obj.is_expired:
+            return "Hết hạn"
 
 
 class RoomsAdmin(admin.ModelAdmin):
